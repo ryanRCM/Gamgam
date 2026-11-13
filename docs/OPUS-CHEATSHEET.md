@@ -24,7 +24,7 @@ Everything a future Claude Opus session needs to maintain or extend this game wi
 - items = updates, bugs and investors, sorted by date, then update, invest, bug, then original order.
 - x starts at 200. Each item moves on 74.4 (SLOT times 0.62). A new date adds a gap of 60 and a signpost.
 - y by kind, with ROAD at 0: updates alternate 130 and 250 above the road, bugs alternate 130 and 230 below, investors all sit 390 above.
-- HALL_X is -420. Frames hang five per row from HALL_X-150, 75 apart, rows 70 apart.
+- HALL_X is -420. Frames hang on two rows of COLS (at least 5), 75 apart, centred on the hall; HALL_W grows to fit them.
 - END_X is the last x plus 260. The lighthouse stands there.
 - all = frames, items, lighthouse. Each gets an id of kind, colon, index.
 
@@ -81,8 +81,8 @@ Everything a future Claude Opus session needs to maintain or extend this game wi
 - Keep it one self-contained file: no imports, no fonts, no fetches.
 - Text goes in with textContent, never innerHTML. Keep it that way, as the data is not trusted markup.
 - src is used as a link target as it stands, so only build from data you trust.
-- Only the first two rows of frames (ten frames) fit on the hall wall. Later rows climb over the roof and the hall's name. Fix the layout if the docs grow.
-- The lighthouse label is drawn as fixed text. It ignores final.title.
+- Frames hang on two rows; the hall grows wider (COLS, HALL_W) as frames are added, never taller, so they never climb the roof.
+- The lighthouse label is drawn from final.title, in capitals.
 - For poking at a running world, window.__hindsight holds W, items, frames, all, seen, hero and openFrame.
 - rnd() is seeded and also used at run time. The order of calls during set-up decides how the world looks.
 - Items with no date sort to the start of the road.
