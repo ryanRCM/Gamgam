@@ -70,6 +70,13 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
     await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
   }
 
+  // Bug 9: choosing "Run." in a police stop makes you run and puts their guns out.
+  const rn = await p.evaluate(() => { const S = HS.S; S.dlg = null; S.wmenu = false; S.wanted = 1; const c = HS.WR.ents.find(e => !e.dead && e.p); if (!c) return { skip: 1 };
+    HS.openD("wstop", c.p.id); const b = [...document.querySelectorAll('[data-a="dopt"]')].find(x => /^Run\./.test(x.textContent)); b && b.click();
+    return { goX: HS.WR.me.goX, wanted: S.wanted }; });
+  ok(`${t} police stop: Run. actually runs`, rn.goX != null && rn.wanted >= 2, JSON.stringify(rn));
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.wanted = 0; HS.render(); });
+
   // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
   await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
   await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");

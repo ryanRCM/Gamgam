@@ -1889,7 +1889,7 @@ function meStep(dt){const m=WR.me,f=S.fxs;if(m.dead){m.roll+=(m.rollTo-m.roll)*M
   if(RS2&&Math.hypot(RS2.dx,RS2.dy)>.3){const a=Math.atan2(RS2.dy,RS2.dx),sy=m.y-SHY;let best=null,bd=.34;WR.ents.forEach(e=>{if(e.dead||!(hostP(e)||e.tgt===m))return;const d=Math.hypot(e.x-m.x,e.y-CHY-sy);if(d>280)return;let df=Math.abs(Math.atan2(e.y-CHY-sy,e.x-m.x)-a);if(df>Math.PI)df=2*Math.PI-df;if(df<bd&&los(m.x,sy,e.x,e.y-CHY)){bd=df;best=e}});
     if(best){m.lock=best;t1=best;ax=best.x;ay=best.y-(S.focusOn&&best.h>20?33:CHY)}else{ax=m.x+Math.cos(a)*120;ay=sy+Math.sin(a)*120}aiming=true}
   else if(IN.aimOn){ax=WR.cam.x+IN.ax;ay=WR.cam.y+IN.ay;aiming=true}
-  else if(IN.F){t1=autoTgt();if(t1){ax=t1.x;ay=t1.y-(S.focusOn&&t1.h>20?33:CHY)}else{ax=m.x+m.dir*100;ay=m.y-SHY}aiming=true}
+  else if(IN.F){t1=m.killT&&m.killT.e&&!m.killT.e.dead?m.killT.e:autoTgt();if(t1){ax=t1.x;ay=t1.y-(S.focusOn&&t1.h>20?33:CHY)}else{ax=m.x+m.dir*100;ay=m.y-SHY}aiming=true}
   if(aiming){const sy=m.y-SHY,dx=ax-m.x,dy=ay-sy;if(Math.abs(dx)>2&&!(m.spinT>0))m.dir=dx<0?-1:1;m.aimE=Math.atan2(-dy,Math.abs(dx)||1);m.aimA=Math.atan2(dy,dx);m.aimT=.7;
     if(S.inv.wp==='dual'){const t2=autoTgt2(t1||autoTgt());if(t2&&(t2.x-m.x)*m.dir>0){m.aimA2=Math.atan2(t2.y-CHY-sy,t2.x-m.x);m.aimE2=Math.atan2(-(t2.y-CHY-sy),Math.abs(t2.x-m.x))}else{m.aimA2=m.aimA;m.aimE2=m.aimE}}
     if(m.spinT>0){m.sprayD=-(m.sprayD||1);m.aimA=m.sprayD>0?0:Math.PI}
@@ -2660,7 +2660,7 @@ DLG.wstop=pid=>{const p=(S.world.people||[]).find(x=>x.id===pid)||{n:'Officer',s
    opts:[{t:w>=2?'Get on the ground.':'Hands out. Let them search you.',ok:()=>{done();if(w>=2||guns){S.cash=Math.max(0,S.cash-fine);S.inv={own:{fists:1},wp:'fists',mag:{},res:{}};S.heat=Math.max(0,S.heat-20);return `Cuffs, a van, a night in a cell. They keep every gun and ${fmt(fine)}. In the morning you walk.`}return '"You are fine. Mind how you go." They watch you all the way down the street.'}},
     {t:'"Officer, there has been a misunderstanding."',check:['CHARM',w>=2?11:8],ok:()=>{done();return 'A long look. The radio says something about another call. "Go home."'},fail:()=>{wantedAdd(0,2);S.stopCd=3;return '"Turn around. Hands behind your back." The other hand comes off the radio.'}},
     {t:'Fold some notes into your ID.',cost:()=>Math.round(fine*1.5),ok:()=>{done();S.flags.bribed=1;return 'The notes vanish. So does the report.'}},
-    {t:'Run.',ok:()=>{wantedAdd(1);S.stopCd=6;return S.wanted>=3?'"SHOTS AUTHORISED." You are already moving.':'"HEY!" Boots behind you. A radio crackles. Their guns are out now.'}}]}};
+    {t:'Run.',ok:()=>{wantedAdd(1,2);S.stopCd=15;S.flagRun=1;try{const m=WR.me,c=WR.ents.find(e=>e.p&&e.p.id===pid);if(c){c.tgt=m;simGo(clamp(m.x+(Math.sign(m.x-c.x)||1)*260,20,WW*TS-72),true,8)}}catch(_){}return S.wanted>=3?'"SHOTS AUTHORISED." You are already moving.':'"HEY!" Boots behind you. A radio crackles. Their guns are out now.'}}]}};
 /* ---- the president, in person ---- */
 DLG.wpres=()=>{const P=potus(),own=P.owner==='P',c=infCost(),o=[];
   if(own)o.push({t:'"I need a pardon."',ok:()=>{S.heat=0;S.wanted=0;S.hunted=false;return 'Signed in green ink before you finish the sentence.'}},{t:'"Call off the police for a while."',ok:()=>{S.copsOff=180;S.wanted=0;return 'One phone call. Every radio in the city goes quiet for three minutes.'}},{t:'"I want a contract."',ok:()=>{if(cdLeft('contract'))return '"Not twice in one week. People notice."';P.cd.contract=Date.now()+12e4;const v=goal()*.25;S.cash+=v;return `${fmt(v)} for a bridge nobody will build.`}});
@@ -3552,7 +3552,7 @@ function simStep(dt){const m=WR.me;if(m.dead){simStop();m.todo=m.seq=m.killT=nul
   /* on the way to someone or something */
   if(m.todo){const td=m.todo;td.t-=dt;
     if(td.e){const e=td.e,a=SIMA.find(q=>q.k===td.a),far=a.far?a.far():15,d=e.x-m.x;if(e.dead&&td.a!=='kill'||td.t<=0){m.todo=null;simStop()}
-      else if(Math.abs(d)<=far+3){m.todo=null;simStop();m.dir=Math.sign(d)||m.dir;a.do(e)}else simGo(e.x-Math.sign(d)*far,Math.abs(d)>150)}
+      else if(Math.abs(d)<=far+3){m.todo=null;simStop();m.dir=Math.sign(d)||m.dir;a.do(e)}else simGo(e.x-Math.sign(d)*far,Math.abs(d)>150||td.t<8)}
     else if(td.h){const d=td.h.x-m.x;if(td.t<=0){m.todo=null;simStop()}else if(Math.abs(d)<6){m.todo=null;simStop();WR.cur=td.h;worldAct()}else simGo(td.h.x,Math.abs(d)>150)}}
   /* walking to a spot */
   if(m.goX!=null){const d=m.goX-m.x;m.goT-=dt;if(Math.abs(d)<4||m.goT<=0||S.dlg){simStop();if(!m.todo)S.run=false}else{KH.R=d>0;KH.L=d<0;m.auto=1}}
@@ -3833,7 +3833,7 @@ DLG.aptdoor=ctx=>{const b=WR.bl[ctx],own=BG.own(b),H=BG.home(b),nm=own[0]?own[0]
 {const ds13=doorStep;doorStep=function(dt){ds13(dt);if(!WR||S.dlg)return;const m=WR.me,gy=GY*TS;
   WR.bl.forEach((b,bi)=>{if(b.k!=='apt'||b.f<=0||Math.abs((b.x0+b.x1)/2*TS-m.x)>400)return;if(b.lock==null){b.lock=true}if(b.askT>0)b.askT-=dt;const P=plan(b);
    if(b.lock)P.doors.forEach(d=>{if(d.inner)return;d.lk=1;const out=(m.x-d.x)*d.sd<0,other=WR.ents.some(e=>!e.dead&&Math.abs(e.x-d.x)<13);if(!other&&out)d.o=Math.min(d.o,.05);
-     if(out&&d.o<.5&&Math.abs(m.x-d.x)<9&&m.vx*d.sd>4&&m.y>gy-6){m.x=d.x-d.sd*9;m.vx=0;if(m.goT>60&&m.goX!=null){const far=P.doors.filter(q=>!q.inner).find(q=>q!==d);m.x=far.x-far.sd*12;return}simStop();m.todo=null;if(!(b.askT>0)){b.askT=3;openD('aptdoor',bi)}}
+     if(out&&d.o<.5&&Math.abs(m.x-d.x)<9&&m.vx*d.sd>4&&m.y>gy-6){m.x=d.x-d.sd*9;m.vx=0;if(m.goT>60&&m.goX!=null){const far=P.doors.filter(q=>!q.inner).find(q=>q!==d);m.x=far.x-far.sd*12;return}if(!(m.todo&&m.todo.e||m.killT)){simStop();m.todo=null;if(!(b.askT>0)){b.askT=3;openD('aptdoor',bi)}}}
      if(!out&&d.o>=.5&&!b.tail&&BG.inB(b,m.x)){b.tail=1}});
    if(b.lock&&BG.inB(b,m.x)&&!b.brk&&!b.inv2){b.inv2=1;bgOpen(b,'tail');say('You slipped in behind someone. The door closes on its own.','violet');setTimeout(()=>bgAlarm(b,0),2200)}
    if(b.brk&&BG.inB(b,m.x)){b.reT=(b.reT||0)+dt;if(b.reT>1.5)bgAlarm(b,0)}})};
