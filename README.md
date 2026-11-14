@@ -22,3 +22,10 @@ It reads `CHANGELOG.md` (updates), `brain/dev/Bug log.md` (bugs) and `apps/life/
 ## Check
 
 `node tests/check.mjs [page.html]`: 14 checks at phone (390px) and laptop width.
+
+## Hindsight Terminal (`terminal/`)
+
+The main game: start under a bridge with a thousand dollars and a machine that sees tomorrow. Trade, stream, fight, act, run for president, buy countries, nuke them, leave the planet, and see what the world does about it. Every copy ends up different. Design: `docs/DESIGN-ESSAY.md`.
+
+- **Play:** open `terminal/index.html` (serve the folder so `pack/` loads), or the live artifact.
+- **Check:** `node terminal/check.mjs` (27 checks at phone and laptop size), `node tools/syntax.cjs`, and the smoke runs `node tools/smoke-run.cjs 1 200 phone` and `node tools/smoke-street.cjs 1 0 laptop`.

@@ -36,6 +36,12 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   const vis = await p.evaluate(() => ["sexp", "simp", "sback"].map(a => { const b = document.querySelector(`[data-a="${a}"]`); if (!b) return false; const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(b).display !== "none"; }));
   ok(`${t} SAVES shows EXPORT, IMPORT and BACK`, vis.every(Boolean), "visible: " + JSON.stringify(vis));
 
+  // Same root cause as Blocker 2: the title's More… fold hid ROADMAP's way back.
+  await p.evaluate(() => { const b = document.querySelector('[data-a="sback"]'); b && b.click(); }); await p.waitForTimeout(200);
+  await p.evaluate(() => { const b = document.querySelector('[data-a="road"]'); b && b.click(); }); await p.waitForTimeout(300);
+  const rb = await p.evaluate(() => { const b = document.querySelector('[data-a="roadback"]'); if (!b) return false; const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
+  ok(`${t} ROADMAP shows a BACK button`, rb);
+
   // Blocker 1: a save made with a conversation open must load clean (no open conversation, no errors).
   // Real repro: new life → intro → street → open the taxi → save → reload → CONTINUE.
   await p.evaluate(() => localStorage.removeItem("hindsight-v2")); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
@@ -47,6 +53,67 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   errs.length = 0; await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
   await act("continue"); await p.waitForTimeout(1200);
   ok(`${t} CONTINUE works after saving mid-conversation in the street`, errs.length === 0 && await p.evaluate(() => HS.S.dlg == null), errs[0] || "conversation kept open after load");
+  // v23: you never leave the chair. A save made out in the street continues at the desk.
+  ok(`${t} v23: CONTINUE from a street save lands at the desk`, await p.evaluate(() => HS.S.loc === "desk"));
+  // The street still runs as simulation; the checks below drive it directly.
+  await p.evaluate(() => { HS.enterWorld(); }); await p.waitForTimeout(500);
+  // Bugs 11 and 12: the street menu's close button is on screen, the help text is current, and a taxi closes the menu.
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.wmenu = true; HS.render(); }); await p.waitForTimeout(400);
+  const mn = await p.evaluate(() => { const b = document.querySelector('[data-a="wmclose"]'); const r = b && b.getBoundingClientRect(); const note = [...document.querySelectorAll("#panel .note")].map(n => n.textContent).join(" ");
+    return { on: !!b && r.bottom <= innerHeight + 1 && r.height > 0, stale: /thumb|Shift focus/.test(note) }; });
+  ok(`${t} street menu: close button on screen, no stale controls`, mn.on && !mn.stale, JSON.stringify(mn));
+  await act("taxi");
+  ok(`${t} taxi closes the street menu`, await p.evaluate(() => !HS.S.wmenu && !!HS.S.dlg));
+  await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
+
+  // Bug 10: with a conversation sheet open on a phone, you stand above the sheet, not under it.
+  if (vp.n === "phone") {
+    await p.evaluate(() => { HS.S.wmenu = false; HS.openD("wtaxi"); }); await p.waitForTimeout(900);
+    const fr = await p.evaluate(() => ({ top: document.getElementById("panel").getBoundingClientRect().top, meY: (HS.WR.me.y - HS.WR.cam.y) / HS.VH * innerHeight }));
+    ok(`${t} conversation sheet: you stay above it`, fr.top > 0 && fr.meY < fr.top, JSON.stringify(fr));
+    await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
+  }
+
+  // Bug 9: choosing "Run." in a police stop makes you run and puts their guns out.
+  const rn = await p.evaluate(() => { const S = HS.S; S.dlg = null; S.wmenu = false; S.wanted = 1; const c = HS.WR.ents.find(e => !e.dead && e.p); if (!c) return { skip: 1 };
+    HS.openD("wstop", c.p.id); const b = [...document.querySelectorAll('[data-a="dopt"]')].find(x => /^Run\./.test(x.textContent)); b && b.click();
+    return { goX: HS.WR.me.goX, wanted: S.wanted }; });
+  ok(`${t} police stop: Run. actually runs`, rn.goX != null && rn.wanted >= 2, JSON.stringify(rn));
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.wanted = 0; HS.render(); });
+
+  // 4x feature 1: the machine remembers four of you. A slot exists after play and SAVES can load it.
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.phase = "trade"; localStorage.removeItem("hindsight-slots"); HS.save(); });
+  const slots = await p.evaluate(() => JSON.parse(localStorage.getItem("hindsight-slots") || "[]").length);
+  ok(`${t} play leaves a save slot`, slots >= 1, "slots " + slots);
+
+  // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
+  await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
+  await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");
+  const el = await p.evaluate(() => ({ ph: HS.S.phase, riv: HS.S.el && HS.S.el.riv }));
+  ok(`${t} reload on election night resumes the election`, el.ph === "election" && el.riv < 60, JSON.stringify(el));
+
+  // Bugs 5 and 14: keyboard walks in the house, and the third hit of the blue needs a second press.
+  const kb = await p.evaluate(() => { const S = HS.S; S.phase = "trade"; S.el = null; S.dlg = null; S.loc = "in"; S.cus = false; S.px = S.tx = 100; HS.render();
+    dispatchEvent(new KeyboardEvent("keydown", { code: "KeyD", key: "d" })); const moved = S.tx > 100;
+    S.px = S.tx = 240; S.fxs.high = 60; S.fxs.hits = 2; dispatchEvent(new KeyboardEvent("keydown", { code: "KeyE", key: "e" }));
+    return { moved, alive: S.phase === "trade", armed: S.armed }; });
+  ok(`${t} keyboard walks in the house; the deadly pipe asks twice`, kb.moved && kb.alive && kb.armed === "pipe", JSON.stringify(kb));
+
+  // Bug 19: no market twice on one BOARD (40 boards).
+  const dup = await p.evaluate(() => { let bad = 0; for (let i = 1; i <= 40; i++) { HS.S.bx = { seed: i * 7919, slip: {}, peek: {}, open: [], done: [], n: 0 }; const q = HS.btBoard().map(m => m.q); if (q.length !== 8 || new Set(q).size !== 8) bad++ } return bad; });
+  ok(`${t} BOARD never lists a market twice`, dup === 0, dup + " bad boards");
+
+  // v23: the ROOM group opens every window at the desk, and reporting a tenant pays when it matches the directive.
+  const v23 = await p.evaluate(() => { const S = HS.S; S.phase = "trade"; S.loc = "desk"; S.dlg = null; S.cus = false; const seen = [];
+    for (const t of ["room", "feeds", "phone", "agents", "bldg"]) { S.tab = t; HS.render(); seen.push(document.getElementById("panel").innerText.length > 80) }
+    const D = HS.DESK23(), b = D.BLD(), t = b.t.find(q => !q.gone); t.cat = b.dir.cat; const c0 = S.cash; D.click("rep:" + t.id); return { seen, paid: S.cash > c0 } });
+  ok(`${t} v23: desk windows render and the Ministry pays for a matching report`, v23.seen.every(Boolean) && v23.paid, JSON.stringify(v23));
+
+  // Bug 4 (now v22): all four characters are open from the first life. Bug 13: GOD and BODY hidden from players.
+  const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });
+  ok(`${t} all four characters are playable`, lk.filter(Boolean).length === 0, JSON.stringify(lk));
+  const dev = await p.evaluate(() => ["bGod", "bBody"].map(id => { const b = document.getElementById(id); return !b || getComputedStyle(b).display === "none"; }));
+  ok(`${t} GOD and BODY are hidden from players`, dev.every(Boolean), JSON.stringify(dev));
   await ctx.close();
 }
 await browser.close(); srv.close();

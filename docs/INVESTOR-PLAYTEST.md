@@ -56,45 +56,45 @@ Thirty-three found. Line numbers refer to `index.html` in the upload.
 
 ### Blockers
 
-1. **CONTINUE is dead after a reload during any street conversation.** Steps: enter the street, MENU, TAXI (or TALK to anyone), wait five seconds for the autosave, reload, press CONTINUE. Result: stays on the title, red "BUG: Cannot read properties of null (reading 'me')" bar, error thrown every frame from `DLG.wtaxi`. The save holds `S.dlg` and `loc:'world'` but `WR` is not rebuilt before the node is drawn. Likely place: `load()` / the continue handler; clear `S.dlg` and `S.wmenu` on load, or call `enterWorld()` first.
-2. **SAVES shows no buttons.** Steps: title, SAVES. Result: explanation text, a paste box, and "More…". No EXPORT THIS SAVE, IMPORT FROM THE BOX or BACK, with or without a save. `pSaves()` (line 2189) does emit them, so a later style is hiding them; suspect the title skin rules on `#panel.t21` (around line 5171). The ROADMAP screen showed the same symptom: no visible way back.
+1. ✅ fixed (14 Nov 2026) · **CONTINUE is dead after a reload during any street conversation.** Steps: enter the street, MENU, TAXI (or TALK to anyone), wait five seconds for the autosave, reload, press CONTINUE. Result: stays on the title, red "BUG: Cannot read properties of null (reading 'me')" bar, error thrown every frame from `DLG.wtaxi`. The save holds `S.dlg` and `loc:'world'` but `WR` is not rebuilt before the node is drawn. Likely place: `load()` / the continue handler; clear `S.dlg` and `S.wmenu` on load, or call `enterWorld()` first.
+2. ✅ fixed (14 Nov 2026) · **SAVES shows no buttons.** Steps: title, SAVES. Result: explanation text, a paste box, and "More…". No EXPORT THIS SAVE, IMPORT FROM THE BOX or BACK, with or without a save. `pSaves()` (line 2189) does emit them, so a later style is hiding them; suspect the title skin rules on `#panel.t21` (around line 5171). The ROADMAP screen showed the same symptom: no visible way back.
 
 ### Major
 
-3. **Reload on election night eats the campaign fee.** Steps: RUN FOR PRESIDENT, reach the BUY ADS screen, reload, CONTINUE. Result: back at the desk in the trade phase, fee gone, no election. Likely place: `startElection()` saves with `phase:'election'`; `load()` does not restore `S.el`.
-4. **Three of four characters can never be picked.** Steps: NEW LIFE, tap any LOCKED slot, at any generation. Likely place: the pick row (line 5802) and the `pick` handler (line 5971) hard-code `id==='gamb'`.
-5. **Keyboard walking does not work in the house or the field.** Steps: desktop, STREET, hold D, hold right arrow, press E. Result: nothing, while the hint line says "A/D or ←/→ walk · E use". Likely place: the keydown handler at line 6060 returns unless `S.loc==='world'`.
-6. **SHIFT does not run.** Steps: desktop street, hold D for 2.5 s (about 92 px), then SHIFT+D for 2.5 s (about 50 px). The hint says "SHIFT run"; the old menu text says "Shift focus". Likely place: `KMAP` and the hold handler near line 6059.
-7. **SHOOT from the wheel misses the chosen target and kills a bystander.** Steps: buy a pistol, tap a person about 15 px away, SHOOT. Result: 10 rounds fired, target at full health, another person dead. Likely place: `simStep` `killT` branch (sets `KH.F=true` without aiming at `q.e`).
-8. **PUNCH never lands on a walking target, then a door hijacks you.** Steps: tap someone who is walking, PUNCH. Result: you follow, never swing, and if you cross a flat door a "A FRONT DOOR" dialogue opens and the action is cancelled. Likely place: `simStep` `todo` branch (needs within 18 px, same speed as target) and the door check at line 3834 (`m.todo=null; openD('aptdoor')`).
-9. **"Run." in a police stop does nothing.** Steps: get wanted, stand in a flat, wait for the stop, choose Run. Result: "You are already moving", no movement, no shots, same dialogue again about twenty seconds later. The stop also happens through a shut door. Likely place: `DLG.wstop` and `threatStep`.
-10. **The camera does not reframe for the bottom sheet.** Steps: phone, open any street conversation or MENU. Result: the sheet covers the lower half and the upper half shows sky, roofs or ceiling; you and the speaker are hidden. Likely place: `viewSync()` and the `body.wm.dlg #panel` rule; offset `WR.cam.y` by the sheet height.
-11. **BACK TO THE STREET is off-screen and the menu survives a taxi ride.** Steps: phone, MENU. The close button sits at about y=871 on an 844-tall screen. Take a TAXI: the menu is still open on arrival. Likely place: `pWorldMenu()` and the `taxi` option's `ok()`.
-12. **The street menu documents controls that no longer exist.** "Left thumb moves: push up to jump… Right thumb aims and shoots… Space… X spin, C kick". Likely place: the help string in `pWorldMenu()`.
-13. **Developer tools are shown to players.** GOD MODE in the house and field panels (labelled "OFF / nothing can hurt you"), GOD and BODY on the street's top row, GOD MODE in the street menu. The code comments say "Not for players". Likely place: `bGod`, `bBody`, the `god` button in the walk panel.
-14. **One tap can end the run or halve your cash.** Steps: in the house, with two hits of the blue active, tap the pipe; or in the field, tap the gnome. Result: death, or half your cash buried, with no confirm. Likely place: the scene `pointerdown` at line 3573 (`S.autoAct`) plus `HOT.in` pipe and `HOT.out` gnome.
-15. **About one life in eight starts with a worthless main coin.** Seen once (OBOL at $0.28) and matches `const dud=r()<.12` in `genMarket()`. On generation one this removes the first-minute payoff.
-16. **Sacking the press secretary is free and unlimited.** Steps: Cabinet Room, "Fire … Hire a new press secretary", repeat. Nine in a row with no cost or cooldown, re-rolling skill each time. Likely place: `DLG.cab`.
+3. ✅ fixed (14 Nov 2026) · **Reload on election night eats the campaign fee.** Steps: RUN FOR PRESIDENT, reach the BUY ADS screen, reload, CONTINUE. Result: back at the desk in the trade phase, fee gone, no election. Likely place: `startElection()` saves with `phase:'election'`; `load()` does not restore `S.el`.
+4. ✅ fixed (14 Nov 2026) · **Three of four characters can never be picked.** Steps: NEW LIFE, tap any LOCKED slot, at any generation. Likely place: the pick row (line 5802) and the `pick` handler (line 5971) hard-code `id==='gamb'`.
+5. ✅ fixed (14 Nov 2026) · **Keyboard walking does not work in the house or the field.** Steps: desktop, STREET, hold D, hold right arrow, press E. Result: nothing, while the hint line says "A/D or ←/→ walk · E use". Likely place: the keydown handler at line 6060 returns unless `S.loc==='world'`.
+6. ✅ fixed (14 Nov 2026) · **SHIFT does not run.** Steps: desktop street, hold D for 2.5 s (about 92 px), then SHIFT+D for 2.5 s (about 50 px). The hint says "SHIFT run"; the old menu text says "Shift focus". Likely place: `KMAP` and the hold handler near line 6059.
+7. ✅ fixed (14 Nov 2026) · **SHOOT from the wheel misses the chosen target and kills a bystander.** Steps: buy a pistol, tap a person about 15 px away, SHOOT. Result: 10 rounds fired, target at full health, another person dead. Likely place: `simStep` `killT` branch (sets `KH.F=true` without aiming at `q.e`).
+8. ✅ fixed (14 Nov 2026) · **PUNCH never lands on a walking target, then a door hijacks you.** Steps: tap someone who is walking, PUNCH. Result: you follow, never swing, and if you cross a flat door a "A FRONT DOOR" dialogue opens and the action is cancelled. Likely place: `simStep` `todo` branch (needs within 18 px, same speed as target) and the door check at line 3834 (`m.todo=null; openD('aptdoor')`).
+9. ✅ fixed (14 Nov 2026) · **"Run." in a police stop does nothing.** Steps: get wanted, stand in a flat, wait for the stop, choose Run. Result: "You are already moving", no movement, no shots, same dialogue again about twenty seconds later. The stop also happens through a shut door. Likely place: `DLG.wstop` and `threatStep`.
+10. ✅ fixed (14 Nov 2026) · **The camera does not reframe for the bottom sheet.** Steps: phone, open any street conversation or MENU. Result: the sheet covers the lower half and the upper half shows sky, roofs or ceiling; you and the speaker are hidden. Likely place: `viewSync()` and the `body.wm.dlg #panel` rule; offset `WR.cam.y` by the sheet height.
+11. ✅ fixed (14 Nov 2026) · **BACK TO THE STREET is off-screen and the menu survives a taxi ride.** Steps: phone, MENU. The close button sits at about y=871 on an 844-tall screen. Take a TAXI: the menu is still open on arrival. Likely place: `pWorldMenu()` and the `taxi` option's `ok()`.
+12. ✅ fixed (14 Nov 2026) · **The street menu documents controls that no longer exist.** "Left thumb moves: push up to jump… Right thumb aims and shoots… Space… X spin, C kick". Likely place: the help string in `pWorldMenu()`.
+13. ✅ fixed (14 Nov 2026) · **Developer tools are shown to players.** GOD MODE in the house and field panels (labelled "OFF / nothing can hurt you"), GOD and BODY on the street's top row, GOD MODE in the street menu. The code comments say "Not for players". Likely place: `bGod`, `bBody`, the `god` button in the walk panel.
+14. ✅ fixed (14 Nov 2026) · **One tap can end the run or halve your cash.** Steps: in the house, with two hits of the blue active, tap the pipe; or in the field, tap the gnome. Result: death, or half your cash buried, with no confirm. Likely place: the scene `pointerdown` at line 3573 (`S.autoAct`) plus `HOT.in` pipe and `HOT.out` gnome.
+15. ✅ fixed (14 Nov 2026) · **About one life in eight starts with a worthless main coin.** Seen once (OBOL at $0.28) and matches `const dud=r()<.12` in `genMarket()`. On generation one this removes the first-minute payoff.
+16. ✅ fixed (14 Nov 2026) · **Sacking the press secretary is free and unlimited.** Steps: Cabinet Room, "Fire … Hire a new press secretary", repeat. Nine in a row with no cost or cooldown, re-rolling skill each time. Likely place: `DLG.cab`.
 
 ### Minor
 
-17. Death screen "Peak fortune $15.6K" while the HUD shows $16.2K. `S.peak` is not updated by THE BOARD payout.
-18. The monitor's CHIRP ticker announced a net worth "just passed millions" at $16K. Likely place: `post()` thresholds.
-19. The same market can appear twice on one BOARD ("Bad Idea wins the 3.40"). Likely place: the board generator behind `btnew`.
-20. Prices print twice in street menus: "A beer. $20 $20", "Buy RAKE… $200M $200M", every DOCKS line. Likely place: option labels that include the price plus the `cost` renderer.
-21. Typos: "Mara Sato, your the general, has talked to a paper." and "2 crisises waiting".
-22. The EVERCLEAR bottle sprite covers RESET and overlaps the right-hand LOOK buttons on phone. Likely place: `#pal` positioning.
-23. Tutorial lines are clamped to two rows and end in "…" on phone and desktop. Likely place: `#lines div` line clamp.
-24. Desktop key hint overlaps SOUND / UNMAKE / RESET. Likely place: `#pchelp`.
-25. The EMPIRE button is injected mid-dialogue and breaks the war panel grid. Likely place: the `emp21` injection.
-26. The presidency bar at the bottom of the desk panel is cut off on desktop.
-27. 404 for `pack/09_fonts/dejavu_sans_mono.woff` when any side page opens.
-28. Heat was read at 116 after a shooting; the bar tops out at 100. Likely place: `heatAdd()` clamp.
-29. With a gun out, the street's top-right buttons wrap to three rows and BODY lands on another icon.
-30. The wheel opens on whoever is standing on top of you; while it is open it blocks MENU.
-31. The statue page ships with test buttons ("Wealth £100,000"), a Hitboxes tick box and pounds instead of dollars.
-32. The lock game gives no visible tell for the binding pin and sits in a mostly empty black screen.
-33. A GUT line on the very first desk crisis says "You have a feeling you have sat through this before."
+17. ✅ fixed (14 Nov 2026) · Death screen "Peak fortune $15.6K" while the HUD shows $16.2K. `S.peak` is not updated by THE BOARD payout.
+18. ✅ fixed (14 Nov 2026) · The monitor's CHIRP ticker announced a net worth "just passed millions" at $16K. Likely place: `post()` thresholds.
+19. ✅ fixed (14 Nov 2026) · The same market can appear twice on one BOARD ("Bad Idea wins the 3.40"). Likely place: the board generator behind `btnew`.
+20. ✅ fixed (14 Nov 2026) · Prices print twice in street menus: "A beer. $20 $20", "Buy RAKE… $200M $200M", every DOCKS line. Likely place: option labels that include the price plus the `cost` renderer.
+21. ✅ fixed (14 Nov 2026) · Typos: "Mara Sato, your the general, has talked to a paper." and "2 crisises waiting".
+22. ✅ fixed (14 Nov 2026) · The EVERCLEAR bottle sprite covers RESET and overlaps the right-hand LOOK buttons on phone. Likely place: `#pal` positioning.
+23. ✅ fixed (14 Nov 2026) · Tutorial lines are clamped to two rows and end in "…" on phone and desktop. Likely place: `#lines div` line clamp.
+24. ✅ fixed (14 Nov 2026) · Desktop key hint overlaps SOUND / UNMAKE / RESET. Likely place: `#pchelp`.
+25. ✅ fixed (14 Nov 2026) · The EMPIRE button is injected mid-dialogue and breaks the war panel grid. Likely place: the `emp21` injection.
+26. ✅ fixed (14 Nov 2026) · The presidency bar at the bottom of the desk panel is cut off on desktop.
+27. ✅ fixed (14 Nov 2026) · 404 for `pack/09_fonts/dejavu_sans_mono.woff` when any side page opens.
+28. ✅ fixed (14 Nov 2026) · Heat was read at 116 after a shooting; the bar tops out at 100. Likely place: `heatAdd()` clamp.
+29. ✅ fixed (14 Nov 2026) · With a gun out, the street's top-right buttons wrap to three rows and BODY lands on another icon.
+30. ✅ fixed (14 Nov 2026) · The wheel opens on whoever is standing on top of you; while it is open it blocks MENU.
+31. ✅ fixed (14 Nov 2026) · The statue page ships with test buttons ("Wealth £100,000"), a Hitboxes tick box and pounds instead of dollars.
+32. ✅ fixed (14 Nov 2026) · The lock game gives no visible tell for the binding pin and sits in a mostly empty black screen.
+33. ✅ fixed (14 Nov 2026) · A GUT line on the very first desk crisis says "You have a feeling you have sat through this before."
 
 ## The Locked List
 
@@ -102,27 +102,27 @@ Format: number · name · what to change · why it goes viral · size.
 
 ### Fix first (bugs and blockers)
 
-1 · **Unbreakable CONTINUE** · On load, clear `S.dlg` and `S.wmenu`, rebuild the street before drawing, and restore `S.el`. Add a "last good save" slot and offer it when the red bar fires. · Nobody clips a game that ate a streamer's run off camera; they clip themselves uninstalling it. · S
+1 · ✅ fixed (14 Nov 2026) · **Unbreakable CONTINUE** · On load, clear `S.dlg` and `S.wmenu`, rebuild the street before drawing, and restore `S.el`. Add a "last good save" slot and offer it when the red bar fires. · Nobody clips a game that ate a streamer's run off camera; they clip themselves uninstalling it. · S
 
-2 · **SAVES that saves** · Make EXPORT, IMPORT and BACK visible again and add COPY CODE. Give ROADMAP a BACK. · Save codes are how a streamer hands chat their world. · S
+2 · ✅ fixed (14 Nov 2026) · **SAVES that saves** · Make EXPORT, IMPORT and BACK visible again and add COPY CODE. Give ROADMAP a BACK. · Save codes are how a streamer hands chat their world. · S
 
-3 · **Guns that hit what you chose** · In `killT`, aim at the chosen person before firing; bystanders only get hit when they are genuinely in the line. Keep the "THAT IS ILYA" reaction for those cases. · The accident is only a great clip if the viewer believes it was fair. · M
+3 · ✅ fixed (14 Nov 2026) · **Guns that hit what you chose** · In `killT`, aim at the chosen person before firing; bystanders only get hit when they are genuinely in the line. Keep the "THAT IS ILYA" reaction for those cases. · The accident is only a great clip if the viewer believes it was fair. · M
 
-4 · **Punches that land** · Let a queued PUNCH close the gap with a short lunge, and stop flat doors cancelling an action in progress. · A wheel with dead options is a wheel streamers stop opening. · S
+4 · ✅ fixed (14 Nov 2026) · **Punches that land** · Let a queued PUNCH close the gap with a short lunge, and stop flat doors cancelling an action in progress. · A wheel with dead options is a wheel streamers stop opening. · S
 
-5 · **Police that follow through** · "Run." must start a chase with shots; no stops through shut doors. · A chase is content; a repeated text box is a skip. · M
+5 · ✅ fixed (14 Nov 2026) · **Police that follow through** · "Run." must start a chase with shots; no stops through shut doors. · A chase is content; a repeated text box is a skip. · M
 
-6 · **Hide the dev tools** · GOD and BODY only after the five-tap unlock the code already has. · Stops the first comment being "just turn on god mode". · S
+6 · ✅ fixed (14 Nov 2026) · **Hide the dev tools** · GOD and BODY only after the five-tap unlock the code already has. · Stops the first comment being "just turn on god mode". · S
 
-7 · **Keys that match the hint** · A/D, arrows and E in the house and field; SHIFT actually runs; Esc opens and closes MENU; delete the twin-stick paragraph. · Desktop is where it will be streamed. · S
+7 · ✅ fixed (14 Nov 2026) · **Keys that match the hint** · A/D, arrows and E in the house and field; SHIFT actually runs; Esc opens and closes MENU; delete the twin-stick paragraph. · Desktop is where it will be streamed. · S
 
-8 · **Frame the speaker** · Lift the camera by the sheet height whenever a street conversation or MENU opens; keep you and them in the top half. · A phone recording of ceiling lamps is not a clip. · S
+8 · ✅ fixed (14 Nov 2026) · **Frame the speaker** · Lift the camera by the sheet height whenever a street conversation or MENU opens; keep you and them in the top half. · A phone recording of ceiling lamps is not a clip. · S
 
-9 · **Menu that closes** · Pin BACK TO THE STREET to the bottom of the sheet and close the menu after a taxi. · Removes ten seconds of dead air from every ride. · S
+9 · ✅ fixed (14 Nov 2026) · **Menu that closes** · Pin BACK TO THE STREET to the bottom of the sheet and close the menu after a taxi. · Removes ten seconds of dead air from every ride. · S
 
-10 · **No dud coin on life one** · Skip the dud roll when `S.gen===1` (from the code). · Guarantees the 15x moment in every first video. · S
+10 · ✅ fixed (14 Nov 2026) · **No dud coin on life one** · Skip the dud roll when `S.gen===1` (from the code). · Guarantees the 15x moment in every first video. · S
 
-11 · **Unlock the other three** · One new character per death, announced on the death screen with their perk. · "I died to unlock the Paranoid" is a video title. · S
+11 · ✅ fixed (14 Nov 2026) · **Unlock the other three** · One new character per death, announced on the death screen with their perk. · "I died to unlock the Paranoid" is a video title. · S
 
 ### The first 60 seconds
 
