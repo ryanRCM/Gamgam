@@ -142,6 +142,7 @@ input[type=range]:focus-visible{outline:2px solid var(--cyan)}
 #lines{flex:1; min-width:0; font-size:18px; color:var(--dim); display:flex; flex-direction:column; gap:1px}
 #lines div{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden}
 #lines div:last-child{color:var(--ink)}
+#lines div:last-child{-webkit-line-clamp:4}#lines div.x{-webkit-line-clamp:unset!important;display:block!important}#lines{pointer-events:auto}#lines div{cursor:pointer}
 #lines .gold{color:var(--gold)!important} #lines .rose{color:var(--rose)!important} #lines .cyan{color:var(--cyan)!important} #lines .violet{color:var(--violet)!important}
 .mini{font-size:7px; min-height:28px; padding:6px; box-shadow:0 2px 0 #000; color:var(--dim)}
 /* WORLD: the control deck */
@@ -2307,7 +2308,7 @@ $('tc').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-h]');
 $('tc').addEventListener('contextmenu',e=>e.preventDefault());
 $('bSpin').addEventListener('pointerdown',e=>{e.preventDefault();doSpin()});$('bKick').addEventListener('pointerdown',e=>{e.preventDefault();doKick()});
 $('bFocus').addEventListener('pointerdown',e=>{e.preventDefault();toggleFocus()});$('bAct').addEventListener('click',()=>worldAct());
-$('bWpn').addEventListener('click',()=>cycleW());$('bMenu').addEventListener('click',()=>{S.wmenu=true;render()});
+$('bWpn').addEventListener('click',()=>cycleW());$('bMenu').addEventListener('click',()=>{pieClose();S.wmenu=true;render()});
 addEventListener('resize',()=>{viewSync()});
 function pWorldMenu(){const [ln,lt]=learned();return `<div class="who2">${WR?zoneName():''} · ${stage()} · CHAOS ${Math.round(chaos())}%</div>
   <div class="read"><span class="ro">HEALTH ${Math.round(S.whp)}${S.arm>0?' · VEST '+Math.round(S.arm):''}</span><span class="au">WANTED ${stars()}</span></div>
@@ -3522,7 +3523,7 @@ body.wm #lines{text-align:left;font-size:11px;gap:3px;text-shadow:none}
 body.wm #lines div{display:block!important;background:rgba(0,0,0,.6);border-left:2px solid currentColor;padding:3px 7px;-webkit-line-clamp:4;animation:toast 4.5s forwards}
 @keyframes toast{0%{opacity:0;transform:translateX(-10px)}5%{opacity:1;transform:none}78%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){body.wm #lines div{animation:none}}
-#tcTop{max-width:50vw;flex-wrap:wrap;justify-content:flex-end;gap:5px}#tcTop button{height:28px;padding:0 9px;font-size:9px!important}
+#tcTop{max-width:calc(100vw - 20px);flex-wrap:nowrap;justify-content:flex-end;gap:5px}#tcTop button{white-space:nowrap}#tcTop button{height:28px;padding:0 9px;font-size:9px!important}
 #gbar{top:max(78px,calc(env(safe-area-inset-top) + 74px))!important;left:auto!important;right:8px;transform:none!important;justify-content:flex-end!important;max-width:44vw!important}
 #tc #bLow{position:absolute;right:calc(max(12px,env(safe-area-inset-right)) + 86px);bottom:calc(max(18px,env(safe-area-inset-bottom)) + 98px);width:74px;height:34px;border-radius:17px;font-size:10px!important;display:none}`;document.head.appendChild(st)}
 Q100.forEach(q=>{if(q[1]==='Will the desk and house match the new look?'){q[0]='S';q[2]='The house does now: cut open, lit by what you see. The terminal desk is next.'}if(q[1]==='Controller support?'){q[0]='S';q[2]='Stick or d-pad walks, A shoots, B kicks, X acts, Y aims. Not yet tried on a real pad.'}if(q[1]==='Voice?')q[2]='Every line now passes through one function. A robot test voice can be switched on. Recordings next.';if(q[1]==='How long is a session?')q[2]='Each life is now clocked. Not shown anywhere yet.'});
@@ -3543,7 +3544,7 @@ const PIE=document.createElement('div');PIE.id='pie';document.body.appendChild(P
 function pieClose(){PIE.style.display='none';PIET=null}
 function pieOpen(e,cx,cy){PIET=e;const p=e.p,hv=v=>typeof v==='function'?v():v;npcInit(p);
   const acts=SIMA.filter(a=>!(e.ko>0)||a.k==='beat'||a.k==='kill'||a.k==='punch');
-  PIE.innerHTML=`<b>${p.n}</b><i>${(p.occ||'').toUpperCase()}${hostP(e)?' · HOSTILE':e.ko>0?' · OUT COLD':''}</i>`+acts.map(a=>`<button type="button" data-k="${a.k}" ${a.ok&&!a.ok()?'disabled':''}>${hv(a.n)}<small>${hv(a.d)}</small></button>`).join('')+'<button type="button" data-k="x" class="x">NEVER MIND</button>';
+  PIE.innerHTML=`<b>${p.n}</b><i>${WR.pieN?WR.pieN+' HERE · TAP AGAIN FOR THE NEXT · ':''}${(p.occ||'').toUpperCase()}${hostP(e)?' · HOSTILE':e.ko>0?' · OUT COLD':''}</i>`+acts.map(a=>`<button type="button" data-k="${a.k}" ${a.ok&&!a.ok()?'disabled':''}>${hv(a.n)}<small>${hv(a.d)}</small></button>`).join('')+'<button type="button" data-k="x" class="x">NEVER MIND</button>';
   PIE.style.display='block';const r=PIE.getBoundingClientRect();PIE.style.left=clamp(cx+14,6,innerWidth-r.width-6)+'px';PIE.style.top=clamp(cy-r.height/2,6,innerHeight-r.height-6)+'px'}
 PIE.addEventListener('click',ev=>{const b=ev.target.closest('[data-k]');if(!b||b.disabled)return;const k=b.dataset.k,e=PIET;pieClose();audioStart();if(k==='x'||!e||!WR)return;const a=SIMA.find(q=>q.k===k),m=WR.me;m.seq=null;m.killT=null;m.todo={e,a:k,t:9};sfx('tick')});
 function simGo(x,run,T){const m=WR.me;m.goX=x;m.goT=T||40;S.run=!!run&&(S.stam==null||S.stam>.2)}
@@ -3551,7 +3552,7 @@ function simStop(){const m=WR.me;if(m.auto){KH.L=KH.R=false;m.auto=0}m.goX=null}
 function simStep(dt){const m=WR.me;if(m.dead){simStop();m.todo=m.seq=m.killT=null;return}
   /* on the way to someone or something */
   if(m.todo){const td=m.todo;td.t-=dt;
-    if(td.e){const e=td.e,a=SIMA.find(q=>q.k===td.a),far=a.far?a.far():15,d=e.x-m.x;if(e.dead&&td.a!=='kill'||td.t<=0){m.todo=null;simStop()}
+    if(td.e&&!SIMA.find(q=>q.k===td.a)){m.todo=null;simStop()}else if(td.e){const e=td.e,a=SIMA.find(q=>q.k===td.a),far=a.far?a.far():15,d=e.x-m.x;if(e.dead&&td.a!=='kill'||td.t<=0){m.todo=null;simStop()}
       else if(Math.abs(d)<=far+3){m.todo=null;simStop();m.dir=Math.sign(d)||m.dir;a.do(e)}else simGo(e.x-Math.sign(d)*far,Math.abs(d)>150||td.t<8)}
     else if(td.h){const d=td.h.x-m.x;if(td.t<=0){m.todo=null;simStop()}else if(Math.abs(d)<6){m.todo=null;simStop();WR.cur=td.h;worldAct()}else simGo(td.h.x,Math.abs(d)>150)}}
   /* walking to a spot */
@@ -3565,7 +3566,8 @@ function simStep(dt){const m=WR.me;if(m.dead){simStop();m.todo=m.seq=m.killT=nul
 scr.addEventListener('pointerdown',ev=>{if(!wmode()||!WR||GOD.on||S.dlg||S.wmenu||S.phase!=='trade')return;ev.stopImmediatePropagation();ev.preventDefault();audioStart();
   const m=WR.me;if(m.dead)return;if(PIET)pieClose();const p=pt(ev),wx=WR.cam.x+p[0],wy=WR.cam.y+p[1],gy=GY*TS;
   if(ev.clientY>innerHeight-44){m.todo=m.seq=m.killT=null;KH.F=false;simGo(clamp((ev.clientX-16)/(innerWidth-32)*WW*TS,20,WW*TS-72),1,120);sfx('tick');return}
-  let best=null,bd=17;WR.ents.forEach(e=>{if(e.dead)return;const dx=Math.abs(e.x-wx);if(dx<bd&&wy<e.y+10&&wy>e.y-50){bd=dx;best=e}});
+  const C=WR.ents.filter(e=>!e.dead&&Math.abs(e.x-wx)<17&&wy<e.y+10&&wy>e.y-50).sort((a,b)=>Math.abs(a.x-wx)-Math.abs(b.x-wx));let best=C[0]||null;
+  if(C.length>1&&WR.pieLast&&C.includes(WR.pieLast)&&performance.now()-(WR.pieAt||0)<4000)best=C[(C.indexOf(WR.pieLast)+1)%C.length];WR.pieLast=best;WR.pieAt=performance.now();WR.pieN=C.length>1?(C.indexOf(best)+1)+'/'+C.length:'';
   if(best){pieOpen(best,ev.clientX,ev.clientY);sfx('tick');return}
   let hb=null,hd=20;(WR.hot||[]).forEach(h=>{const dx=Math.abs(h.x-wx);if(dx<hd&&wy>gy-RH&&wy<gy+14){hd=dx;hb=h}});
   m.seq=null;m.killT=null;KH.F=false;
@@ -4339,10 +4341,10 @@ const CU={on:false,imgs:{},q:null};
   every(()=>{const s=steps[i];drawL(typeof s.L==='function'?s.L((performance.now()-t0)/s.t):s.L);if(performance.now()-t0>=s.t){i++;if(i>=steps.length){close();if(done)done();return}t0=performance.now();if(steps[i].c!=null)cap.innerHTML=steps[i].c;if(steps[i].s)playS(steps[i].s,.5)}},50);if(steps[0].s)playS(steps[0].s,.5)};
  /* the lock: five pins, one order. a wrong pin springs back and costs a slip */
  window.cuLock=function(done){const P='cu.lock_pick.',ord=[0,1,2,3,4].sort(()=>R()-.5),set=[],lift=[0,0,0,0,0],max=Math.min(10,4+Math.round(((S.st&&S.st.LOGIC)||2))),st={miss:0,at:2,push:-1,pt:0,end:0};
-  const msg=()=>`Tap a pin. Find the order they bind in. <b style="color:#ffd070">${set.length}/5</b> set. Slips left: <b style="color:${max-st.miss<3?'#ef5d75':'#e6e1d4'}">${max-st.miss}</b>`;open('THE LOCK',msg(),true);btn.onclick=()=>{close();done(false)};
+  const msg=()=>`Tap the pin that trembles. It is the one binding. <b style="color:#ffd070">${set.length}/5</b> set. Slips left: <b style="color:${max-st.miss<3?'#ef5d75':'#e6e1d4'}">${max-st.miss}</b>`;open('THE LOCK',msg(),true);btn.onclick=()=>{close();done(false)};
   tap=(x,y)=>{if(st.end||st.push>=0)return;const i=clamp(Math.round((x-119)/19),0,4);st.at=i;if(set.includes(i))return;st.push=i;st.pt=performance.now()};
   every(()=>{const now=performance.now();if(st.push>=0){const k=(now-st.pt)/220,i=st.push;lift[i]=-9*Math.min(1,k);if(k>=1){if(ord[set.length]===i){set.push(i);lift[i]=-9;playS('lock_pin_click_'+(i+1),.6);if(set.length===5){st.end=1;playS('lock_open',.6);cap.innerHTML='It turns.';setTimeout(()=>{close();done(true)},700)}}else{lift[i]=0;st.miss++;try{sfx('bad')}catch(_){}if(st.miss>=max){st.end=1;cap.innerHTML='The pick snaps.';setTimeout(()=>{close();done(false)},800)}}st.push=-1;if(!st.end)cap.innerHTML=msg()}}
-   const px=119+st.at*19,w=Math.sin(now/130)*1.2;drawL([P+'door_lock_plate',P+'cylinder_cutaway'].concat([0,1,2,3,4].map(i=>[P+'pin_'+(i+1),0,lift[i]]),[[P+'tension_wrench',w,0],[P+'pick',px-178,st.push>=0?-3:0],[P+'left_hand',w*.5,0],[P+'right_hand',(px-157)*.4,st.push>=0?-2:0]]))},40)};
+   const px=119+st.at*19,w=Math.sin(now/130)*1.2;drawL([P+'door_lock_plate',P+'cylinder_cutaway'].concat([0,1,2,3,4].map(i=>[P+'pin_'+(i+1),0,lift[i]+(st.push<0&&!st.end&&i===ord[set.length]?Math.round(Math.sin(now/70)*1.6):0)]),[[P+'tension_wrench',w,0],[P+'pick',px-178,st.push>=0?-3:0],[P+'left_hand',w*.5,0],[P+'right_hand',(px-157)*.4,st.push>=0?-2:0]]))},40)};
  /* the kick: hit it when the mark is in the gap. twice. */
  window.cuKick=function(done){const P='cu.door_kick.',gw=Math.min(64,26+((S.st&&S.st.NERVE)||2)*6),st={hits:0,miss:0,k:-1,kt:0,end:0,g0:128+Math.floor(R()*30)};open('THE DOOR',`Tap when the mark is in the gap. Twice. Two misses and your foot gives up.`,true);btn.onclick=()=>{close();done(false)};
   const pos=now=>160+Math.sin(now/260)*118;
@@ -5173,6 +5175,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
 #panel.t21>button.pri{font-size:26px!important;border-left-color:#c85a5a!important;color:#fff!important}
 #panel.t21>button:hover,#panel.t21>button:active{border-left-color:#c85a5a!important;color:#fff!important}
 body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{display:none!important}
+#panel .emp21b{grid-column:1/-1;width:100%;white-space:normal}
 #panel.t21 .more21{display:none}#panel.t21.open .more21{display:block}
 #panel.t21 .vtag{font:11px monospace;color:#5d5866;padding:6px 12px}`;document.head.appendChild(st);
  const MORE=['dev','voice','xboss','xgames'];
@@ -6097,6 +6100,7 @@ function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hin
   return false}
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
+$('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
 window.HS={get VH(){return H},btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));

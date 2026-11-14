@@ -84,16 +84,16 @@ Thirty-three found. Line numbers refer to `index.html` in the upload.
 20. ✅ fixed (14 Nov 2026) · Prices print twice in street menus: "A beer. $20 $20", "Buy RAKE… $200M $200M", every DOCKS line. Likely place: option labels that include the price plus the `cost` renderer.
 21. ✅ fixed (14 Nov 2026) · Typos: "Mara Sato, your the general, has talked to a paper." and "2 crisises waiting".
 22. ✅ fixed (14 Nov 2026) · The EVERCLEAR bottle sprite covers RESET and overlaps the right-hand LOOK buttons on phone. Likely place: `#pal` positioning.
-23. Tutorial lines are clamped to two rows and end in "…" on phone and desktop. Likely place: `#lines div` line clamp.
+23. ✅ fixed (14 Nov 2026) · Tutorial lines are clamped to two rows and end in "…" on phone and desktop. Likely place: `#lines div` line clamp.
 24. ✅ fixed (14 Nov 2026) · Desktop key hint overlaps SOUND / UNMAKE / RESET. Likely place: `#pchelp`.
 25. ✅ fixed (14 Nov 2026) · The EMPIRE button is injected mid-dialogue and breaks the war panel grid. Likely place: the `emp21` injection.
-26. The presidency bar at the bottom of the desk panel is cut off on desktop.
+26. ✅ fixed (14 Nov 2026) · The presidency bar at the bottom of the desk panel is cut off on desktop.
 27. ✅ fixed (14 Nov 2026) · 404 for `pack/09_fonts/dejavu_sans_mono.woff` when any side page opens.
 28. ✅ fixed (14 Nov 2026) · Heat was read at 116 after a shooting; the bar tops out at 100. Likely place: `heatAdd()` clamp.
-29. With a gun out, the street's top-right buttons wrap to three rows and BODY lands on another icon.
-30. The wheel opens on whoever is standing on top of you; while it is open it blocks MENU.
+29. ✅ fixed (14 Nov 2026) · With a gun out, the street's top-right buttons wrap to three rows and BODY lands on another icon.
+30. ✅ fixed (14 Nov 2026) · The wheel opens on whoever is standing on top of you; while it is open it blocks MENU.
 31. ✅ fixed (14 Nov 2026) · The statue page ships with test buttons ("Wealth £100,000"), a Hitboxes tick box and pounds instead of dollars.
-32. The lock game gives no visible tell for the binding pin and sits in a mostly empty black screen.
+32. ✅ fixed (14 Nov 2026) · The lock game gives no visible tell for the binding pin and sits in a mostly empty black screen.
 33. ✅ fixed (14 Nov 2026) · A GUT line on the very first desk crisis says "You have a feeling you have sat through this before."
 
 ## The Locked List
