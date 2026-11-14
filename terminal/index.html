@@ -1150,7 +1150,7 @@ const pct=(st,dc)=>{const need=dc-ST(st);return need<=2?100:need>12?0:PCT[need]}
 const roll=(st,dc)=>1+Math.floor(R()*6)+1+Math.floor(R()*6)+ST(st)>=dc;
 function node(){return DLG[S.dlg.id](S.dlg.ctx)}
 function openD(id,ctx){sceneT=performance.now();S.dlg={id,ctx:ctx==null?null:ctx,res:null};sfx('tick');render()}
-function choose(i){const n=node(),o=n.opts[i];if(!o)return;const cost=o.cost?o.cost():0;if(cost>S.cash)return;
+function choose(i){const n=node(),o=n.opts[i];if(!o)return;const cost=o.cost?Math.round(o.cost()*INF22.cpi()):0;if(cost>S.cash)return;
   let ok=true;if(o.check)ok=roll(o.check[0],o.check[1]);S.cash-=cost;
   let r=(ok?o.ok:(o.fail||o.ok))()||'',next=o.next||null;if(typeof r==='object'){next=r.next;r=r.t||''}
   sfx(o.check?(ok?'ok':'bad'):'tick');
@@ -2214,7 +2214,7 @@ function assassins(dt){if(S.copsOff>0)S.copsOff-=dt;
    Go live from the terminal or anywhere in the world. Viewers come from fame and from hype: style kills, making it rain,
    big gambling wins, big trades, giveaways. They tip. Sponsors pay per viewer. Fame grows while you are live.
    Being live tells everyone where you are: heat creeps up and assassins find you twice as fast. */
-const SPONS=[[2000,'volt','VOLTAGE ENERGY','A can of neon on your desk, every stream.',.01],[10000,'rake','RAKE','Stream the casino. They pay per viewer and want you gambling on camera. Table limits go up five times.',.08],[100000,'krane','KRANE CHIPS','Krane hardware on every frame. The biggest cheque in streaming.',.3]];
+const SPONS=[[2000,'volt','VOLTAGE ENERGY','A can of neon on your desk, every stream.',.00002],[10000,'rake','RAKE','Stream the casino. They pay per viewer and want you gambling on camera. Table limits go up five times.',.0001],[100000,'krane','KRANE CHIPS','Krane hardware on every frame. The biggest cheque in streaming.',.0003]];
 function hype(n,label){if(!S.live)return;S.hype=Math.min(400,(S.hype||0)+n);if(label&&n>=20){S.kchat=S.kchat||[];S.kchat.unshift({t:'CHAT: '+label,c:1});S.kchat.length=Math.min(S.kchat.length,8)}}
 const CHATL=['W','L','CLIP IT','NO WAY','BRO','LMAO','HE IS COOKED','RUN','IS THIS REAL','SEND IT','GOAT','ACTUAL MENACE','CHAT','W STREAM','DO IT','RIP','HOLY','5 MORE MINUTES','WHERE IS THIS'];
 /* ===== v22 · PAINTED PIXELS =====
@@ -2276,6 +2276,35 @@ const R22=(()=>{const P=a=>a[Math.floor(R()*a.length)];let last=null;
  function about(){const r=(S.recent||[])[0];return r&&Date.now()-r.t<180000?r:null}
  return {note,line,about}})();
 
+/* ===== v22 · REAL MONEY =====
+   The world has a money supply (about $120T broad money in 2026, growing ~6% a year). Everything you pull out of the
+   markets is new money chasing the same goods. The price level follows your share of the money supply:
+   CPI = e^(30 x share). $1T (under 1%) is barely felt; $8T (7%) is a 7x price level; $20T is 150x; past that the dollar
+   is dead and the world switches currency, converting what you hold at a ruinous rate.
+   Every price in the game (conversations, shops, countries, tricks, repairs) is multiplied by CPI. Viewers cap at the
+   people online on Earth; fame at the people alive. */
+const INF22=(()=>{const CUR=['NEW DOLLAR','GLOBAL CREDIT','SOL','ORBITAL MARK','STANDARD HOUR','QUANTUM NOTE'];
+ const W=()=>{const w=S.world;w.cpi=w.cpi||1;w.cur=w.cur||0;return w};
+ const MS=()=>{const w=S.world||{},y=(w.year||2026)-2026;return 1.2e14*Math.pow(1.06,Math.min(y,600))};
+ const wealth=()=>{let v=S.cash||0;try{(S.hold||[]).forEach((h,a)=>{if(h&&h.u)v+=h.u*S.mk[a][S.t]})}catch(_){}return v};
+ const cpi=()=>{try{return W().cpi||1}catch(_){return 1}};
+ let warned=0;
+ setInterval(()=>{try{if(!S||!S.ch||!S.world)return;const w=W(),share=Math.max(0,wealth()/MS()),target=Math.exp(30*share);w.cpi=Math.min(w.cpi*1.25,w.cpi+(Math.max(1,target)-w.cpi)*.08);
+   if(w.cpi>3&&warned<1){warned=1;say(`<b class="hd">INFLATION</b> Prices are up ${Math.round((w.cpi-1)*100)}%. Everyone knows whose money it is. A loaf costs what a lunch used to.`,'rose');try{R22.note('rich',{x:fmt(S.cash)})}catch(_){}}
+   if(w.cpi>40&&warned<2){warned=2;say('<b class="hd">INFLATION</b> Bread is priced by the hour. Pensions are gone. The papers print your face over a wheelbarrow of notes.','rose');try{CONS22.tie('market',{sym:'the dollar'})}catch(_){}if(!S.dlg&&S.phase==='trade')try{openD('mint22')}catch(_){}}
+   if(w.cpi>1000&&!S.dlg){const old=w.curName||'DOLLAR',rate=Math.max(w.cpi,Math.exp(Math.min(40,30*wealth()/MS()))),mine=!!w.mint,eff=mine?Math.pow(rate,.2):rate;const RIV=['VANE NOTE','REYES CROWN','KRANE CREDIT','THE PEOPLE\'S MARK','ORBITAL MARK'];
+     w.curName=mine?w.mint:RIV[Math.floor(R()*RIV.length)];w.cur++;S.cash=S.cash/eff;try{(S.hold||[]).forEach(h=>{if(h)h.cost/=rate})}catch(_){}const gold=S.gold22||0;if(gold){S.cash+=gold;S.gold22=0}w.cpi=1;warned=0;w.mint=null;
+     const t=mine?`THE ${old} IS DEAD. The world needs something to count with, and you are ready: the ${w.curName} is now the money of the world. You convert at ${Math.round(eff).toLocaleString()} to 1. Everyone else converts at ${Math.round(rate).toLocaleString()} to 1.`:`THE ${old} IS DEAD. Into the vacuum steps the ${w.curName}, and it is not yours. Your cash converts at ${Math.round(rate).toLocaleString()} to 1.${gold?' The gold you bought comes back whole: '+fmt(gold)+'.':''} Anything you held as dollars is gone. What you own as things is still yours.`;try{S.world.toll=(S.world.toll||0)+Math.round(1e3+R()*9e3);CONS22.tie('market',{sym:'the '+old})}catch(_){}say(`<b class="hd">COLLAPSE</b> ${t}`,'rose');try{const e=S.emp&&S.emp.w22;if(e)e.news.unshift({t,y:S.world.year,col:'#ef5d75'})}catch(_){}try{HSREACT('war')}catch(_){}}
+   if((S.viewers||0)>5.5e9)S.viewers=5.5e9;if((S.fame||0)>8.1e9)S.fame=8.1e9}catch(_){}},1000);
+ const power=()=>S.phase==='war'||!!(S.emp&&Object.keys(S.emp.own||{}).length)||!!(S.emp&&S.emp.co&&((S.emp.co['MERIDIAN BANK']||0)>=51||(S.emp.co['OBOL LABS']||0)>=51));
+ return {cpi,MS,wealth,power}})();
+DLG.mint22=()=>{const w=S.world,sur=(S.name||'Nobody').split(' ').pop().toUpperCase(),pw=INF22.power(),c=INF22.cpi();
+ return {who:'THE VACUUM',text:`Prices are up ${Math.round(c)} times. The dollar has weeks. Whoever is holding the next money when it dies keeps everything; whoever is holding dollars keeps a souvenir.`,
+  th:[['LOGIC',3,'Cash dies. Things live: shares, countries, companies, gold.'],['GUT',4,pw?'You have the power to make the next money yourself. Few people ever do.':'People in power are already printing their own. You are not in power.']],
+  opts:[{t:pw?`Mint your own: the ${sur}. Costs a tenth of everything.`:'Mint your own currency. (You need the presidency, a country, the bank or OBOL.)',ok:()=>{if(!pw)return 'Nobody accepts money from someone with no army, no bank and no flag. The printer jams out of embarrassment.';S.cash*=.9;w.mint='THE '+sur;heatAdd(25);try{R22.note('rich',{x:'the '+sur})}catch(_){}return `The ${sur} is printed in three countries by morning. Your face is on the hundred. When the dollar goes, yours is ready.`}},
+   {t:'Move half your cash into gold.',ok:()=>{const g=S.cash*.5;S.cash-=g;S.gold22=(S.gold22||0)+g/c;return `${fmt(g)} into bars in a vault under a bank that used to be a church. Worth ${fmt(g/c)} in real money, and it will still be worth that afterwards.`}},
+   {t:'Do nothing. Dollars have always come back.',ok:()=>'They have. So far.'}]}};
+
 /* ===== v22 · KLIK CHAT AND LEAKS =====
    kchatLine(): a grammar, not a list. Openers x cores x tails x emotes, every core with its own slots,
    and the core is chosen by what is happening right now (where you are, what you just did, what you own, what the world thinks).
@@ -2334,20 +2363,20 @@ function klikStep(dt){if(!S.ch)return;try{KC.events(dt)}catch(_){}S.kk=S.kk||{pe
   const base=20+Math.pow(Math.max(0,S.fame),.7)*.8,mult=(S.kcat==='gamb'?1.25:S.kcat==='mkt'?1.1:1)*(S.loc==='world'?1.2:1);
   if(!S.live){S.viewers=Math.max(0,(S.viewers||0)-(S.viewers||0)*dt);return}
   const target=base*(1+(S.hype||0)/60)*mult;S.viewers=(S.viewers||0)+(target-(S.viewers||0))*Math.min(1,dt*.6);S.hype=(S.hype||0)*Math.pow(.96,dt);
-  const rate=.02+SPONS.reduce((a,s)=>a+(K.deals[s[1]]?s[4]:0),0),earn=S.viewers*rate*dt;S.cash+=earn;S.earned+=earn;K.earned+=earn;S.fame+=S.viewers*.004*dt;heatAdd(.12*dt);
+  const rate=.00005+SPONS.reduce((a,s)=>a+(K.deals[s[1]]?s[4]:0),0),earn=S.viewers*rate*dt;S.cash+=earn;S.earned+=earn;K.earned+=earn;S.fame+=S.viewers*.004*dt;heatAdd(.12*dt);
   if(S.viewers>K.peak)K.peak=S.viewers;
   S.kct=(S.kct||0)-dt;if(S.kct<=0){S.kct=(S.kburst&&S.kburst.n>0?.08:.3)+R()*(S.viewers>1e5?.2:.6);S.kchat=S.kchat||[];const tip=R()<.12;S.kchat.unshift(tip?{t:'$'+fnum(Math.max(5,S.viewers*.01*(1+R()*20)))+' '+pick(HANDLES).toUpperCase(),c:2}:{t:R()<.12?pick(CHATL):KC.line(),c:0});S.kchat.length=Math.min(S.kchat.length,8)}
   if(!S.dlg&&S.phase==='trade')for(const s of SPONS){if(K.peak>=s[0]&&!K.deals[s[1]]&&!K.off[s[1]]&&!(s[1]==='krane'&&ndead('odalys'))){K.off[s[1]]=1;openD('spons',s[1]);break}}
   S.kuiT=(S.kuiT||0)+dt;if(S.kuiT>1){S.kuiT=0;const v=$('kv');if(v)v.textContent=fnum(S.viewers)+' watching · '+fmt(K.earned)+' earned';const hc=$('hud').querySelector('.cash');if(hc)hc.firstChild.textContent=fmt(S.cash)}}
 function goLive(on){S.live=on;S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};if(on){S.hype=Math.max(S.hype||0,20);say('You are LIVE on KLIK. Everything you do now is content. Everyone watching knows where you are.','violet');post('flex')}else say(`Stream over. Peak ${fnum(S.kk.peak)} viewers, ${fmt(S.kk.earned)} earned so far.`,'cyan');sfx('ok');save();render()}
-DLG.spons=k=>{const s=SPONS.find(x=>x[1]===k);return {who:'KLIK · PARTNERSHIPS',text:`${fnum(s[0])} people watched you at once. ${s[2]} is in your messages. "${s[3]}" They pay ${'$'+s[4]} per viewer, per second, every second you are live.`,
+DLG.spons=k=>{const s=SPONS.find(x=>x[1]===k);return {who:'KLIK · PARTNERSHIPS',text:`${fnum(s[0])} people watched you at once. ${s[2]} is in your messages. "${s[3]}" They pay ${'$'+(s[4]*3600).toFixed(2)} per viewer, per hour, every hour you are live.`,
   opts:[{t:'Sign it.',ok:()=>{S.kk.deals[k]=1;if(k==='rake')S.rake.sponsor=1;return `Signed. ${s[2]} is on your stream now. ${k==='rake'?'Gamble on camera and the viewers pour in.':'Chat calls you a sellout. Chat keeps watching.'}`}},{t:'Turn it down. Stay independent.',ok:()=>{fameAdd(Math.max(200,S.fame*.03));return 'You post the screenshot of you saying no. Chat respects it. Fans up.'}}]}};
 function pKlik(){const K=S.kk||{peak:0,earned:0,deals:{}};
   return `<div class="app klik"><div class="khead"><b>KLIK</b><span id="kv">${S.live?fnum(S.viewers||0)+' watching · ':''}${fmt(K.earned)} earned</span>${S.live?'<em>● LIVE</em>':''}</div>
   <button type="button" class="${S.live?'kend':'kgo'}" data-a="live">${S.live?'END STREAM':'GO LIVE'}<small>${S.live?'peak '+fnum(K.peak)+' viewers':'viewers from your fame, money from tips and sponsors'}</small></button>
   <div class="row r3">${[['chat','JUST CHATTING'],['gamb','GAMBLING'],['mkt','MARKETS']].map(c=>`<button type="button" class="tk ${(S.kcat||'chat')===c[0]?'on':''}" data-a="kcat" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
   <div class="note">${S.kcat==='gamb'?'Every big RAKE win on stream sends viewers through the roof.':S.kcat==='mkt'?'Big buys and sells on stream pull in the money crowd.':'Anything goes. Walk outside live and the street is the show.'} Going live makes heat creep up, and the people who want you dead can watch too.</div>
-  <div class="sec">SPONSORS</div>${SPONS.map(s=>`<div class="read"><span>${s[2]}</span><span class="${K.deals[s[1]]?'g':''}">${K.deals[s[1]]?'SIGNED · $'+s[4]+'/viewer/s':'at '+fnum(s[0])+' viewers'}</span></div>`).join('')}</div>`}
+  <div class="sec">SPONSORS</div>${SPONS.map(s=>`<div class="read"><span>${s[2]}</span><span class="${K.deals[s[1]]?'g':''}">${K.deals[s[1]]?'SIGNED · $'+(s[4]*3600).toFixed(2)+'/viewer/hr':'at '+fnum(s[0])+' viewers'}</span></div>`).join('')}</div>`}
 function drawKlik(now){rect(SX,SY,SW,SH,'#0a0f0a');rect(SX+6,SY+6,160,100,'#141a14');panelGrey(SX+8,SY+8,156,96);
   g.save();g.beginPath();g.rect(SX+8,SY+8,156,96);g.clip();body(g,SX+46,SY+8,LOOK(),4,S.age>58,{t:now,yaw:Math.sin(now/1500)*.5});g.restore();
   if(S.live){rect(SX+10,SY+10,22,8,Math.floor(now/500)%2?'#e8183c':'#a01028');text('LIVE',SX+12,SY+12,1,'#fff');text(fnum(S.viewers||0),SX+36,SY+12,1,'#53fc18')}else text('OFFLINE',SX+12,SY+12,1,'#8d86a3');
@@ -5475,25 +5504,25 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
    everything shows you the number going up. */
 {const fm=n=>fmt(n),R0=Math.random,pk=a=>a[Math.floor(R0()*a.length)];
  const C=[
-  ['us','UNITED STATES',['#b0303a','#f2efe6','#2a3a6a'],'President Dale Harrow','loud',9e12,98],
-  ['cn','CHINA',['#c8282a','#c8282a','#f2c14e'],'Chairman Liu Wenbo','patient',8e12,95],
-  ['ru','RUSSIA',['#f2efe6','#2a4a9a','#c8282a'],'President Arkady Volkov','cold',2.5e12,85],
-  ['in','INDIA',['#e39a3a','#f2efe6','#3a8a4a'],'Prime Minister Anand Rao','warm',3e12,80],
-  ['kp','NORTH KOREA',['#2a4a9a','#c8282a','#2a4a9a'],'Marshal Pak In-su','proud',4e10,60],
-  ['ir','IRAN',['#3a8a4a','#f2efe6','#c8282a'],'Minister Dariush Kaveh','sly',8e11,62],
-  ['gb','UNITED KINGDOM',['#2a3a6a','#f2efe6','#b0303a'],'Prime Minister Hugh Pellew','polite',3e12,70],
-  ['fr','FRANCE',['#2a4a9a','#f2efe6','#c8282a'],'President Élise Marchand','proud',2.8e12,70],
-  ['de','GERMANY',['#1a1a1a','#c8282a','#f2c14e'],'Chancellor Jonas Becker','careful',4e12,65],
-  ['br','BRAZIL',['#3a8a4a','#f2c14e','#2a4a9a'],'President Rafael Duarte','warm',2e12,55],
+  ['us','UNITED STATES',['#b0303a','#f2efe6','#2a3a6a'],'President Dale Harrow','loud',3.0e13,98],
+  ['cn','CHINA',['#c8282a','#c8282a','#f2c14e'],'Chairman Liu Wenbo','patient',1.9e13,95],
+  ['ru','RUSSIA',['#f2efe6','#2a4a9a','#c8282a'],'President Arkady Volkov','cold',2.2e12,85],
+  ['in','INDIA',['#e39a3a','#f2efe6','#3a8a4a'],'Prime Minister Anand Rao','warm',4.3e12,80],
+  ['kp','NORTH KOREA',['#2a4a9a','#c8282a','#2a4a9a'],'Marshal Pak In-su','proud',3e10,60],
+  ['ir','IRAN',['#3a8a4a','#f2efe6','#c8282a'],'Minister Dariush Kaveh','sly',4e11,62],
+  ['gb','UNITED KINGDOM',['#2a3a6a','#f2efe6','#b0303a'],'Prime Minister Hugh Pellew','polite',3.7e12,70],
+  ['fr','FRANCE',['#2a4a9a','#f2efe6','#c8282a'],'President Élise Marchand','proud',3.2e12,70],
+  ['de','GERMANY',['#1a1a1a','#c8282a','#f2c14e'],'Chancellor Jonas Becker','careful',4.8e12,65],
+  ['br','BRAZIL',['#3a8a4a','#f2c14e','#2a4a9a'],'President Rafael Duarte','warm',2.3e12,55],
   ['sa','SAUDI ARABIA',['#2a7a3a','#2a7a3a','#f2efe6'],'Crown Prince Faisal Al-Rashid','sly',1.1e12,55],
   ['jp','JAPAN',['#f2efe6','#c8282a','#f2efe6'],'Prime Minister Kenji Morita','polite',4.2e12,50],
-  ['ng','NIGERIA',['#3a8a4a','#f2efe6','#3a8a4a'],'President Tunde Okafor','warm',4.5e11,40],
-  ['mc','MONACO',['#c8282a','#f2efe6','#c8282a'],'Prince Albrecht II','polite',8e9,5]];
+  ['ng','NIGERIA',['#3a8a4a','#f2efe6','#3a8a4a'],'President Tunde Okafor','warm',2.5e11,40],
+  ['mc','MONACO',['#c8282a','#f2efe6','#c8282a'],'Prince Albrecht II','polite',9e9,5]];
  const CO=[['KRANE CHIPS','chips',8e10],['VOLTAGE ENERGY','energy',4e10],['PEAR','phones',3e12],['OBOL LABS','crypto',2e10],['RAKE','casino',6e9],['MERIDIAN BANK','bank',9e11],['HOLLOW MEDIA','news',1.2e11],['KLIK','streaming',3e11],['ATLAS DEFENCE','weapons',5e11],['NORTHLINE RAIL','rail',7e10]];
  const FAM=[['THE CARROW BOYS','Irish',0,'Started under the same bridge you did.'],['FAMIGLIA VESCARI','Italian',20,'Restaurants with no customers and very good accounts.'],['THE JADE LANTERN','Triad',40,'Nobody has ever seen the boss. The boss has seen everyone.'],['BRATVA KOLESNIK','Russian',60,'They say yes once. They never say it twice.'],['LOS ESPEJOS','Cartel',80,'Mirrors. Everything they do is someone else\'s fault.']];
  const E=()=>{S.emp=S.emp||{own:{},rel:{},co:{},fam:null,not:0,army:1,rk:{},tab:'c',chat:null,log:[]};return S.emp};
- const price=c=>c[5]*.02*(1+(E().own[c[0]]?0:0))*(1-Math.max(0,(E().rel[c[0]]||0))/250);
- const inc=()=>{const e=E();let v=0;C.forEach(c=>{if(e.own[c[0]])v+=c[5]*2e-7});CO.forEach(c=>{if(e.co[c[0]]>=51)v+=c[2]*4e-7*(e.co[c[0]]/100)});if(e.fam!=null)Object.keys(e.rk).forEach(k=>{v+=e.rk[k]*(1+FAM[e.fam][2]/40)});return v};
+ const price=c=>c[5]*1.5*INF22.cpi()*(1-Math.max(0,(E().rel[c[0]]||0))/250);
+ const inc=()=>{const e=E();let v=0;C.forEach(c=>{if(e.own[c[0]])v+=c[5]*.05/144*(1-((e.dmg||{})[c[0]]||0)*.9)*((e.w22&&e.w22.rad[c[0]])?.05:1)});CO.forEach(c=>{if(e.co[c[0]]>=51)v+=c[2]*.05/144*(e.co[c[0]]/100)});if(e.fam!=null)Object.keys(e.rk).forEach(k=>{v+=e.rk[k]*(1+FAM[e.fam][2]/40)});return v};
  setInterval(()=>{try{if(!S||!S.ch||S.phase==='title'||!S.emp)return;const v=inc()*5;if(v>0){S.cash+=v;S.emp.earned=(S.emp.earned||0)+v;if(document.getElementById('emp21').classList.contains('on'))empDraw()}}catch(_){}},5000);
  const css=document.createElement('style');css.textContent=`#emp21{position:fixed;inset:0;z-index:44;background:#000;color:#f2efe6;display:none;flex-direction:column;font:15px/1.4 Georgia,serif}
  #emp21.on{display:flex}#emp21 .hd{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid #2a2630}
@@ -5534,7 +5563,7 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
  function sanction(i){const e=E(),c=C[i];e.rel[c[0]]=Math.max(-100,(e.rel[c[0]]||0)-30);e.log.unshift(`Sanctioned ${c[1]}. Their price drops. Their patience too.`);c[5]*=.92;empDraw()}
  function shares(i,pct){const e=E(),c=CO[i],have=e.co[c[0]]||0,add=Math.min(100-have,pct),cost=c[2]*add/100*(have+add>50?1.3:1);if(add<=0||S.cash<cost)return;S.cash-=cost;e.co[c[0]]=have+add;if(have<51&&have+add>=51){pop('CEO · '+c[0]);try{HSREACT('rich',{m:c[0]})}catch(_){}}try{save();render()}catch(_){}empDraw()}
  function join(i){const e=E(),f=FAM[i],n=notoriety();if(n<f[2]){e.log.unshift(`${f[0]} do not know your name yet. Notoriety ${n}/${f[2]}.`);empDraw();return}e.fam=i;e.rk={};pop('MADE · '+f[0]);try{heatAdd(15)}catch(_){}empDraw()}
- const RK=[['PROTECTION','corner shops on the high street',2e4,400],['THE DOCKS','whatever comes off the boats',3e5,4000],['CASINO SKIM','a little off every table',4e6,40000],['A JUDGE','rulings, on request',5e7,0],['A POLICE STATION','the night shift looks away',2e8,0]];
+ const RK=[['PROTECTION','corner shops on the high street',2e4,70],['THE DOCKS','whatever comes off the boats',3e5,1040],['CASINO SKIM','a little off every table',4e6,13900],['A JUDGE','rulings, on request',5e7,0],['A POLICE STATION','the night shift looks away',2e8,0]];
  function racket(i){const e=E(),r=RK[i];if(S.cash<r[2]||e.rk[r[0]])return;S.cash-=r[2];e.rk[r[0]]=r[3];if(r[0]==='A POLICE STATION')S.heat=Math.max(0,(S.heat||0)-40);if(r[0]==='A JUDGE')S.wanted=0;pop(r[0]);try{heatAdd(6)}catch(_){}empDraw()}
  const notoriety=()=>{let n=Math.round((S.heat||0)/2);try{n+=Math.min(60,(S.world&&S.world.dead?S.world.dead.length:0)*6)}catch(_){}return Math.min(100,n)};
  function empDraw(){const e=E(),t=e.tab;let b='';
@@ -5552,7 +5581,7 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
    <div class="tabs"><button data-e="tab" data-t="c" class="${t==='c'||t==='chat'?'on':''}">COUNTRIES ${own}</button><button data-e="tab" data-t="co" class="${t==='co'?'on':''}">COMPANIES ${ceo}</button><button data-e="tab" data-t="fam" class="${t==='fam'?'on':''}">FAMILY</button><button data-e="tab" data-t="war" class="${t==='war'?'on':''}">WAR DEPT</button><button data-e="tab" data-t="map" class="${t==='map'?'on':''}">MAP</button><button data-e="tab" data-t="media" class="${t==='media'?'on':''}">MEDIA ${(e.w22&&e.w22.shows.length)||''}</button></div><div class="bd">${b}</div>`;if(t==='map')W22.paint()}
  el.addEventListener('click',ev=>{const b=ev.target.closest('[data-e]');if(!b||b.disabled)return;const d=b.dataset,e=E(),i=+d.i;
   if(d.e==='x'){el.classList.remove('on');try{render()}catch(_){}return}if(d.e==='tab'){e.tab=d.t;empDraw();return}if(d.e==='chat'){if(window.visitOpen)return visitOpen(C[i],price(C[i]));return chatOpen(i)}if(d.e==='back'){e.tab='c';empDraw();return}if(d.e==='say')return chatSay(d.k);
-  if(d.e==='nuke')return W22.nuke(i);if(d.e==='tv')return W22.tv();if(d.e==='buy')return buy(i);if(d.e==='inv')return invade(i);if(d.e==='sanc')return sanction(i);if(d.e==='prop')return propaganda(i);if(d.e==='sh')return shares(i,+d.p);if(d.e==='join')return join(i);if(d.e==='rk')return racket(i);
+  if(d.e==='web')return WEB22.go('c'+i);if(d.e==='net')return WEB22.go('home');if(d.e==='nuke')return W22.nuke(i);if(d.e==='tv')return W22.tv();if(d.e==='buy')return buy(i);if(d.e==='inv')return invade(i);if(d.e==='sanc')return sanction(i);if(d.e==='prop')return propaganda(i);if(d.e==='sh')return shares(i,+d.p);if(d.e==='join')return join(i);if(d.e==='rk')return racket(i);
   if(d.e==='army'||d.e==='army5'){const n=d.e==='army'?1:5;if(S.cash<5e9*n)return;S.cash-=5e9*n;e.army+=n;pop('+'+n+' DIVISION'+(n>1?'S':''));empDraw()}});
  window.empOpen=()=>{E();el.classList.add('on');empDraw()};
  /* ===== v22 · THE WORLD WATCHES =====
@@ -5634,7 +5663,7 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
   function map(){const e=E(),w=W(),k=w.sel,i=ci(k),c=C[i];let card='<div class="note">Tap a country.</div>';
     if(c){const o=e.own[k],rad=radOf(k),war=e.wars&&e.wars[k],r=e.rel[k]||0;
       card=`<div class="row">${flag(c)}<div><div class="nm ${o?'own':''}">${c[1]}${o?' · YOURS':''}${rad?' · <span style="color:#7fe07f">IRRADIATED'+(rad.yr?' SINCE '+rad.yr:'')+'</span>':''}</div><div class="sub">${c[3]} · ${c[4]} · army ${c[6]} · relation ${r}${war?' · <span style="color:#e0403a">AT WAR</span>':''}${ATOM.includes(k)?' · nuclear':''}</div>
-       <div class="acts"><button data-e="chat" data-i="${i}">${window.visitOpen?'VISIT':'TALK'}</button>${o||rad?'':`<button data-e="buy" data-i="${i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button><button data-e="inv" data-i="${i}" ${war?'disabled':''}>INVADE ${fm(c[6]*2e8)}</button>`}${!rad&&S.cash>=1e9&&!(e.prop&&e.prop[k])?`<button data-e="prop" data-i="${i}" ${S.cash<c[5]*.002?'disabled':''}>PROPAGANDA</button>`:''}${!o&&!rad&&canNuke()?`<button data-e="nuke" data-i="${i}" style="border-color:#7fe07f;color:#7fe07f">${w.arm===k?'CONFIRM · LAUNCH':'NUKE'}</button>`:''}</div></div><div></div></div>`;
+       <div class="acts"><button data-e="web" data-i="${i}">WEB PAGE</button><button data-e="chat" data-i="${i}">${window.visitOpen?'VISIT':'TALK'}</button>${o||rad?'':`<button data-e="buy" data-i="${i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button><button data-e="inv" data-i="${i}" ${war?'disabled':''}>INVADE ${fm(c[6]*2e8)}</button>`}${!rad&&S.cash>=1e9&&!(e.prop&&e.prop[k])?`<button data-e="prop" data-i="${i}" ${S.cash<c[5]*.002?'disabled':''}>PROPAGANDA</button>`:''}${!o&&!rad&&canNuke()?`<button data-e="nuke" data-i="${i}" style="border-color:#7fe07f;color:#7fe07f">${w.arm===k?'CONFIRM · LAUNCH':'NUKE'}</button>`:''}</div></div><div></div></div>`;
       if(!o&&!rad&&!canNuke())card+=`<div class="note">To launch you need a nuclear state of your own (${ATOM.map(q=>C[ci(q)][1].split(' ').pop()).join(', ')}), or the presidency.</div>`}
     let ch=0;try{ch=chaos()}catch(_){}const strip=PX22.img(PX22.poster('world'+((S.world&&S.world.year)||0)+Math.floor(ch/20),'strip',{chaos:ch,rad:Object.keys(W().rad).length}),160,40,'width:100%;max-width:640px;height:auto;margin:0 auto 6px');
     return strip+`<div class="note">The world as it is now. <span style="color:#f2c14e">Gold</span> is yours, <span style="color:#e0403a">red</span> is war, <span style="color:#c87a3a">brown</span> is ruin, <span style="color:#7fe07f">green</span> never goes away. ▣ your posters.</div>
@@ -5642,7 +5671,7 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
      <div class="sub" style="margin-top:8px">${w.news.slice(0,4).map(n=>`<div style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join('')}</div>`}
   function media(){const w=W(),L=legend().filter(s=>s.who!==nm());
     const sh=s=>`<div class="row">${PX22.img(PX22.poster(s.t+s.yr+s.net,'show',{look:S.look,rad:Object.keys(W().rad).length}),48,64)}<div class="fl" style="display:none">${({'PRESTIGE DRAMA':'DRAMA','REALITY SHOW':'REALITY','TRUE CRIME':'CRIME','SITCOM':'SITCOM','TELENOVELA':'NOVELA','ANIME':'ANIME',"CHILDREN'S CARTOON":'KIDS','STATE BIOPIC':'STATE'})[s.g]||'TV'}</div><div><div class="nm">${s.t}</div><div class="sub">${s.net} · ${s.yr} · ${s.actor} · about ${s.about}</div><div class="bar"><i style="width:${s.r}%;background:#e0b84a"></i></div><div class="sub">${s.r}% watched it · ${s.crit}</div></div><div></div></div>`;
-    return `<div class="note">What the world says about you. It is all made up. Some of it is true.</div><div class="acts"><button data-e="tv" ${S.cash<1e8?'disabled':''}>PITCH A SHOW ABOUT YOURSELF · ${fm(1e8)}</button></div>
+    return `<div class="note">What the world says about you. It is all made up. Some of it is true.</div><div class="acts"><button data-e="net">THE NET</button><button data-e="tv" ${S.cash<1e8?'disabled':''}>PITCH A SHOW ABOUT YOURSELF · ${fm(1e8)}</button></div>
      <div class="nm" style="margin-top:8px">NOW SHOWING</div>${w.shows.length?w.shows.map(sh).join(''):'<div class="note">Nobody has made anything about you yet. Do something worth filming.</div>'}
      <div class="nm" style="margin-top:8px">STATE BROADCASTS</div>${w.bc.length?`<div style="display:flex;gap:6px;margin:4px 0">${[...new Set(w.bc.map(b=>b.c))].slice(0,5).map(c=>PX22.img(PX22.poster(c+(S.name||''),'prop',{look:S.look}),48,64,'border:1px solid #3a3542')).join('')}</div>`+w.bc.slice(0,6).map(b=>`<div class="sub"><b>${b.c}</b> "${b.t}"</div>`).join(''):'<div class="note">Own a country and its television starts talking about you.</div>'}
      <div class="nm" style="margin-top:8px">HEADLINES</div>${w.news.length?w.news.slice(0,10).map(n=>`<div class="sub" style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join(''):'<div class="note">Quiet, for now.</div>'}
@@ -5652,6 +5681,46 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
     C.forEach(c=>{const p=POS[c[0]];if(!p)return;const d=Math.hypot(p[0]*CS+CS/2-x,p[1]*CS+CS/2-y);if(d<bd){bd=d;best=c[0]}});const w=W();if(best){w.sel=best;w.arm=null;empDraw()}});
   return {map,media,paint,nuke,tv,deed,onBuy,makeShow,W,canNuke}})();
  window.HSW22=W22;
+ /* ===== v22 · THE NET =====
+   Fake websites, generated live: WORLDPEDIA for every country, FACEPLACE for every person in the street and for you.
+   Everything on a page is read from the world as it is now: damage, radiation, owners, wars, posters, headlines,
+   who you killed and who you changed. */
+ const WEB22=(()=>{const P=a=>a[Math.floor(Math.random()*a.length)];const ov=document.createElement('div');ov.id='web22';document.body.appendChild(ov);
+  const css=document.createElement('style');css.textContent=`#web22{position:fixed;inset:0;z-index:46;background:#ece8dc;color:#22202c;display:none;flex-direction:column;font:15px/1.45 Georgia,serif}#web22.on{display:flex}
+  #web22 .bar{display:flex;gap:6px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:#d6d1c2;border-bottom:1px solid #b9b3a2;font:12px monospace}#web22 .bar input{flex:1;min-width:0;font:12px monospace;padding:6px 10px;border-radius:14px;border:1px solid #9e9888;background:#fff;color:#55506a}
+  #web22 button{font:11px monospace;background:#fff;color:#1a3fb0;border:1px solid #1a3fb0;border-radius:12px;padding:6px 10px;min-height:0;box-shadow:none;cursor:pointer}#web22 .pg{flex:1;overflow:auto;padding:14px 16px;max-width:760px;width:100%;margin:0 auto}
+  #web22 h1{font:700 24px Georgia,serif;margin:4px 0}#web22 .tag{font:11px monospace;color:#7a7590;letter-spacing:.08em}#web22 .box{border:1px solid #c9c4b4;background:#fff;padding:10px;margin:10px 0}#web22 .box b{color:#1a3fb0}
+  #web22 .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #eee;padding:3px 0}#web22 .cm{border-left:3px solid #c9c4b4;padding:4px 8px;margin:6px 0;font-size:14px}#web22 a{color:#1a3fb0;cursor:pointer;text-decoration:underline}#web22 .red{color:#b0303a}#web22 .grn{color:#2a7d4c}`;document.head.appendChild(css);
+  let cur='home';
+  const cName=c=>c[1].split(' ').map(s=>s[0]+s.slice(1).toLowerCase()).join(' ');
+  function rank(k){try{const e=E(),x=e.w22||{},sc=c=>(c[5]/1e12*(1-((e.dmg||{})[c[0]]||0)*.8)*((x.rad||{})[c[0]]?.05:1))+c[6]*.15;return [...C].sort((a,b)=>sc(b)-sc(a)).findIndex(c=>c[0]===k)+1}catch(_){return 0}}
+  function country(i){const c=C[i],e=E(),k=c[0],x=e.w22||{},dm=(e.dmg||{})[k]||0,rad=(x.rad||{})[k],own=e.own[k],war=e.wars&&e.wars[k],gdp=c[5]*(1-dm*.8)*(rad?.05:1);
+   const heads=(x.news||[]).filter(n=>n.t.toUpperCase().includes(c[1])).slice(0,4),bc=(x.bc||[]).filter(b=>b.c===c[1]).slice(0,3);
+   const CM=[`I remember when bread was cheap here.`,own?`Is it true we belong to ${S.name}? My grandmother says it is the third time.`:`Nobody I know voted for any of this.`,rad?`Our town is a green dot on a map now. That is all we are.`:`The anthem is fine. The man is not.`,war?`My son's unit has not called in nine days.`:`Prices are up again. Somebody somewhere is very rich.`,`${S.name}? Never heard of them. (Edit: I have now.)`];
+   return `<div class="tag">WORLDPEDIA · THE FREE ENCYCLOPEDIA ANYONE CAN EDIT, AND DOES</div><h1>${cName(c)}</h1><div style="display:flex;gap:12px;align-items:center">${flag(c)}<div>${own?`<b class="red">Owned by ${S.name}</b>`:'Sovereign state'}${rad?` · <span class="grn">irradiated since ${rad.yr}</span>`:''}${war?' · <span class="red">at war with you</span>':''}</div></div>
+    <div class="box"><div class="row"><span>Leader</span><span>${c[3]} (${c[4]})</span></div><div class="row"><span>GDP</span><span>${fm(gdp)}${dm>.05?` <span class="red">(−${Math.round(dm*100)}% since the war)</span>`:''}</span></div><div class="row"><span>Army</span><span>${Math.round(c[6]*(1-dm))} / 100</span></div><div class="row"><span>World power</span><span>#${rank(k)} of ${C.length}</span></div><div class="row"><span>Relations with ${S.name}</span><span>${e.rel[k]||0}</span></div><div class="row"><span>Price to buy</span><span>${own||rad?'not for sale':fm(price(c))}</span></div></div>
+    ${bc.length?`<div class="box"><b>State broadcasts</b>${bc.map(b=>`<div class="cm">"${b.t}"</div>`).join('')}</div>`:''}
+    <div class="box"><b>Recent history</b>${heads.length?heads.map(n=>`<div class="cm">${n.y} · ${n.t}</div>`).join(''):'<div class="cm">Nothing recent. Lucky them.</div>'}</div>
+    <div class="box"><b>Talk page</b>${[0,1,2].map(()=>`<div class="cm"><i>${P(FIRST).toLowerCase()}_${P(LASTN).toLowerCase()}</i>: ${P(CM)}</div>`).join('')}</div>`}
+  function person(id){const p=(S.world.people||[]).find(q=>q.id===id);if(!p)return home();const dead=!p.alive,ties=((S.world&&S.world.ties)||[]).filter(t=>t.about===p.n||t.who===p.n);
+   const posts=dead?[`Rest in peace. Gone too soon.`,`They still have not caught who did it. (Everyone knows.)`]:[`${P(['Long shift','Good day','Bad day','Rent is due'])}. ${P(['Saw','Heard about','Walked past'])} ${S.name} ${P(['again','on the news','near the bridge','with a camera'])}.`,P(['Anyone know a good dentist?','Selling my bike. Barely stolen.','Lost my keys. Again.','Lost my dog. His name is Captain.','Losing my mind, slowly, on purpose.']),`${p.rep>2?`${S.name} was kind to me today. Do not tell anyone.`:p.rep<-1?`If you see ${S.name}, walk the other way.`:`Quiet week. I like quiet weeks.`}`];
+   return `<div class="tag">FACEPLACE · WHERE EVERYONE IS FINE</div><h1>${p.n}${dead?' <span class="red">(remembering)</span>':''}</h1><div class="box"><div class="row"><span>Works as</span><span>${p.occ||p.job||'between things'}</span></div><div class="row"><span>Temper</span><span>${p.trait||p.temper||'unknown'}</span></div><div class="row"><span>Lives</span><span>${p.home||'on this street'}</span></div><div class="row"><span>Knows you</span><span>${p.met?(p.rep>1?'likes you':p.rep<-1?'afraid of you':'a little'):'not yet'}</span></div></div>
+    <div class="box"><b>Posts</b>${posts.map(t=>`<div class="cm">${t}</div>`).join('')}${ties.map(t=>`<div class="cm red">${t.who===p.n?`Wrote about ${t.about||'someone'}, after what ${t.by} did.`:`${t.who} posted about them. ${t.by} was involved.`}</div>`).join('')}</div>`}
+  const SRC=['chips','oil','streaming','shipping','banking','weapons','phones','cosmetics','football','crypto','films','private prisons','rockets','fast food'];
+  function elite(){const w=S.world;if(!w.elite){const L=[['Cassius Vane','property and other people\'s secrets',4.2e11,9e7],['Duke Maddox','the RAKE casinos',6e10,4e7],['Odalys Krane','KRANE chips',2.9e11,1.2e8]];for(let i=0;i<13;i++)L.push([P(FIRST)+' '+P(LASTN),P(SRC),Math.round(Math.pow(10,9.5+Math.random()*2.2)),Math.round(Math.pow(10,6+Math.random()*2.8))]);w.elite=L.map(r=>({n:r[0],src:r[1],cash:r[2],fame:r[3],alive:1}))}
+   w.elite.forEach(p=>{p.cash*=1+(Math.random()-.5)*.02*Math.min(3,INF22?INF22.cpi():1);p.fame*=1+(Math.random()-.48)*.01});return w.elite}
+  function ranks(by){const me={n:(S.name||'you')+' (you)',src:'a machine under a bridge',cash:S.cash||0,fame:S.fame||0,me:1};const L=elite().filter(p=>p.alive).concat([me]).sort((a,b)=>b[by]-a[by]);return L}
+  function list(by){const L=ranks(by),mine=L.findIndex(p=>p.me)+1;return `<div class="tag">${by==='cash'?'THE RICH LIST · UPDATED EVERY SECOND YOU EXIST':'MOST FOLLOWED · EVERYWHERE, ALL AT ONCE'}</div><h1>${by==='cash'?'The richest people alive':'The most famous people alive'}</h1><div class="box">You are <b>#${mine}</b> of ${L.length}.</div><div class="box">${L.slice(0,15).map((p,i)=>`<div class="row"><span>${i+1}. ${p.me?'<b>'+p.n+'</b>':p.n}<br><small style="color:#7a7590">${p.src}</small></span><span>${by==='cash'?fmt(p.cash):fnum(p.fame)+' followers'}</span></div>`).join('')}</div>`}
+  function you(){const x=(S.emp&&S.emp.w22)||{},w=S.world||{};return `<div class="tag">FACEPLACE · VERIFIED</div><h1>${S.name}</h1><div class="box"><div class="row"><span>Known as</span><span>${(CHM[S.ch]||{}).tag||''}</span></div><div class="row"><span>Followers</span><span>${fnum(S.fame||0)}</span></div><div class="row"><span>Net worth (claimed)</span><span>${fmt(S.cash||0)}</span></div><div class="row"><span>Shows about you</span><span>${(x.shows||[]).length}</span></div><div class="row"><span>People who stayed dead</span><span>${(w.dead||[]).length}</span></div></div>
+   <div class="box"><b>Comments</b>${[0,1,2,3].map(()=>`<div class="cm">${(typeof KC!=='undefined'&&KC.line)?KC.line():'nice'}</div>`).join('')}</div>`}
+  function home(){const ppl=(S.world.people||[]).slice(0,40);return `<div class="tag">THE NET · ${((S.world&&S.world.year)||2026)}</div><h1>Search everything</h1><div class="box"><b>Countries</b><div>${C.map((c,i)=>`<a data-w="c${i}">${cName(c)}</a>`).join(' · ')}</div></div><div class="box"><b>People on your street</b><div>${ppl.map(p=>`<a data-w="p${p.id}">${p.n}${p.alive?'':' †'}</a>`).join(' · ')||'Nobody, yet.'}</div></div><div class="box"><a data-w="rich">The rich list</a> · <a data-w="fame">Most followed</a> · <a data-w="you">Your own page</a></div>`}
+  function go(w){cur=w;const url=w==='home'?'thenet://search':w==='you'?'faceplace.net/'+String(S.name||'').toLowerCase().replace(/ /g,'.'):w[0]==='c'?'worldpedia.org/wiki/'+C[+w.slice(1)][1].replace(/ /g,'_'):'faceplace.net/'+w.slice(1);
+   ov.innerHTML=`<div class="bar"><button data-w="home">⌂</button><input value="${w==='rich'?'forbs.biz/richest':w==='fame'?'followcount.live/top':url}" readonly aria-label="Address"><button data-w="x">CLOSE</button></div><div class="pg">${w==='rich'?list('cash'):w==='fame'?list('fame'):w==='home'?home():w==='you'?you():w[0]==='c'?country(+w.slice(1)):person(isNaN(+w.slice(1))?w.slice(1):+w.slice(1))}</div>`;ov.classList.add('on')}
+  ov.addEventListener('click',ev=>{const a=ev.target.closest('[data-w]');if(!a)return;if(a.dataset.w==='x'){ov.classList.remove('on');return}go(a.dataset.w)});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&ov.classList.contains('on')){ov.classList.remove('on');e.stopImmediatePropagation()}},true);
+  return {go}})();
+ window.WEB22=WEB22;
+window.HSEMP=window.HSEMP||{C,E};window.HSINC=()=>{const e=E();let c=0,o=0,r=0;C.forEach(q=>{if(e.own[q[0]])c+=q[5]*.05*(1-((e.dmg||{})[q[0]]||0)*.9)*((e.w22&&e.w22.rad[q[0]])?.05:1)});CO.forEach(q=>{if(e.co[q[0]]>=51)o+=q[2]*.05*(e.co[q[0]]/100)});if(e.fam!=null)Object.keys(e.rk).forEach(k=>{r+=e.rk[k]*144*(1+FAM[e.fam][2]/40)});return {c,o,r}};
 
  /* the door in: POWER on the desk, and THE MAP in the White House */
  const r22=render;render=function(){const r=r22.apply(this,arguments);try{const p=$('panel');if(S.phase==='trade'&&S.loc==='desk'&&(S.tab==='pow'||S.tab==='lab')&&!p.querySelector('.emp21b')){const row=p.querySelector('.sub19')||p.querySelector('.tg19');if(row){const bt=document.createElement('button');bt.type='button';bt.className='emp21b';bt.textContent='EMPIRE';bt.onclick=ev=>{ev.stopPropagation();empOpen()};row.appendChild(bt)}}
@@ -6010,7 +6079,7 @@ function hud(){const ph=S.phase,h=$('hud');
   const m=war?meter('APPROVAL','ma',S.war.approval,'gold')+meter('UNREST','mu',S.war.unrest,'rose')+meter('TENSION','mt',S.war.tension,'violet')
     :wm?meter('HEALTH'+(S.arm>0?' +'+Math.round(S.arm)+' VEST':''),'mhp',S.whp,'rose')+meter('WANTED '+stars(),'mw',(S.wanted||0)*20,'gold')+meter('CHAOS '+Math.round(chaos())+'%','mc',chaos(),'violet')
     :meter('FLUX','mf',S.flux,'cyan')+meter('HEAT','mh',S.heat,'rose')+(awake()?meter('PARADOX '+Math.round(S.paradox)+'%','mp',S.paradox,'violet'):meter('TIMELINE '+Math.round((S.scar||0)/SCAR_MAX*100)+'%','mp',(S.scar||0)/SCAR_MAX*100,'dim'));
-  h.innerHTML=`<canvas id="face" width="32" height="32"></canvas><div class="who"><b>${S.name}</b><span>${role} · G${S.gen} · ${S.age}y${fxNames().map(x=>` <i class="fxc">${x}</i>`).join('')}</span></div><div class="cash">${fmt(S.cash)}<small>${war?S.world.year:fnum(S.fame)+' fans'}</small></div><div class="meters">${m}</div>`;
+  h.innerHTML=`<canvas id="face" width="32" height="32"></canvas><div class="who"><b>${S.name}</b><span>${role} · G${S.gen} · ${S.age}y${fxNames().map(x=>` <i class="fxc">${x}</i>`).join('')}</span></div><div class="cash">${fmt(S.cash)}<small>${war?S.world.year:fnum(S.fame)+' fans'}${INF22.cpi()>1.2?` · <span style="color:var(--rose)">real ${fmt(S.cash/INF22.cpi())}</span>`:''}</small></div><div class="meters">${m}</div>`;
   const c=$('face').getContext('2d');c.fillStyle='#1b1728';c.fillRect(0,0,32,32);c.fillStyle=PAPER;c.fillRect(0,0,32,32);faceF(c,LOOK(),16,16.5,1.72,0,S.age>58)}
 function pTitle(){let has=false;try{const s=JSON.parse(localStorage.getItem('hindsight-v2'));has=!!(s&&s.v===2&&s.phase!=='title')}catch(e){}
   return `<div class="title">HINDSIGHT<br>TERMINAL</div><div class="quote">${QUOTE}</div>
@@ -6071,8 +6140,8 @@ function pDlg(){const n=node(),d=S.dlg;let h=n.who?`<div class="who2">${n.who}</
   if(n.who&&n.scene!=='desk'&&d.rx22!==d.id+(n.who||'')){d.rx22=d.id+(n.who||'');d.rxl=R22.line()||((R()<.5)?(()=>{try{return CH22.npc({})}catch(_){return ''}})():'')}
   h+=(n.who&&d.rxl?`<div class="th" style="border-left-color:var(--gold)"><b style="color:var(--gold)">NOW</b> ${d.rxl}</div>`:'')+`<div class="say">${n.text}</div>`;
   (n.th||[]).forEach(t=>{if(ST(t[0])>=t[1])h+=`<div class="th"><b class="c${t[0]}">${t[0]}</b> ${t[2]}</div>`});
-  n.opts.forEach((o,i)=>{const cost=o.cost?o.cost():0;
-    h+=`<button type="button" class="card" data-a="dopt" data-v="${i}" ${cost>S.cash?'disabled':''}>${o.check?`<em class="c${o.check[0]}">[${o.check[0]} ${pct(o.check[0],o.check[1])}%]</em> `:''}${o.t}${cost&&!String(o.t).includes(fmt(cost))?` <em class="au">${fmt(cost)}</em>`:''}</button>`});
+  n.opts.forEach((o,i)=>{const cost=o.cost?Math.round(o.cost()*INF22.cpi()):0;
+    h+=`<button type="button" class="card" data-a="dopt" data-v="${i}" ${cost>S.cash?'disabled':''}>${o.check?`<em class="c${o.check[0]}">[${o.check[0]} ${pct(o.check[0],o.check[1])}%]</em> `:''}${o.t}${cost&&INF22.cpi()<1.05&&!String(o.t).includes(fmt(cost))||cost&&INF22.cpi()>=1.05?` <em class="au">${fmt(cost)}</em>`:''}</button>`});
   if(d.id==='dip')h+=`<button type="button" data-a="dhang">HANG UP</button>`;
   return h}
 function timeBar(){
@@ -6467,7 +6536,7 @@ const ECO22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
    try{if(R()<.3)post(up?'pump':'dump',{a:sym,q:qlab(S.t||0)})}catch(_){}}
  setInterval(()=>{try{if(!S||S.phase!=='trade'||S.dlg||!S.ch)return;const e=E();e.nT-=1;if(e.nT<=0){e.nT=7+Math.floor(R()*8);news();if(S.loc==='desk')render()}if(e.sec>0)e.sec=Math.max(0,e.sec-.15)}catch(_){}},1000);
  function sec(n){const e=E();e.sec=Math.min(100,e.sec+n*(mod().heat||1));if(e.sec>=100&&!S.dlg){e.sec=60;openD('sec22')}}
- const cost=()=>Math.max(500,S.cash*.05);
+ const cost=()=>Math.max(500*INF22.cpi(),S.cash*.05);
  function pump(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,fam=Math.log10(10+(S.fame||0)),f=1+.08*fam*(1+R()*.5);shock(a,f,Math.min(N-1,S.t+1),8,.8);E().pumps++;sec(14);heatAdd(6);try{hype(25,'PUMP');post('pump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}say(`You flood CHIRP about ${ASSETS[a].sym}. ${fmt(c)} on bots and a man in a suit. The next few quarters lift ${Math.round((f-1)*100)}%.`,'gold');done()}
  function rumour(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,f=1/(1+.09*Math.log10(10+(S.fame||0))*(1+R()*.5));shock(a,f,Math.min(N-1,S.t+1),8,.8);sec(18);heatAdd(8);try{post('dump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}try{R22.note('market',{sym:ASSETS[a].sym})}catch(_){}say(`A rumour about ${ASSETS[a].sym}'s chairman and a goat. False. Effective. The next few quarters sag ${Math.round((1-f)*100)}%.`,'rose');done()}
  function spoof(){if(S.flux<20)return say('Not enough flux to spoof. Spoofing is just a jump you never take.','rose');S.flux-=20;const a=S.asset,up=R()<.5?1:-1,f=1+up*(.1+R()*.15);S.mk[a][S.t]*=f;S.warp[a][S.t]+=.6;sec(10);say(`Ghost orders flicker on ${ASSETS[a].sym}. The price you can trade at right now is ${up>0?'up':'down'} ${Math.round(Math.abs(f-1)*100)}%. It will snap back.`,'violet');done()}
@@ -6530,7 +6599,7 @@ const MACH22=(()=>{const W=()=>{const w=S.world;w.wear=w.wear||0;w.fix=w.fix||0;
  function fix(){const w=W();if(w.fix>=3||!w.broken&&w.wear<60)return;const c=Math.max(1e5,S.cash*.3);if(S.cash<c)return;S.cash-=c;w.fix++;w.broken=0;w.wear=55+w.fix*12;try{if(awake())pdx(10)}catch(_){}
    say(['You solder it back together with a borrowed iron and a prayer. It boots. It hums a note it never used to.','A second repair. Parts from a dead phone, a hearing aid and a toy. It works, angrily.','The last repair anyone could do. Half the machine is tape now. It will not survive another death.'][w.fix-1],'gold');save();render()}
  function panel(){const w=W(),c=Math.max(1e5,S.cash*.3),col=w.broken?'#ef5d75':w.wear>75?'#f2c14e':'#8fd8ae';
-   return `<div class="app lab" style="margin-top:6px"><div class="sec">THE MACHINE · <span style="color:${col}">${w.broken?'DEAD':Math.round(100-w.wear)+'% LEFT'}</span> · repaired ${w.fix}/3</div><div class="note">A gutted aluminium laptop, sealed to the table with epoxy and four bolts. Car battery. Jam-jar cloud chamber. An oscilloscope that only shows tomorrow.</div>
+   return `<div class="app lab" style="margin-top:6px"><div class="sec">THE MACHINE · <span style="color:${col}">${w.broken?'DEAD':Math.round(100-w.wear)+'% LEFT'}</span> · repaired ${w.fix}/3</div><div class="note">A gutted aluminium laptop, sealed to the table with epoxy and four bolts. Car battery. Jam-jar cloud chamber. An oscilloscope that only shows tomorrow.</div>${(()=>{try{const wd=S.world,e=S.emp||{},x=e.w22||{},cpi=INF22.cpi(),sh=INF22.wealth()/INF22.MS(),era=ERA22.era(wd.year)[1],pop=Math.max(0,8.1e9-(e.cas||0)-(wd.toll||0));return `<div class="read"><span>${ERA22.planet().name.toUpperCase()} · ${wd.year} · ${era}</span><span>${fnum(pop)} alive</span></div><div class="read"><span>MONEY: ${wd.curName||'DOLLAR'} · prices ×${cpi<10?cpi.toFixed(2):Math.round(cpi)}</span><span>you hold ${(sh*100).toFixed(sh<.01?3:1)}% of all money</span></div><div class="read"><span class="ro">dead by your hand ${(wd.dead||[]).length} · in your wars ${fnum(e.cas||0)} · after your markets ${fnum(wd.toll||0)}</span></div>${(()=>{const C=(window.HSEMP&&HSEMP.C)||[],own=e.own||{},dm=e.dmg||{},rad=x.rad||{},sc=c=>(c[5]/1e12*(1-(dm[c[0]]||0)*.8)*(rad[c[0]]?.05:1))+c[6]*.15*(1-(dm[c[0]]||0));let me=0;const L=[];C.forEach(c=>{const v=sc(c);if(own[c[0]])me+=v;else L.push([c[1],v])});if(me)L.push(['YOU · '+(S.name||'').toUpperCase(),me]);L.sort((a,b)=>b[1]-a[1]);const tot=L.reduce((a,b)=>a+b[1],0)||1;return `<div class="sec" style="margin-top:4px">INCOME PER GAME YEAR (12 MIN)</div>${(()=>{const I=window.HSINC?HSINC():{c:0,o:0,r:0},k=(S.kk&&S.kk.earned)||0;return `<div class="read"><span>countries ${fmt(I.c)} · companies ${fmt(I.o)}</span><span>rackets ${fmt(I.r)} · streaming so far ${fmt(k)}</span></div>`})()}<div class="sec" style="margin-top:4px">WHO RUNS THE WORLD</div>`+L.slice(0,5).map((r,i)=>`<div class="read"><span${/^YOU/.test(r[0])?' class="au"':''}>${i+1}. ${r[0]}</span><span>${Math.round(r[1]/tot*100)}% of world power</span></div>`).join('')})()}<div class="read"><span>chaos ${Math.round(wd.chaos||0)}% · ${(n=>n+(n===1?' country':' countries'))(Object.keys(x.rad||{}).length)} glowing · ${(n=>n+(n===1?' planet':' planets'))((wd.left||[]).length)} left</span><span>${(wd.legend||[]).length} shows · ${(wd.ties||[]).length} lives you changed</span></div>`}catch(_){return ''}})()}
    ${(w.broken||w.wear>=60)&&w.fix<3?`<button type="button" class="card" data-a="mach" data-v="fix" ${S.cash<c?'disabled':''}>REPAIR IT · ${fmt(c)}<small>${['solder and a prayer','parts from a dead phone','the last repair anyone could do'][w.fix]}</small></button>`:''}
    ${w.broken&&w.fix>=3?`<button type="button" class="pri big" data-a="mach" data-v="end">THE LAST JUMP<small>it will not come back from this. neither will you.</small></button>`:''}</div>`}
  return {use,fix,panel,W}})();
@@ -6569,9 +6638,9 @@ $('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="mac
 /* ===== v22 · THE CAMERA =====
    Streaming outside needs a camera rig (KLIK or the street menu). Live in the street, you hold it: a little camera at
    your hand with a red light, and a picture-in-picture feed cut live from the street around you, chat scrolling over it. */
-const CAM22=(()=>{const cost=300,has=()=>!!(S.camera||((S.bag||{}).camera>0));
- function buy(){if(has()||S.cash<cost)return;S.cash-=cost;S.camera=1;S.bag=S.bag||{};S.bag.camera=(S.bag.camera||0)+1;say('A camera rig: a phone on a gimbal, a mic the size of a thumb, a battery pack held on with a hair tie. You can stream outside now.','gold');save();render()}
- const btn=()=>has()?'':`<button type="button" class="kgo" data-a="cam22" ${S.cash<cost?'disabled':''}>BUY A CAMERA RIG · ${fmt(cost)}<small>you cannot stream outside without one</small></button>`;
+const CAM22=(()=>{let cost=300;const _c=()=>Math.round(300*INF22.cpi()),has=()=>!!(S.camera||((S.bag||{}).camera>0));
+ function buy(){cost=_c();if(has()||S.cash<cost)return;S.cash-=cost;S.camera=1;S.bag=S.bag||{};S.bag.camera=(S.bag.camera||0)+1;say('A camera rig: a phone on a gimbal, a mic the size of a thumb, a battery pack held on with a hair tie. You can stream outside now.','gold');save();render()}
+ const btn=()=>{cost=_c();return has()?'':`<button type="button" class="kgo" data-a="cam22" ${S.cash<cost?'disabled':''}>BUY A CAMERA RIG · ${fmt(cost)}<small>you cannot stream outside without one</small></button>`};
  const cam=document.createElement('div');cam.id='cam22';cam.style.cssText='position:fixed;z-index:3;width:12px;height:9px;background:#14121c;border:1px solid #cfc9bb;display:none;pointer-events:none';cam.innerHTML='<i style="position:absolute;right:1px;top:1px;width:3px;height:3px;background:#ef5d75;border-radius:50%"></i>';document.body.appendChild(cam);
  const pip=document.createElement('canvas');pip.id='pip22';pip.width=176;pip.height=132;pip.style.cssText='position:fixed;left:10px;bottom:70px;z-index:4;width:176px;height:132px;border:2px solid #53fc18;background:#000;display:none;pointer-events:none;image-rendering:pixelated';document.body.appendChild(pip);
  const px=pip.getContext('2d');let t=0;
@@ -6585,7 +6654,8 @@ const CAM22=(()=>{const cost=300,has=()=>!!(S.camera||((S.bag||{}).camera>0));
  return {buy,btn,has}})();
 {const gl0=goLive;goLive=function(on){if(on&&S.loc==='world'&&!CAM22.has()){say('You need a camera to stream outside. KLIK sells a rig.','rose');render();return}return gl0(on)}}
 {const pk0=pKlik;pKlik=function(){return pk0().replace('<div class="row r3">',CAM22.btn()+'<div class="row r3">')}}
-{const pw0=pWorldMenu;pWorldMenu=function(){return CAM22.btn()+pw0()}}
+{const pw0=pWorldMenu;pWorldMenu=function(){return CAM22.btn()+pw0().replace('<button type="button" class="pri" data-a="wmclose"','<button type="button" data-a="net22">THE NET<small>look anyone up. countries, people, you</small></button><button type="button" class="pri" data-a="wmclose"')}}
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="net22"]');if(b)WEB22.go('home')});
 $('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="cam22"]');if(b&&!b.disabled){audioStart();CAM22.buy()}});
 
 /* ===== v22 · CONSEQUENCES =====
@@ -6597,7 +6667,7 @@ const CONS22=(()=>{const P=a=>a[Math.floor(R()*a.length)],nm=()=>P(FIRST)+' '+P(
  const SEED={kill:e=>({who:nm(),about:e.who||'someone',rel:P(REL)}),nuke:e=>({who:nm(),about:e.x||'the city'}),market:e=>({who:nm(),about:e.sym||'the market'}),leak:()=>({who:nm()}),bought:()=>({who:nm()}),war:()=>({who:nm()}),rich:()=>({who:nm()})};
  const LATER={kill:t=>[`${t.who}, ${t.about}'s ${t.rel}, has started sleeping on the bench outside where it happened.`,`${t.who} put ${t.about}'s photo in the window of the shop. Someone keeps leaving flowers. Someone keeps taking them.`,`${t.who} bought a gun today. ${t.about}'s ${t.rel} has never held one before.`],
   nuke:t=>[`${t.who} survived ${t.about}. She was in a lift. She walks out of the hospital today and asks the first reporter your name.`,`${t.who} has started a choir in a refugee camp near ${t.about}. They sing every night at the time of the flash.`,`${t.who}, nine years old, draws you with no face. The drawing is in every newspaper.`],
-  market:t=>[`${t.who}, 71, had everything in ${t.about}. She is selling the piano.`,`${t.who} was a junior analyst who shorted ${t.about} on a hunch. He is a millionaire now and he thinks he is a genius.`,`${t.who} lost the shop over ${t.about}. He writes to you every day. You never read them. He knows.`],
+  market:t=>[`${t.who}, 71, had everything in ${t.about}. She is selling the piano.`,`${t.who} lost everything in ${t.about} and took his own life on Thursday. His daughter posts his last photo: a man smiling at a chart. She tags you.`,`A thread goes round: the names of people who died after ${t.about} collapsed. ${t.who} is the fourth name. The thread is very long.`,`${t.who} was a junior analyst who shorted ${t.about} on a hunch. He is a millionaire now and he thinks he is a genius.`,`${t.who} lost the shop over ${t.about}. He writes to you every day. You never read them. He knows.`],
   leak:t=>[`${t.who} was the intern standing behind you in the clip. She is famous now, and cannot get a job anywhere.`,`${t.who} in the press office has been fired for your leak. Her mortgage was due Friday.`],
   bought:t=>[`${t.who}, a schoolteacher in the country you bought, has been told to hang your portrait. She hangs it upside down. Her class laughs for the first time in months.`,`${t.who} stops paying taxes to a country that is now yours. Others copy him.`],
   war:t=>[`${t.who} came home from your war with one boot. He sells the other one online with a short, polite description.`,`${t.who}'s brother did not come home from your war. He is running for office on that alone.`],
@@ -6607,7 +6677,7 @@ const CONS22=(()=>{const P=a=>a[Math.floor(R()*a.length)],nm=()=>P(FIRST)+' '+P(
   war:t=>({line:`${t.who} wins his seat. His first speech is about you, and it is very good.`,fx:()=>{try{if(S.war)S.war.unrest=(S.war.unrest||0)+8}catch(_){}}})};
  function tie(k,e){const f=SEED[k];if(!f)return;const t=Object.assign({k,at:Date.now()+(60+R()*180)*1000,yr:(S.world&&S.world.year)||2026},f(e||{}));S.ties22=S.ties22||[];S.ties22.push(t);
    const w=S.world;w.ties=w.ties||[];if(R()<.5)w.ties.push({k,who:t.who,about:t.about||'',yr:t.yr,by:S.name});if(w.ties.length>30)w.ties.shift()}
- function tell(t,str){try{say(`<b class="hd">LATER</b> ${str}`,'gold')}catch(_){}try{const e=S.emp&&S.emp.w22;if(e)e.news.unshift({t:str,y:(S.world&&S.world.year)||2026,col:'#f2c14e'})}catch(_){}try{S.feed=S.feed||[];S.feed.unshift({h:t.who.toLowerCase().replace(/ /g,'_'),t:str,l:Math.round(50+R()*5e3)})}catch(_){}}
+ function tell(t,str){try{if(/took his own life|died after/.test(str)){S.world.toll=(S.world.toll||0)+1}}catch(_){}try{say(`<b class="hd">LATER</b> ${str}`,'gold')}catch(_){}try{const e=S.emp&&S.emp.w22;if(e)e.news.unshift({t:str,y:(S.world&&S.world.year)||2026,col:'#f2c14e'})}catch(_){}try{S.feed=S.feed||[];S.feed.unshift({h:t.who.toLowerCase().replace(/ /g,'_'),t:str,l:Math.round(50+R()*5e3)})}catch(_){}}
  setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade'||S.dlg)return;const now=Date.now(),L=S.ties22||[];const due=L.find(t=>t.at<=now);if(!due)return;S.ties22=L.filter(t=>t!==due);
    tell(due,P((LATER[due.k]||(()=>['Someone you never met is still thinking about you.']))(due)));if(BACK[due.k]&&R()<.35){const b=BACK[due.k](due);due.at=now+(90+R()*120)*1000;due.k='_back';due.b=b;S.ties22.push(due)}}catch(_){}},4000);
  setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade'||S.dlg)return;const L=S.ties22||[],now=Date.now(),b=L.find(t=>t.k==='_back'&&t.at<=now);if(!b)return;S.ties22=L.filter(t=>t!==b);tell(b,b.b.line);b.b.fx()}catch(_){}},5000);
@@ -6641,7 +6711,7 @@ const CTRL22=(()=>{let dev=matchMedia('(pointer:coarse)').matches?'touch':'keys'
  setInterval(()=>{try{q.style.display=S&&S.ch&&S.phase!=='title'&&S.phase!=='pick'?'block':'none';maybe(false)}catch(_){}},1200);
  return {show,dev:()=>dev}})();
 
-window.HS={get VH(){return H},KC,R22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},KC,R22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
