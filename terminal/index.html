@@ -2213,6 +2213,35 @@ function assassins(dt){if(S.copsOff>0)S.copsOff-=dt;
 const SPONS=[[2000,'volt','VOLTAGE ENERGY','A can of neon on your desk, every stream.',.01],[10000,'rake','RAKE','Stream the casino. They pay per viewer and want you gambling on camera. Table limits go up five times.',.08],[100000,'krane','KRANE CHIPS','Krane hardware on every frame. The biggest cheque in streaming.',.3]];
 function hype(n,label){if(!S.live)return;S.hype=Math.min(400,(S.hype||0)+n);if(label&&n>=20){S.kchat=S.kchat||[];S.kchat.unshift({t:'CHAT: '+label,c:1});S.kchat.length=Math.min(S.kchat.length,8)}}
 const CHATL=['W','L','CLIP IT','NO WAY','BRO','LMAO','HE IS COOKED','RUN','IS THIS REAL','SEND IT','GOAT','ACTUAL MENACE','CHAT','W STREAM','DO IT','RIP','HOLY','5 MORE MINUTES','WHERE IS THIS'];
+/* ===== v22 · PAINTED PIXELS =====
+   Procedural low-res paintings: dusk skies, ridges, dithered light, a figure in your own colours.
+   PX22.poster(key,kind,o) -> data URL (cached). kind: show | prop | strip. Seeded by key, so a show keeps its poster forever. */
+const PX22=(()=>{const cache={};
+ const hx=h=>{h=(h||'#888').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255]};
+ const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));const css=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+ const hs=s=>{let h=2166136261;for(const ch of String(s))h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0};
+ const SKIES=[[[34,22,46],[196,92,52],[246,190,110]],[[18,28,52],[88,112,150],[226,170,120]],[[40,16,20],[150,46,38],[240,140,60]],[[14,20,30],[40,70,80],[150,170,140]],[[30,26,40],[120,90,130],[230,200,170]]];
+ function sky(g,r,w,h,pal,hz){for(let y=0;y<hz;y++){const t=y/hz,c=t<.6?mix(pal[0],pal[1],t/.6):mix(pal[1],pal[2],(t-.6)/.4);for(let x=0;x<w;x++){const d=((x+y)%2)*(r()<.5?1:0);g.fillStyle=css(d?mix(c,pal[2],.08):c);g.fillRect(x,y,1,1)}}
+   if(r()<.7){const sx=Math.floor(w*(.2+r()*.6)),sy=Math.floor(hz*(.55+r()*.3)),sr=2+Math.floor(r()*3);g.fillStyle=css(mix(pal[2],[255,240,210],.6));for(let y=-sr;y<=sr;y++)for(let x=-sr;x<=sr;x++)if(x*x+y*y<=sr*sr)g.fillRect(sx+x,sy+y,1,1)}}
+ function ridge(g,r,w,h,base,col,amp,rough){let y=base;for(let x=0;x<w;x++){y+=(r()-.5)*rough;y=Math.max(base-amp,Math.min(base+amp,y));g.fillStyle=css(col);g.fillRect(x,Math.round(y),1,h-Math.round(y))}}
+ function figure(g,x,y,L,s){const coat=hx(L.coat),pants=hx(L.pants),skin=hx(L.skin),hair=hx(L.hair);s=s||1;const R=(a,b,w,h,c)=>{g.fillStyle=css(c);g.fillRect(x+a*s,y+b*s,w*s,h*s)};
+   R(-1,-14,3,3,skin);if(L.hs!==3)R(-1,-15,3,1+(L.hs===6?2:0),hair);R(-2,-11,5,6,coat);R(-3,-10,1,5,coat);R(3,-10,1,5,coat);R(-2,-5,2,5,pants);R(1,-5,2,5,pants);R(-2,0,2,1,[20,16,24]);R(1,0,2,1,[20,16,24])}
+ function paint(key,kind,o){const r=rng(hs(key+kind)),W=kind==='strip'?160:48,H=kind==='strip'?40:64,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+   let pal=SKIES[Math.floor(r()*SKIES.length)];if(o&&o.chaos>40)pal=SKIES[2];if(o&&o.rad&&(kind==='strip'||r()<.35))pal=[[10,24,14],[60,120,50],[190,230,120]];
+   const hz=Math.floor(H*(kind==='strip'?.62:.58));sky(g,r,W,H,pal,hz);
+   ridge(g,r,W,H,hz-Math.floor(H*.12),mix(pal[0],[0,0,0],.35),Math.floor(H*.08),1.6);ridge(g,r,W,H,hz,mix(pal[0],[0,0,0],.6),Math.floor(H*.05),1);
+   if(r()<.5||kind==='strip'){g.fillStyle=css(mix(pal[0],[0,0,0],.75));for(let i=0;i<W/6;i++){const bx=Math.floor(r()*W),bh=2+Math.floor(r()*(kind==='strip'?8:6));g.fillRect(bx,hz-bh+2,1+Math.floor(r()*3),bh)}}
+   if(o&&o.rad&&kind!=='prop'){const mx=Math.floor(W*(.3+r()*.4)),top=Math.floor(hz*.25);g.fillStyle=css([220,230,170]);for(let y=top;y<hz;y++){const w=y<top+8?6-Math.abs(y-top-4):1+Math.floor((y-top)/12);g.fillRect(mx-w,y,w*2+1,1)}}
+   if(kind==='show'){figure(g,Math.floor(W/2),H-6,o.look||{},1);g.fillStyle='rgba(0,0,0,.6)';g.fillRect(0,0,W,9);g.fillStyle=css(pal[2]);g.fillRect(2,3,W-4,1);g.fillRect(2,5,Math.floor((W-4)*.6),1)}
+   if(kind==='prop'){g.fillStyle=css([150,24,24]);g.fillRect(0,0,W,H);g.fillStyle=css([196,40,30]);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;for(let d=0;d<60;d++){const x=Math.round(W/2+Math.cos(a)*d),y=Math.round(H*.42+Math.sin(a)*d);if(i%2)g.fillRect(x,y,1,1)}}
+     const L=o.look||{},hair=hx(L.hair),skin=hx(L.skin);g.fillStyle=css(mix(skin,[242,193,78],.35));for(let y=-9;y<=9;y++)for(let x=-7;x<=7;x++)if(x*x/49+y*y/81<=1)g.fillRect(W/2+x,Math.floor(H*.42)+y,1,1);
+     if(L.hs!==3){g.fillStyle=css(hair);for(let x=-7;x<=7;x++)g.fillRect(W/2+x,Math.floor(H*.42)-9-(L.hs===6?2:0),1,3+(L.hs===6?2:0))}
+     g.fillStyle=css([242,193,78]);g.fillRect(4,H-14,W-8,2);g.fillRect(8,H-10,W-16,1);g.fillRect(12,H-7,W-24,1)}
+   return c.toDataURL()}
+ function poster(key,kind,o){const k=key+'|'+kind+'|'+(o&&o.rad?1:0)+'|'+(o&&o.chaos>40?1:0);return cache[k]||(cache[k]=paint(key,kind,o))}
+ const img=(src,w,h,extra)=>`<img src="${src}" width="${w}" height="${h}" style="image-rendering:pixelated;display:block;flex:none;${extra||''}" alt="">`;
+ return {poster,img}})();
+
 /* ===== v22 · KLIK CHAT AND LEAKS =====
    kchatLine(): a grammar, not a list. Openers x cores x tails x emotes, every core with its own slots,
    and the core is chosen by what is happening right now (where you are, what you just did, what you own, what the world thinks).
@@ -5561,7 +5590,7 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
       if(war){g.strokeStyle='#e0403a';g.lineWidth=2;g.beginPath();g.arc(X,Y,rr+4+3*Math.sin(t/150),0,7);g.stroke()}
       g.fillStyle=rad?'#7fe07f':own?'#f2c14e':war?'#e0403a':'#cfc9bb';g.beginPath();g.arc(X,Y,rr,0,7);g.fill();
       if(w.sel===c[0]){g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(X,Y,rr+7,0,7);g.stroke()}
-      g.font='10px monospace';g.fillStyle=own?'#f2c14e':'#e6e1d4';g.fillText((rad?'☢ ':'')+(e.prop&&e.prop[c[0]]?'▣ ':'')+c[1].split(' ').map(s=>s[0]+s.slice(1).toLowerCase()).join(' '),X+rr+3,Y+3)});
+      g.font='10px monospace';g.fillStyle=own?'#f2c14e':'#e6e1d4';g.fillText((rad?'☢ ':'')+(e.prop&&e.prop[c[0]]?'▣ ':'')+(w.sel===c[0]||own?c[1].split(' ').map(s=>s[0]+s.slice(1).toLowerCase()).join(' '):c[0].toUpperCase()),X+rr+3,Y+3)});
     if(w.boom){const p=POS[w.boom.k],a=(t-w.boom.t)/1000;if(p&&a<9){const X=p[0]*CS+CS/2,Y=p[1]*CS+CS/2;g.fillStyle=`rgba(255,240,200,${Math.max(0,.9-a/2)})`;g.beginPath();g.arc(X,Y,8+a*22,0,7);g.fill();g.strokeStyle=`rgba(255,160,60,${Math.max(0,1-a/9)})`;g.lineWidth=3;g.beginPath();g.arc(X,Y,14+a*40,0,7);g.stroke()}}
     cancelAnimationFrame(raf);if(el.classList.contains('on')&&E().tab==='map')raf=requestAnimationFrame(paint)}
   function map(){const e=E(),w=W(),k=w.sel,i=ci(k),c=C[i];let card='<div class="note">Tap a country.</div>';
@@ -5569,14 +5598,15 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
       card=`<div class="row">${flag(c)}<div><div class="nm ${o?'own':''}">${c[1]}${o?' · YOURS':''}${rad?' · <span style="color:#7fe07f">IRRADIATED'+(rad.yr?' SINCE '+rad.yr:'')+'</span>':''}</div><div class="sub">${c[3]} · ${c[4]} · army ${c[6]} · relation ${r}${war?' · <span style="color:#e0403a">AT WAR</span>':''}${ATOM.includes(k)?' · nuclear':''}</div>
        <div class="acts"><button data-e="chat" data-i="${i}">${window.visitOpen?'VISIT':'TALK'}</button>${o||rad?'':`<button data-e="buy" data-i="${i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button><button data-e="inv" data-i="${i}" ${war?'disabled':''}>INVADE ${fm(c[6]*2e8)}</button>`}${!rad&&S.cash>=1e9&&!(e.prop&&e.prop[k])?`<button data-e="prop" data-i="${i}" ${S.cash<c[5]*.002?'disabled':''}>PROPAGANDA</button>`:''}${!o&&!rad&&canNuke()?`<button data-e="nuke" data-i="${i}" style="border-color:#7fe07f;color:#7fe07f">${w.arm===k?'CONFIRM · LAUNCH':'NUKE'}</button>`:''}</div></div><div></div></div>`;
       if(!o&&!rad&&!canNuke())card+=`<div class="note">To launch you need a nuclear state of your own (${ATOM.map(q=>C[ci(q)][1].split(' ').pop()).join(', ')}), or the presidency.</div>`}
-    return `<div class="note">The world as it is now. <span style="color:#f2c14e">Gold</span> is yours, <span style="color:#e0403a">red</span> is war, <span style="color:#c87a3a">brown</span> is ruin, <span style="color:#7fe07f">green</span> never goes away. ▣ your posters.</div>
+    let ch=0;try{ch=chaos()}catch(_){}const strip=PX22.img(PX22.poster('world'+((S.world&&S.world.year)||0)+Math.floor(ch/20),'strip',{chaos:ch,rad:Object.keys(W().rad).length}),160,40,'width:100%;max-width:640px;height:auto;margin:0 auto 6px');
+    return strip+`<div class="note">The world as it is now. <span style="color:#f2c14e">Gold</span> is yours, <span style="color:#e0403a">red</span> is war, <span style="color:#c87a3a">brown</span> is ruin, <span style="color:#7fe07f">green</span> never goes away. ▣ your posters.</div>
      <canvas id="w22c" width="640" height="320" style="width:100%;image-rendering:pixelated;border:1px solid #2a2630;touch-action:manipulation;cursor:pointer"></canvas>${card}
      <div class="sub" style="margin-top:8px">${w.news.slice(0,4).map(n=>`<div style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join('')}</div>`}
   function media(){const w=W(),L=legend().filter(s=>s.who!==nm());
-    const sh=s=>`<div class="row"><div class="fl" style="justify-content:center;align-items:center;font:9px monospace;text-align:center">${({'PRESTIGE DRAMA':'DRAMA','REALITY SHOW':'REALITY','TRUE CRIME':'CRIME','SITCOM':'SITCOM','TELENOVELA':'NOVELA','ANIME':'ANIME',"CHILDREN'S CARTOON":'KIDS','STATE BIOPIC':'STATE'})[s.g]||'TV'}</div><div><div class="nm">${s.t}</div><div class="sub">${s.net} · ${s.yr} · ${s.actor} · about ${s.about}</div><div class="bar"><i style="width:${s.r}%;background:#e0b84a"></i></div><div class="sub">${s.r}% watched it · ${s.crit}</div></div><div></div></div>`;
+    const sh=s=>`<div class="row">${PX22.img(PX22.poster(s.t+s.yr+s.net,'show',{look:S.look,rad:Object.keys(W().rad).length}),48,64)}<div class="fl" style="display:none">${({'PRESTIGE DRAMA':'DRAMA','REALITY SHOW':'REALITY','TRUE CRIME':'CRIME','SITCOM':'SITCOM','TELENOVELA':'NOVELA','ANIME':'ANIME',"CHILDREN'S CARTOON":'KIDS','STATE BIOPIC':'STATE'})[s.g]||'TV'}</div><div><div class="nm">${s.t}</div><div class="sub">${s.net} · ${s.yr} · ${s.actor} · about ${s.about}</div><div class="bar"><i style="width:${s.r}%;background:#e0b84a"></i></div><div class="sub">${s.r}% watched it · ${s.crit}</div></div><div></div></div>`;
     return `<div class="note">What the world says about you. It is all made up. Some of it is true.</div><div class="acts"><button data-e="tv" ${S.cash<1e8?'disabled':''}>PITCH A SHOW ABOUT YOURSELF · ${fm(1e8)}</button></div>
      <div class="nm" style="margin-top:8px">NOW SHOWING</div>${w.shows.length?w.shows.map(sh).join(''):'<div class="note">Nobody has made anything about you yet. Do something worth filming.</div>'}
-     <div class="nm" style="margin-top:8px">STATE BROADCASTS</div>${w.bc.length?w.bc.slice(0,6).map(b=>`<div class="sub"><b>${b.c}</b> "${b.t}"</div>`).join(''):'<div class="note">Own a country and its television starts talking about you.</div>'}
+     <div class="nm" style="margin-top:8px">STATE BROADCASTS</div>${w.bc.length?`<div style="display:flex;gap:6px;margin:4px 0">${[...new Set(w.bc.map(b=>b.c))].slice(0,5).map(c=>PX22.img(PX22.poster(c+(S.name||''),'prop',{look:S.look}),48,64,'border:1px solid #3a3542')).join('')}</div>`+w.bc.slice(0,6).map(b=>`<div class="sub"><b>${b.c}</b> "${b.t}"</div>`).join(''):'<div class="note">Own a country and its television starts talking about you.</div>'}
      <div class="nm" style="margin-top:8px">HEADLINES</div>${w.news.length?w.news.slice(0,10).map(n=>`<div class="sub" style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join(''):'<div class="note">Quiet, for now.</div>'}
      ${L.length?`<div class="nm" style="margin-top:8px">RERUNS · SHOWS ABOUT WHO YOU USED TO BE</div>${L.slice(0,6).map(sh).join('')}`:''}`}
   function tv(){if(S.cash<1e8)return;S.cash-=1e8;makeShow('pitch');empDraw()}
