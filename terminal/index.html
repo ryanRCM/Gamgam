@@ -460,7 +460,7 @@ function genMarket(seed){const r=rng(seed),v=x=>Array.isArray(x)?x[0]+r()*(x[1]-
     ev.push({id:id++,q,k:T.k,title:T.t[j],out:T.o[j],odds:Math.round(T.odds[0]+r()*(T.odds[1]-T.odds[0])),used:0,stake:0,done:false})}
   crash.forEach(c=>ev.push({id:id++,q:c,k:'crash',title:'Market panic',out:'everything falls for two quarters',odds:9,used:0,stake:0,done:false}));
   ev.sort((a,b)=>a.q-b.q);return {mk,ev}}
-function beginLife(chId){try{ERA22.apply()}catch(_){}const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
+function beginLife(chId){try{ERA22.apply()}catch(_){}try{setTimeout(()=>CONS22.inherit(),4000)}catch(_){}const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
   const sk={tether:0,coil:0,cloak:0,memory:0,pool:0};let scrap=false;
   if(prev){if(w.machine==='hidden')for(const k in sk)sk[k]=Math.floor((prev[k]||0)/2);
     else if(w.machine==='public')for(const k in sk)sk[k]=Math.min(1,SK[k].cost.length);else scrap=true}
@@ -2252,7 +2252,7 @@ const PX22=(()=>{const cache={};
 const R22=(()=>{const P=a=>a[Math.floor(R()*a.length)];let last=null;
  const st=()=>{const w=S.emp&&S.emp.w22;return {dead:(S.world&&S.world.dead||[]).length,want:S.wanted||0,rad:w?Object.keys(w.rad).length:0,shows:w?w.shows.length:0,leak:S.scandal||0,
    war:S.emp&&S.emp.wars?Object.keys(S.emp.wars).length:0,own:S.emp?Object.keys(S.emp.own||{}).length:0,cash:S.cash||0,ph:S.phase,live:!!S.live,fame:S.fame||0}};
- function note(k,d){S.recent=S.recent||[];S.recent.unshift(Object.assign({k,t:Date.now()},d||{}));if(S.recent.length>12)S.recent.length=12}
+ function note(k,d){try{window.__cons22&&window.__cons22(k,d)}catch(_){}S.recent=S.recent||[];S.recent.unshift(Object.assign({k,t:Date.now()},d||{}));if(S.recent.length>12)S.recent.length=12}
  setInterval(()=>{try{if(!S||!S.ch||S.phase==='title'||S.phase==='pick')return;const n=st();if(last){
    if(n.dead>last.dead){const d=S.world.dead[S.world.dead.length-1]||{};note('kill',{who:d.n||d.name||'someone'})}
    if(n.want>last.want)note('wanted',{n:n.want});if(n.rad>last.rad){const w=S.emp.w22,k=Object.keys(w.rad).pop();note('nuke',{x:((window.HSEMP&&HSEMP.C||[]).find(c=>c[0]===k)||[0,'somewhere'])[1]})}
@@ -6467,9 +6467,9 @@ const ECO22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
  function sec(n){const e=E();e.sec=Math.min(100,e.sec+n*(mod().heat||1));if(e.sec>=100&&!S.dlg){e.sec=60;openD('sec22')}}
  const cost=()=>Math.max(500,S.cash*.05);
  function pump(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,fam=Math.log10(10+(S.fame||0)),f=1+.08*fam*(1+R()*.5);shock(a,f,Math.min(N-1,S.t+1),8,.8);E().pumps++;sec(14);heatAdd(6);try{hype(25,'PUMP');post('pump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}say(`You flood CHIRP about ${ASSETS[a].sym}. ${fmt(c)} on bots and a man in a suit. The next few quarters lift ${Math.round((f-1)*100)}%.`,'gold');done()}
- function rumour(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,f=1/(1+.09*Math.log10(10+(S.fame||0))*(1+R()*.5));shock(a,f,Math.min(N-1,S.t+1),8,.8);sec(18);heatAdd(8);try{post('dump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}say(`A rumour about ${ASSETS[a].sym}'s chairman and a goat. False. Effective. The next few quarters sag ${Math.round((1-f)*100)}%.`,'rose');done()}
+ function rumour(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,f=1/(1+.09*Math.log10(10+(S.fame||0))*(1+R()*.5));shock(a,f,Math.min(N-1,S.t+1),8,.8);sec(18);heatAdd(8);try{post('dump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}try{R22.note('market',{sym:ASSETS[a].sym})}catch(_){}say(`A rumour about ${ASSETS[a].sym}'s chairman and a goat. False. Effective. The next few quarters sag ${Math.round((1-f)*100)}%.`,'rose');done()}
  function spoof(){if(S.flux<20)return say('Not enough flux to spoof. Spoofing is just a jump you never take.','rose');S.flux-=20;const a=S.asset,up=R()<.5?1:-1,f=1+up*(.1+R()*.15);S.mk[a][S.t]*=f;S.warp[a][S.t]+=.6;sec(10);say(`Ghost orders flicker on ${ASSETS[a].sym}. The price you can trade at right now is ${up>0?'up':'down'} ${Math.round(Math.abs(f-1)*100)}%. It will snap back.`,'violet');done()}
- function glitch(){const a=S.asset,e=E();e.glitch++;const f=R()<.6?1.4+R()*1.6:1/(1.4+R());shock(a,f,S.t,6,.7);for(let j=0;j<N;j++)S.warp[a][j]+=.4*R();try{scarAdd(2);pdx&&awake()&&pdx(6)}catch(_){}sec(26);flash('jump');sfx('jump');
+ function glitch(){const a=S.asset,e=E();e.glitch++;try{R22.note('market',{sym:ASSETS[a].sym})}catch(_){}const f=R()<.6?1.4+R()*1.6:1/(1.4+R());shock(a,f,S.t,6,.7);for(let j=0;j<N;j++)S.warp[a][j]+=.4*R();try{scarAdd(2);pdx&&awake()&&pdx(6)}catch(_){}sec(26);flash('jump');sfx('jump');
    say(f>1?`The chart tears. ${ASSETS[a].sym} jumps ${Math.round((f-1)*100)}% through a hole in the timeline. Somewhere a trader faints.`:`The chart tears the wrong way. ${ASSETS[a].sym} falls ${Math.round((1-1/f)*100)}% into a hole you made.`,'violet');
    if(e.glitch%4===0){shock(Math.floor(R()*ASSETS.length),.6,Math.min(N-1,S.t+1),10,.9);say('Too many tears. The market corrects itself somewhere else, violently.','rose')}done()}
  function done(){try{save();render()}catch(_){}}
@@ -6534,7 +6534,7 @@ const MACH22=(()=>{const W=()=>{const w=S.world;w.wear=w.wear||0;w.fix=w.fix||0;
  return {use,fix,panel,W}})();
 const CRED22=(()=>{function record(){const w=S.world||{},r=w.rulers||[],L=w.legend||[],e=S.emp&&S.emp.w22,left=w.left||[];
    return {lives:r.length+(S.ch&&S.phase!=='dead'?1:0),names:r.map(x=>x.name).concat(S.name&&S.phase!=='dead'?[S.name]:[]),deaths:r.map(x=>x.cause),shows:L.map(s=>s.t),rad:e?Object.keys(e.rad).length:0,dead:(w.dead||[]).length,left:left.map(p=>p.name+(p.boom?' (destroyed)':'')),year:w.year||2026,planet:(w.planet&&w.planet.name)||'Earth'}}
- function text(){const r=record();return `HINDSIGHT TERMINAL\nThe record of one machine, ${r.lives} lives, ${r.year-2026} years.\n\nSTARRING\n${r.names.join('\n')||'Nobody, briefly'}\n\nHOW THEY WENT\n${r.deaths.join('\n')||'Still going'}\n\nAS SEEN ON TV\n${r.shows.slice(0,12).join('\n')||'Nothing worth filming'}\n\nPLANETS LEFT BEHIND\n${r.left.join('\n')||'None. Earth kept you.'}\n\nCOUNTRIES THAT GLOW\n${r.rad}\n\nPEOPLE WHO STAYED DEAD\n${r.dead}\n\nLAST SEEN\n${r.planet}, ${r.year}`}
+ function text(){const r=record();return `HINDSIGHT TERMINAL\nThe record of one machine, ${r.lives} lives, ${r.year-2026} years.\n\nSTARRING\n${r.names.join('\n')||'Nobody, briefly'}\n\nHOW THEY WENT\n${r.deaths.join('\n')||'Still going'}\n\nAS SEEN ON TV\n${r.shows.slice(0,12).join('\n')||'Nothing worth filming'}\n\nPLANETS LEFT BEHIND\n${r.left.join('\n')||'None. Earth kept you.'}\n\nPEOPLE YOU CHANGED\n${((S.world&&S.world.ties)||[]).slice(-10).map(x=>x.who).join('\n')||'Nobody noticed. That is its own story.'}\n\nCOUNTRIES THAT GLOW\n${r.rad}\n\nPEOPLE WHO STAYED DEAD\n${r.dead}\n\nLAST SEEN\n${r.planet}, ${r.year}`}
  function roll(){const t=text(),ov=document.createElement('div');ov.id='cred22';
    ov.style.cssText='position:fixed;inset:0;z-index:95;background:#000;color:#e6e1d4;overflow:hidden;font:15px/1.6 monospace;text-align:center';
    if(!document.getElementById('cred22s')){const s=document.createElement('style');s.id='cred22s';s.textContent='@keyframes cred22{from{transform:translateY(100vh)}to{transform:translateY(-100%)}}#cred22 .roll{animation:cred22 48s linear forwards;white-space:pre-wrap;padding:0 16px}#cred22 .roll b{color:#f2c14e;letter-spacing:.2em}#cred22 .end{position:absolute;left:0;right:0;bottom:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}';document.head.appendChild(s)}
@@ -6567,7 +6567,60 @@ const CAM22=(()=>{const cost=300,has=()=>!!(S.camera||((S.bag||{}).camera>0));
 {const pw0=pWorldMenu;pWorldMenu=function(){return CAM22.btn()+pw0()}}
 $('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="cam22"]');if(b&&!b.disabled){audioStart();CAM22.buy()}});
 
-window.HS={get VH(){return H},KC,R22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+/* ===== v22 · CONSEQUENCES =====
+   Nothing you do is abstract. Every big act lands on one named person, and their story comes back to you later:
+   minutes later in this life, or as a grudge or a debt in a life to come (S.world.ties). The stories are assembled
+   from who they were, what you did, and what has happened since, so they surprise even the people who wrote them. */
+const CONS22=(()=>{const P=a=>a[Math.floor(R()*a.length)],nm=()=>P(FIRST)+' '+P(LASTN);
+ const REL=['daughter','son','brother','sister','mother','best friend','husband','wife','flatmate','apprentice'];
+ const SEED={kill:e=>({who:nm(),about:e.who||'someone',rel:P(REL)}),nuke:e=>({who:nm(),about:e.x||'the city'}),market:e=>({who:nm(),about:e.sym||'the market'}),leak:()=>({who:nm()}),bought:()=>({who:nm()}),war:()=>({who:nm()}),rich:()=>({who:nm()})};
+ const LATER={kill:t=>[`${t.who}, ${t.about}'s ${t.rel}, has started sleeping on the bench outside where it happened.`,`${t.who} put ${t.about}'s photo in the window of the shop. Someone keeps leaving flowers. Someone keeps taking them.`,`${t.who} bought a gun today. ${t.about}'s ${t.rel} has never held one before.`],
+  nuke:t=>[`${t.who} survived ${t.about}. She was in a lift. She walks out of the hospital today and asks the first reporter your name.`,`${t.who} has started a choir in a refugee camp near ${t.about}. They sing every night at the time of the flash.`,`${t.who}, nine years old, draws you with no face. The drawing is in every newspaper.`],
+  market:t=>[`${t.who}, 71, had everything in ${t.about}. She is selling the piano.`,`${t.who} was a junior analyst who shorted ${t.about} on a hunch. He is a millionaire now and he thinks he is a genius.`,`${t.who} lost the shop over ${t.about}. He writes to you every day. You never read them. He knows.`],
+  leak:t=>[`${t.who} was the intern standing behind you in the clip. She is famous now, and cannot get a job anywhere.`,`${t.who} in the press office has been fired for your leak. Her mortgage was due Friday.`],
+  bought:t=>[`${t.who}, a schoolteacher in the country you bought, has been told to hang your portrait. She hangs it upside down. Her class laughs for the first time in months.`,`${t.who} stops paying taxes to a country that is now yours. Others copy him.`],
+  war:t=>[`${t.who} came home from your war with one boot. He sells the other one online with a short, polite description.`,`${t.who}'s brother did not come home from your war. He is running for office on that alone.`],
+  rich:t=>[`${t.who} read about your money and quit his job to copy you. It is going badly. He is still trying.`,`${t.who} cleans your old flat. She found your notebook. She has started reading it.`]};
+ const BACK={kill:t=>({line:`${t.who} found you. "You don't remember ${t.about}. I do." The police arrive late, deliberately.`,fx:()=>{try{wantedAdd(1)}catch(_){}}}),
+  market:t=>({line:`${t.who} is outside the house with a sign with your name on it. A crowd forms. They are not on your side.`,fx:()=>{heatAdd(12)}}),
+  war:t=>({line:`${t.who} wins his seat. His first speech is about you, and it is very good.`,fx:()=>{try{if(S.war)S.war.unrest=(S.war.unrest||0)+8}catch(_){}}})};
+ function tie(k,e){const f=SEED[k];if(!f)return;const t=Object.assign({k,at:Date.now()+(60+R()*180)*1000,yr:(S.world&&S.world.year)||2026},f(e||{}));S.ties22=S.ties22||[];S.ties22.push(t);
+   const w=S.world;w.ties=w.ties||[];if(R()<.5)w.ties.push({k,who:t.who,about:t.about||'',yr:t.yr,by:S.name});if(w.ties.length>30)w.ties.shift()}
+ function tell(t,str){try{say(`<b class="hd">LATER</b> ${str}`,'gold')}catch(_){}try{const e=S.emp&&S.emp.w22;if(e)e.news.unshift({t:str,y:(S.world&&S.world.year)||2026,col:'#f2c14e'})}catch(_){}try{S.feed=S.feed||[];S.feed.unshift({h:t.who.toLowerCase().replace(/ /g,'_'),t:str,l:Math.round(50+R()*5e3)})}catch(_){}}
+ setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade'||S.dlg)return;const now=Date.now(),L=S.ties22||[];const due=L.find(t=>t.at<=now);if(!due)return;S.ties22=L.filter(t=>t!==due);
+   tell(due,P((LATER[due.k]||(()=>['Someone you never met is still thinking about you.']))(due)));if(BACK[due.k]&&R()<.35){const b=BACK[due.k](due);due.at=now+(90+R()*120)*1000;due.k='_back';due.b=b;S.ties22.push(due)}}catch(_){}},4000);
+ setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade'||S.dlg)return;const L=S.ties22||[],now=Date.now(),b=L.find(t=>t.k==='_back'&&t.at<=now);if(!b)return;S.ties22=L.filter(t=>t!==b);tell(b,b.b.line);b.b.fx()}catch(_){}},5000);
+ /* a new life inherits the old ones' ties */
+ function inherit(){try{const w=S.world,t=(w.ties||[]).filter(x=>x.by!==S.name);if(!t.length)return;const x=P(t),gap=(w.year||2026)-x.yr;
+   const line=({kill:`${x.who} was there the night ${x.by} killed ${x.about||'someone'}, ${gap} years ago. ${x.who} runs the police now.`,nuke:`${x.who} survived what ${x.by} did. ${gap} years on, she chairs the commission that decides who is allowed near a machine like yours.`,market:`${x.who} was ruined by ${x.by}. Their grandchildren own the bank you use.`,war:`${x.who} came back from ${x.by}'s war. His party has run the country for ${gap} years.`,leak:`${x.who}, the intern in ${x.by}'s leak, wrote the book everyone reads at school.`,bought:`The schoolteacher ${x.who}, who hung ${x.by} upside down, has a statue now.`,rich:`${x.who} copied ${x.by}'s life and got it right. Everyone has heard of them; nobody has heard of ${x.by}.`})[x.k];
+   if(line)setTimeout(()=>tell(x,line),8000)}catch(_){}}
+ return {tie,inherit}})();
+window.__cons22=(k,d)=>CONS22.tie(k,d);
+
+/* ===== v22 · CONTROLS THAT KNOW YOUR DEVICE =====
+   Works out what you are playing on (touch, keyboard and mouse, gamepad) and switches the moment you do.
+   The first time you reach each place (desk, house and field, street, the other side, the presidency) on that device,
+   a card says exactly what works there. Press ? (or tap the ? button) to see it again. */
+const CTRL22=(()=>{let dev=matchMedia('(pointer:coarse)').matches?'touch':'keys';
+ addEventListener('keydown',e=>{if(dev!=='keys'&&!/^(Shift|Control|Alt|Meta)$/.test(e.key)){dev='keys';maybe(true)}},true);
+ addEventListener('touchstart',()=>{if(dev!=='touch'){dev='touch';maybe(true)}},{capture:true,passive:true});
+ addEventListener('gamepadconnected',()=>{dev='pad';maybe(true)});
+ const CARDS={desk:{touch:['Drag the slider to move through time.','JUMP goes there. BUY and SELL trade at that moment.','MONEY, SOCIAL, POWER, YOU: the groups. STREET takes you outside.','PUMP, RUMOUR, SPOOF, GLITCH bend the market. Watch the SEC meter.'],
+   keys:['←/→ move through time · J jump','B buy all · V half · S sell · H short · C cover · Q/E switch asset','P pump · U rumour · O spoof · G glitch','TAB next desk tab · 1-9 pick an option · ENTER continue · ESC back'],pad:['D-pad: move through time · A: jump','X: buy · B: sell · LB/RB: switch asset','START: menu']},
+  walk:{touch:['Tap the floor to walk there.','Tap a thing to walk over and use it.','Dangerous things ask twice.'],keys:['A/D or ←/→ walk · E use','Dangerous things ask twice: press E again.','ESC back'],pad:['Left stick walk · A use']},
+  world:{touch:['Tap the ground to walk. Tap the strip at the bottom to travel.','Tap a person for the wheel: talk, give, punch, more. Tap again to cycle a crowd.','MENU: taxi, KLIK, weapons, the dead.'],keys:['A/D or ←/→ walk · E act · F hit or shoot','SHIFT slow motion · Q switch weapon · X spin · C kick · R reload','Click a person for the wheel · ESC menu'],pad:['Left stick walk · A act · X hit or shoot','RB slow motion · Y wheel · START menu']},
+  war:{touch:['Tap a room to walk there. Tap the desk for crises.','EMPIRE: countries, companies, the map, the media.'],keys:['1-9 choose · ENTER continue · ESC back','EMPIRE opens the world: map, media, war.'],pad:['A choose · B back']}};
+ const ctx=()=>{try{if(document.getElementById('trip22'))return null;if(S.phase==='war')return 'war';if(S.phase!=='trade'||S.dlg)return null;return S.loc==='world'?'world':S.loc==='desk'?'desk':'walk'}catch(_){return null}};
+ const card=document.createElement('div');card.id='ctrl22';card.style.cssText='position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:80;max-width:min(92vw,440px);background:#0b0a12;border:2px solid #f2c14e;padding:12px 14px;font:13px/1.5 monospace;color:#e6e1d4;display:none;box-shadow:0 6px 0 #000';document.body.appendChild(card);
+ const q=document.createElement('button');q.type='button';q.textContent='?';q.title='Controls';q.style.cssText='position:fixed;right:8px;bottom:44px;z-index:31;width:30px;height:30px;min-height:0;padding:0;border-radius:50%;font:14px monospace;background:#1b1728;color:#f2c14e;border:2px solid #352e4c';document.body.appendChild(q);
+ function show(c){c=c||ctx();if(!c)return;const L=(CARDS[c]||{})[dev]||(CARDS[c]||{}).keys;if(!L)return;card.innerHTML=`<b style="color:#f2c14e;letter-spacing:.15em">${({desk:'THE DESK',walk:'THE HOUSE AND FIELD',world:'THE STREET',war:'THE PRESIDENCY'})[c]} · ${({touch:'TOUCH',keys:'KEYBOARD AND MOUSE',pad:'GAMEPAD'})[dev]}</b>${L.map(l=>`<div>· ${l}</div>`).join('')}<div style="color:#8d86a3;margin-top:6px">${dev==='touch'?'Tap anywhere to close':'Any key closes · ? shows this again'}</div>`;card.style.display='block'}
+ const hide=()=>{card.style.display='none'};card.addEventListener('pointerdown',hide);addEventListener('keydown',e=>{if(card.style.display==='block'&&e.key!=='?'){hide()}if(e.key==='?'){show();e.preventDefault()}},true);q.addEventListener('click',()=>show());
+ let seen={};try{seen=JSON.parse(localStorage.getItem('hs-ctrl22')||'{}')}catch(_){}
+ function maybe(force){const c=ctx();if(!c)return;const k=c+'|'+dev;if(seen[k]&&!force)return;if(force&&seen[k])return;seen[k]=1;try{localStorage.setItem('hs-ctrl22',JSON.stringify(seen))}catch(_){}show(c)}
+ setInterval(()=>{try{q.style.display=S&&S.ch&&S.phase!=='title'&&S.phase!=='pick'?'block':'none';maybe(false)}catch(_){}},1200);
+ return {show,dev:()=>dev}})();
+
+window.HS={get VH(){return H},KC,R22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});

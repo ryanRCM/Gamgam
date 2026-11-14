@@ -70,9 +70,27 @@ EMPIRE's MAP draws the world tile by tile: what you own (gold), war (red), ruin 
 
 MEDIA lists the TV shows made about you: genre, network, title, the actor who plays you, a review and a rating, each with its own painted pixel poster. It also carries the state broadcasts from countries you own, the headlines, and reruns of shows about who you used to be. Everything is generated from what you did, so two runs never read the same.
 
-## 9. What v22 still needs
+## 9. Consequences: accidental storytelling through real people
 
-- Four save slots ("the machine remembers four of you") and a share-a-life code.
+The strongest stories in the game are the ones nobody wrote. Every big act (a killing, a bomb, a market trick, a leak, a country bought, a war) lands on **one named person**, and their story comes back to you minutes later: the best friend sleeping on the bench where it happened, the 71-year-old selling her piano because of your rumour, the girl who survived the flash in a lift and asks the first reporter your name. Some of them come back for you: a gun, a crowd at the door, a politician whose whole career is you. And some outlive you. A later life opens with the consequences of an earlier one: the witness who now runs the police, the survivor who chairs the commission on machines like yours. The credits list them under PEOPLE YOU CHANGED.
+
+None of it is scripted in sequence. It is assembled from who the person was, what you did, and what has happened since, which is why it can still surprise the people who built it.
+
+## 10. A mark in history: every copy ends up different
+
+Most games are the same game for everyone. This one is built to diverge. Every system here (prices, news, chat, people, shows, propaganda, consequences, eras, planets) is generated from the seed of your world and then **bent by your choices**, and almost everything you bend is kept: the dead stay dead, the green stays green, the shows become reruns, the ties pass down the generations, the machine wears out on your hands and nobody else's. After a few hundred hours, no two copies of Hindsight Terminal on Earth will contain the same history.
+
+That makes each copy a footprint: an honest record of how one person behaved with absolute power and a machine that let them cheat. Who did they pump? Who did they spare? Did they leave the planet, or burn it and stay? The credits at the end are not the developers'. They are the player's, and COPY YOUR RECORD lets them keep it.
+
+Strategic code is what makes this profound rather than random. The rules are small and legible, so the stories they produce feel earned, and the memory is long, so the stories accumulate meaning. Played seriously, the game becomes a mirror held up for a thousand years, and what it shows is the player.
+
+## 11. Controls that know you
+
+The game works out what you are playing on (touch, keyboard and mouse, or gamepad) and switches the moment you do. The first time you reach each place (the desk, the house and field, the street, the presidency) on that device, a card shows exactly what works there. Press ? to see it again.
+
+## 12. What v22 still needs
+
+- A share-a-life code with a postcard image (four save slots shipped in v22).
 - A real-device pass: a mid-range phone, a 7 MB first load on mobile data, and audio.
 - A second investor playtest focused on markets in depth and dying in the street, now that the blockers are gone.
 - Later, if wanted: the same design rebuilt for Roblox. The systems above are data and rules, so they port; the art and the controls would be redone.
