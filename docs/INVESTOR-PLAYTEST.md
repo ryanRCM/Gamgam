@@ -102,9 +102,9 @@ Format: number · name · what to change · why it goes viral · size.
 
 ### Fix first (bugs and blockers)
 
-1 · **Unbreakable CONTINUE** · On load, clear `S.dlg` and `S.wmenu`, rebuild the street before drawing, and restore `S.el`. Add a "last good save" slot and offer it when the red bar fires. · Nobody clips a game that ate a streamer's run off camera; they clip themselves uninstalling it. · S
+1 · ✅ fixed (14 Nov 2026) · **Unbreakable CONTINUE** · On load, clear `S.dlg` and `S.wmenu`, rebuild the street before drawing, and restore `S.el`. Add a "last good save" slot and offer it when the red bar fires. · Nobody clips a game that ate a streamer's run off camera; they clip themselves uninstalling it. · S
 
-2 · **SAVES that saves** · Make EXPORT, IMPORT and BACK visible again and add COPY CODE. Give ROADMAP a BACK. · Save codes are how a streamer hands chat their world. · S
+2 · ✅ fixed (14 Nov 2026) · **SAVES that saves** · Make EXPORT, IMPORT and BACK visible again and add COPY CODE. Give ROADMAP a BACK. · Save codes are how a streamer hands chat their world. · S
 
 3 · **Guns that hit what you chose** · In `killT`, aim at the chosen person before firing; bystanders only get hit when they are genuinely in the line. Keep the "THAT IS ILYA" reaction for those cases. · The accident is only a great clip if the viewer believes it was fair. · M
 

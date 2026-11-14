@@ -36,6 +36,12 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   const vis = await p.evaluate(() => ["sexp", "simp", "sback"].map(a => { const b = document.querySelector(`[data-a="${a}"]`); if (!b) return false; const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(b).display !== "none"; }));
   ok(`${t} SAVES shows EXPORT, IMPORT and BACK`, vis.every(Boolean), "visible: " + JSON.stringify(vis));
 
+  // Same root cause as Blocker 2: the title's More… fold hid ROADMAP's way back.
+  await p.evaluate(() => { const b = document.querySelector('[data-a="sback"]'); b && b.click(); }); await p.waitForTimeout(200);
+  await p.evaluate(() => { const b = document.querySelector('[data-a="road"]'); b && b.click(); }); await p.waitForTimeout(300);
+  const rb = await p.evaluate(() => { const b = document.querySelector('[data-a="roadback"]'); if (!b) return false; const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
+  ok(`${t} ROADMAP shows a BACK button`, rb);
+
   // Blocker 1: a save made with a conversation open must load clean (no open conversation, no errors).
   // Real repro: new life → intro → street → open the taxi → save → reload → CONTINUE.
   await p.evaluate(() => localStorage.removeItem("hindsight-v2")); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
