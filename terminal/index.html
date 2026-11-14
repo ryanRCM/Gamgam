@@ -461,7 +461,7 @@ function genMarket(seed){const r=rng(seed),v=x=>Array.isArray(x)?x[0]+r()*(x[1]-
     ev.push({id:id++,q,k:T.k,title:T.t[j],out:T.o[j],odds:Math.round(T.odds[0]+r()*(T.odds[1]-T.odds[0])),used:0,stake:0,done:false})}
   crash.forEach(c=>ev.push({id:id++,q:c,k:'crash',title:'Market panic',out:'everything falls for two quarters',odds:9,used:0,stake:0,done:false}));
   ev.sort((a,b)=>a.q-b.q);return {mk,ev}}
-function beginLife(chId){try{ERA22.apply()}catch(_){}try{WPN.fists.dmg=chId==='insom'?26:14}catch(_){}try{setTimeout(()=>CONS22.inherit(),4000)}catch(_){}const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
+function beginLife(chId){S.born23=Date.now();try{ERA22.apply()}catch(_){}try{WPN.fists.dmg=chId==='insom'?26:14}catch(_){}try{setTimeout(()=>CONS22.inherit(),4000)}catch(_){}const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
   const sk={tether:0,coil:0,cloak:0,memory:0,pool:0};let scrap=false;
   if(prev){if(w.machine==='hidden')for(const k in sk)sk[k]=Math.floor((prev[k]||0)/2);
     else if(w.machine==='public')for(const k in sk)sk[k]=Math.min(1,SK[k].cost.length);else scrap=true}
@@ -1342,7 +1342,7 @@ function resolve(){S.ev.forEach(e=>{if(!e.used||e.done||e.q>S.t)return;e.done=tr
     say(`${e.title}: ${e.out}. Your bet pays ${fmt(win)}.`,'gold');post('bet',{o:e.odds})}
   else{const f=fameAdd(600*Math.exp(.11*e.q)*e.odds/4);heatAdd(5);say(`${e.title}: ${e.out}. Your video called it. +${fnum(f)} fans.`,'cyan');post('vid',{e:e.title})}})}
 function track(){if(S.cash>S.peak)S.peak=S.cash;wealth();if(S.towerQ==null&&S.cash>=1e6){S.towerQ=S.t;say('A tower with your name on it now stands in the city. It always has.','gold');post('tower')}}
-function doJump(){if(!canJump())return;const fp=forceP();try{S.jt23=(S.jt23||[]).filter(t=>Date.now()-t<40000);S.jt23.push(Date.now());if(S.jt23.length===4)say('<b class="hd">THE MACHINE</b> The fan screams. Jumping this fast costs more flux each time. Let it cool.','violet')}catch(_){}try{MACH22.use(fp>0)}catch(_){}if(fp){S.flux=0;const fq=Math.min(8,fp);if(awake()){pdx(fq);say(`Not enough flux. You forced it. Paradox +${fq}.`,'violet')}else{heatAdd(fq);say(`Not enough flux. You forced it and browned out half the street. Heat +${fq}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
+function doJump(){if(!canJump())return;const fp=forceP();if(fp>0&&Date.now()-(S.born23||0)<180000){say('<b class="hd">THE MACHINE</b> Not enough flux. It refuses to force a jump this early in a life. Wait for the bar to fill.','violet');return}try{S.jt23=(S.jt23||[]).filter(t=>Date.now()-t<40000);S.jt23.push(Date.now());if(S.jt23.length===4)say('<b class="hd">THE MACHINE</b> The fan screams. Jumping this fast costs more flux each time. Let it cool.','violet')}catch(_){}try{MACH22.use(fp>0)}catch(_){}if(fp){S.flux=0;const fq=Math.min(8,fp);if(awake()){pdx(fq);say(`Not enough flux. You forced it. Paradox +${fq}.`,'violet')}else{heatAdd(fq);say(`Not enough flux. You forced it and browned out half the street. Heat +${fq}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
   if(d!==N-1&&S.vis[d]){if(awake()){const rv=mod().revisit||20;pdx(rv);say(`You have been to ${qlab(d)} before. You nearly saw yourself. Paradox +${rv}.`,'violet')}else if(!S.flags.rv){S.flags.rv=1;say(`You have been to ${qlab(d)} before. Harmless, for now. Once the timeline is damaged, this is how you meet yourself.`,'violet')}}
   if(d!==N-1)S.vis[d]=1;
   const lost=S.mem.filter(id=>{const e=S.ev.find(x=>x.id===id);return e.done||e.used});S.mem=S.mem.filter(id=>!lost.includes(id));

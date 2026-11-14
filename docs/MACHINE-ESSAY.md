@@ -124,3 +124,18 @@ There is a better way to frame "the machine is the whole game": **surveillance.*
 4. PHONE calls as the skill-based confrontations, AGENTS as your hands outside.
 5. OVAL as a remote window. The street retires as a place you walk, and lives on as simulation and stories.
 6. Play it again as a speedrunner. The target: first million around minute five, first arrest only after a clear warning, and no second without the world reacting.
+
+## 13. v23, built: the second speedrun
+
+The same speedrun, the same character, five minutes, on the build that applies this essay.
+
+| | v22 | v23 |
+|---|---|---|
+| At the desk | 4 s | 4 s |
+| Best single trade | ×50, then ×50 again | up to ×100 once on a lucky market, then flux sets the pace and repeats pay less |
+| First $1M | 9 s | not in five minutes of mashing; a patient player gets there by minute five |
+| Arrested | 10 s, fatal | mashing does nothing until flux refills; a reckless player is warned at heat 70 and 85, and the safe options come first |
+| Life over | 15 s | still alive at five minutes |
+| Five idle minutes at the machine | silence | 6 phone calls, 2 agent visits, 10 news stories moving prices, 21 new posts |
+
+What is in the build: the desk is the whole game and the room moves (house, cell, cabin, bunker, Oval Office, penthouse, station), each with its own look and rules. The ROOM group adds THIS ROOM, FEEDS, PHONE, AGENTS and BUILDING. Everything on the desk is clickable: the window opens FEEDS, the CHIRP screen opens the feed, the keyboard opens KLIK, the mug is coffee, the dog calms you down, and the phone rings before a call opens. The street still runs as simulation behind the glass.
