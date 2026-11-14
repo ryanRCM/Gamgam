@@ -234,7 +234,7 @@ const CHARS=[
  {id:'insom',name:'Tomo Achebe',tag:'THE INSOMNIAC',creed:'Sleep is where ambition goes to die. Four years awake and counting.',
   st:{NERVE:2,CHARM:3,LOGIC:5,GUT:2},perk:'Never sleeps. Flux recharges 50% faster.',flaw:'Burning out. Old age comes for you ten years early.',
   look:{skin:'#6e4127',hair:'#14101c',hs:6,coat:'#a57be0',pants:'#2a2433',shoes:'#58d6c9',build:0,ht:2,top:'tee',acc:'phones'},mod:{flux:1.5,old:50},remake:{name:'Temi Achebe',line:'The surgeon asks what he wants to look like. He gives the answer he has been awake avoiding for four years. Temi wakes after eleven days and, for the first time in her life, sleeps. Nobody is looking for her.',look:{skin:'#6e4127',hair:'#14101c',hs:1,coat:'#a57be0',pants:'#2a2433',build:0,acc:''}}},
- {id:'gamb',name:'Boba Glober',tag:'THE GAMBLER',creed:'Every room is a table and the stream never ends. Absurdism, hood down, one left in the pack.',
+ {id:'gamb',name:'Boba Glober',tag:'THE GAMBLER',creed:'Every room is a table, every loss is a lesson, every lesson is a joke. Breathe. Bet. Let go.',
   st:{NERVE:5,CHARM:3,LOGIC:1,GUT:4},perk:'Bookies love the action. Bets pay 50% more.',flaw:"Can't resist one more look. Revisiting a moment costs 30 paradox, not 20.",
   look:{skin:'#d9a988',hair:'#14101c',hs:3,coat:'#23232b',pants:'#3a3a42',shoes:'#ece5cc',build:0,top:'hoodie',hood:false,beard:1,eye:'#2a2433',acc:'cig'},mod:{odds:1.5,revisit:30},remake:{name:'Solana Ferreira',line:'Sol cuts the deck to choose the new face, and rigs the cut. First time he has ever cheated to get the thing he actually wanted. Solana walks out. The house never sees her coming.',look:{skin:'#9a5f3a',hair:'#4a2a17',hs:1,coat:'#b0303a',pants:'#2b1d14',build:0,acc:'cig'}}},
 ];
@@ -310,7 +310,7 @@ function ST(k){const f=S.fxs||{};let d=0;
   if(f.wired>0)d+=k==='LOGIC'?1:k==='CHARM'?-1:0;
   if(f.hang>0)d+=k==='NERVE'||k==='CHARM'?-1:0;
   return Math.max(0,S.st[k]+d)}
-const fxNames=()=>{const f=S.fxs||{};return [f.drunk>120?'WASTED':f.drunk>0?'DRUNK':'',f.high>0?'HIGH':'',f.wired>0?'WIRED':'',f.hang>0?'HUNGOVER':'',S.dark>0?'DARK':'',S.allin?'ALL IN':'',S.spot?'SPOTLIT':''].filter(Boolean)};
+const fxNames=()=>{const f=S.fxs||{};return [f.drunk>120?'WASTED':f.drunk>0?'DRUNK':'',f.high>0?'HIGH':'',f.wired>0?'WIRED':'',f.hang>0?'HUNGOVER':'',S.dark>0?'DARK':'',f.salvia>0?'ELSEWHERE':'',f.datura>0?'THE HOST':'',f.juice>0?'JUICED':'',S.allin?'ALL IN':'',S.spot?'SPOTLIT':''].filter(Boolean)};
 const NPC={
   VANE:{skin:'#07060c',hair:'#07060c',hs:0,coat:'#07060c',pants:'#07060c',build:2,acc:''},
   AGENT:{skin:'#6e4127',hair:'#14101c',hs:4,coat:'#2f3e5c',pants:'#1c2233',build:1,acc:'shades'},
@@ -2297,13 +2297,14 @@ const KC=(()=>{const P=a=>a[Math.floor(R()*a.length)],ch=p=>R()<p;
   street:[()=>`${SN()} in ${where()} at night ${P(['is a horror movie','is content','is how people die','is my favourite genre'])}`,()=>`${P(['someone','a man','a guy in a cap','the bookie'])} just ${P(['looked at','followed','recognised','filmed'])} ${SN()} ${P(['in','outside','behind'])} ${where()}`,()=>`WATCH YOUR ${P(['BACK','LEFT','RIGHT','WALLET','SIX'])}`,()=>`i live near ${where()} ${P(['and i am scared','this is real','i can see the stream from my window','please leave'])}`],
   wanted:[()=>`${'★'.repeat(Math.max(1,S.wanted||1))} ${P(['RUN','STOP','HE IS NOT STOPPING','THE POLICE ARE ON STREAM'])}`,()=>`${P(['cops','feds','police'])} ${P(['watching the stream rn','in chat say hi','tracking the ip','are mods now'])}`,()=>`${SN()} ${P(['speedrunning prison','going to jail live','fleeing the scene on stream'])}`],
   kill:[()=>`HE ${P(['DID WHAT','REALLY DID THAT','JUST','ON STREAM'])} ${P(['💀','???','.','!!!'])}`,()=>`${P(['rip','press f for','who was','justice for'])} ${P(['the doctor','that guy','the bookie','ilya','the lookout','that poor man'])}`,()=>`${P(['klik','the government','his mum','the police'])} ${P(['is not going to like that','saw that','has entered the chat'])}`,()=>`${P(['reported','clipped','sent to the news','sent to his mum'])}`],
+  yogi:[()=>`${SN()} ${P(['is meditating','is breathing','is at peace','is smiling'])} ${P(['while losing everything','during a war','mid crash','on stream','with a gun out'])}`,()=>`${P(['namaste','om','breathe in','let go'])} ${P(['and buy the dip','and sell the top','chat','king'])}`,()=>`the zen gambler ${P(['strikes again','is unbeatable','has transcended money','just lost it all and said thank you'])}`],
   potus:[()=>`the president is ${P(['streaming','live','doing a q and a','gaming'])} from ${where()} ${P(['this is fine','democracy ended','i love this timeline','who allowed this'])}`,()=>`${P(['ask','make','tell'])} ${SN()} to ${P(['show the codes','open the drawer','read the briefing','call russia on stream','show the map room','sack someone live'])}`,()=>`${P(['impeach','reelect','crown','arrest'])} ${SN()}`,()=>`${P(['secret service','the chief of staff','an intern','the general'])} ${P(['is behind you','just walked past','is mouthing STOP','is pulling the plug'])}`],
   nuke:[()=>`☢ ${P(['he actually did it','what have you done','history will not forgive this','my country is on the map'])}`,()=>`${P(['day','hour'])} ${Math.floor(1+R()*40)} after ${P(['the bomb','the flash','the launch'])} and ${SN()} ${P(['is still streaming','is eating cereal','is reading chat','has not blinked'])}`,()=>`${P(['pray for','thoughts for','never forget'])} ${(()=>{const w=W22();const k=w&&Object.keys(w.rad)[0];return k?k.toUpperCase():'everyone'})()}`],
   war:[()=>`${P(['war','actual war','ww3'])} ${P(['on stream','speedrun','any%','is trending'])}`,()=>`my ${P(['cousin','brother','neighbour','uncle'])} ${P(['got drafted','is over there','is watching this from a bunker'])}`],
   tv:[()=>{const w=W22(),s=w&&w.shows[0];return s?`${P(['the actor in','the guy from','everyone in'])} ${s.t.toLowerCase()} ${P(['plays you better','is hotter','is more believable','deserves an award'])}`:`make a show about ${SN()}`},()=>`${P(['season 2','the finale','episode 4','the musical'])} ${P(['when','is better than this','spoiled this'])}`],
   leak:[()=>`${P(['CLIPPED','SCREENSHOTTED','ARCHIVED','SENT TO EVERY NEWSROOM'])} ${P(['💀','🗿','👀',''])}`,()=>`${P(['zoom in','pause at','frame by frame'])} ${P(['0:'+Math.floor(10+R()*49),'the left monitor','the desk','the folder'])}`,()=>`${P(['that is classified','that is a felony','that is treason','that is a war'])} ${P(['lol','bro','on stream','in 4k'])}`,()=>`${P(['foreign governments','the cia','russia','my nan','the press'])} ${P(['are in chat','took notes','are typing','saw that'])}`]};
  function line(ctx){const rb=R22.about(),map={kill:'kill',wanted:'wanted',nuke:'nuke',leak:'leak',show:'tv',war:'war',rich:'rich',broke:'poor'};const c=ctx||(S.kburst&&S.kburst.n>0?S.kburst.k:null)||(rb&&R()<.4?map[rb.k]:null);let pool=CORE.any;const r=R();
-   if(c&&CORE[c]&&r<.85)pool=CORE[c];else if(S.phase==='war'&&r<.45)pool=CORE.potus;else if((S.wanted||0)>=1&&r<.4)pool=CORE.wanted;else if(S.loc==='world'&&r<.35)pool=CORE.street;else if(S.cash>1e8&&r<.3)pool=CORE.rich;else if(S.cash<5e3&&r<.3)pool=CORE.poor;
+   if(c&&CORE[c]&&r<.85)pool=CORE[c];else if(S.ch==='gamb'&&r<.25)pool=CORE.yogi;else if(S.phase==='war'&&r<.45)pool=CORE.potus;else if((S.wanted||0)>=1&&r<.4)pool=CORE.wanted;else if(S.loc==='world'&&r<.35)pool=CORE.street;else if(S.cash>1e8&&r<.3)pool=CORE.rich;else if(S.cash<5e3&&r<.3)pool=CORE.poor;
    else{const w=W22();if(w&&Object.keys(w.rad).length&&r<.5)pool=CORE.nuke;else if(w&&w.shows.length&&r<.4)pool=CORE.tv;else if(S.emp&&S.emp.wars&&Object.keys(S.emp.wars).length&&r<.5)pool=CORE.war}
    let t=P(OP)+P(pool)()+P(TL)+P(EM);if(ch(.25))t=t.toUpperCase();if(ch(.12))t=t.replace(/[aeiou]/,m=>m.repeat(2+Math.floor(R()*5)));return handle()+': '+t}
  /* ---------- leaks from the White House ---------- */
@@ -5057,7 +5058,7 @@ try{const P=(window.AudioScheduledSourceNode||{}).prototype;if(P){const s0=P.sta
    The desk had ten tabs on screen at once. Now four: MONEY, SOCIAL, POWER, YOU, and only the chosen one opens its few.
    Shorts make noise. A small one: one guy notices. A big one: threads, videos, memes. A short left open for years
    becomes a running joke with a day counter, and closing it sets everything off. CHIRP for the posts, REELS for the videos. */
-{const TG={money:['mkt','alm','bet','rake'],social:['feed','klik'],power:['pow','lab'],you:['you']},TGN={money:'MONEY',social:'SOCIAL',power:'POWER',you:'YOU'};
+{const TG={money:['mkt','alm','bet','rake'],social:['feed','klik'],power:['pow','lab'],you:['you','job']},TGN={money:'MONEY',social:'SOCIAL',power:'POWER',you:'YOU'};
  const tgOf=t=>{for(const k in TG)if(TG[k].includes(t))return k;return 'money'},LAST={};
  const css=document.createElement('style');css.textContent=`
  .tg19{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 6px}
@@ -6027,11 +6028,11 @@ const CH22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
  const PER={narc:['They are already looking at you before you speak. You like that.','"Are you someone? You look like someone."','A girl asks for a selfie. You say yes before she finishes.','"Is that a real suit or a costume?" It is both.'],
   para:['They glance at the cap and then at your hands.','"You alright, mate? You keep checking the door."','A man with a dog crosses the road when he sees you. Good. Or bad.','"Nobody is following you." That is exactly what they would say.'],
   insom:['"Have you slept?" No.','They notice the headphones are not plugged into anything.','A shopkeeper offers you a coffee for free. Your eyes did that.','"You look like you have seen tomorrow." You have.'],
-  gamb:['They clock the hoodie and the cigarette and decide you owe someone money.','"Fancy a bet?" They are joking. You are not.','A man flips a coin as you pass. You call it before it lands.','"You look lucky." Nobody has said that in years.']};
+  gamb:['They clock the hoodie and the cigarette and decide you owe someone money. You bless them anyway.','"Fancy a bet?" You tell them the bet is already lost, and that this is freeing.','A man flips a coin as you pass. You call it before it lands and wish it well.','"You look calm for someone that broke." Broke is a feeling, you explain. They leave.','They panic about the news. You breathe in for four, out for six, and buy the dip.','"How are you so relaxed?" Nothing is real and the river does not care. Also you have seen tomorrow.','A woman asks if you are a monk. Only on losing days, you say. Today is a winning day.','"Are you smiling at me?" You are smiling at the absurdity of everything. Also at them a bit.']};
  const TPL=[b=>`"Nice ${b}."`,b=>`"Where did you get that ${b}?"`,b=>`Someone stares at your ${b} a beat too long.`,b=>`"The ${b}? Bold."`,b=>`A kid points at your ${b} and laughs. The mum does not stop them.`,b=>`"I would kill for that ${b}." They mean it a little.`,b=>`"You cannot wear that ${b} in here." They let you anyway.`,b=>`Two people whisper about the ${b}. One of them is impressed.`];
  function npc(p){const b=bits();if(R()<.5&&PER[S.ch])return P(PER[S.ch]);return b.length?P(TPL)(P(b)):''}
  function press(){const b=bits(),c=CHM[S.ch]||{};return P([`A reporter asks about the ${P(b)||'look'}. "Is that presidential?"`,`The papers call you "${(c.tag||'THE STRANGER').replace('THE ','the ').toLowerCase()} in the ${P(b)||'suit'}".`,`A cartoonist draws you as nothing but the ${P(b)||'hair'}. It sells.`,`Polls say voters trust the ${P(b)||'face'} more than the policies.`])}
- const OPEN={narc:'Three cameras, a ring light, and nobody watching yet. Yet.',para:'Every window on the street is a lens. You count them on the way past.',insom:'Day four awake. The streetlights have started to hum in a key.',gamb:'One cigarette left and a coin you do not trust. The bridge is warm tonight.'};
+ const OPEN={narc:'Three cameras, a ring light, and nobody watching yet. Yet.',para:'Every window on the street is a lens. You count them on the way past.',insom:'Day four awake. The streetlights have started to hum in a key.',gamb:'One cigarette left, a coin you do not trust, and perfect peace. The river is loud. You let it be loud.'};
  function open(){if(OPEN[S.ch])try{say(OPEN[S.ch],'violet')}catch(_){}}
  return {bits,npc,press,open}})();
 function pPick(){if(S.cus)return pCustom();const c=CHARS[S.pick],a=ABIL[c.id];
@@ -6139,11 +6140,11 @@ function pSheet(){const tabs=[['info','INFO'],['skills','SKILLS'],['health','HEA
     +(S.world.rulers.length?`<div class="sec">BEFORE YOU</div><div class="list">${S.world.rulers.slice(-4).reverse().map(r=>`<div><b>${r.name}</b> · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}</div>`).join('')}</div>`:'')}
   return o+'</div>'}
 function pTrade(){if(S.cus)return pCustom();if(S.loc==='world')return S.wmenu?pWorldMenu():pWorld();if(S.loc!=='desk')return pWalk();
-  const tabs=[['mkt','MARKET'],['alm','SEEK'],['rake','RAKE'],['feed','CHIRP'],['klik','KLIK'],['pow','POWER'],['lab','LAB'],['you','YOU']],ab=ABIL[S.ch];
+  const tabs=[['mkt','MARKET'],['alm','SEEK'],['rake','RAKE'],['feed','CHIRP'],['klik','KLIK'],['pow','POWER'],['lab','LAB'],['you','YOU']].concat(JOB22.tag()?[['job',JOB22.tag()]]:[]),ab=ABIL[S.ch];
   let o=`<div class="row r5">${tabs.map(t=>`<button type="button" class="tab t-${t[0]} ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}<button type="button" class="tab t-up" data-a="getup">UP</button></div>
   <button type="button" id="ab" class="abil" data-a="abil" ${S.abT>0?'disabled':''}>${ab.n}<small id="abs">${S.abT>0?'ready in '+Math.ceil(S.abT)+'s':ab.d}</small></button>`;
   if(awake())o+=`<div class="pdx">PARADOX ${Math.round(S.paradox)}% · ${pdxHint()}</div>`;
-  o+=S.tab==='klik'?pKlik():S.tab==='pow'?timeBar()+pPower():S.tab==='mkt'?timeBar()+pMarket():S.tab==='alm'?timeBar()+pSeek():S.tab==='rake'?pRake():S.tab==='feed'?pFeed():S.tab==='you'?pSheet():pLab();
+  o+=S.tab==='job'?JOB22.panel():S.tab==='klik'?pKlik():S.tab==='pow'?timeBar()+pPower():S.tab==='mkt'?timeBar()+pMarket():S.tab==='alm'?timeBar()+pSeek():S.tab==='rake'?pRake():S.tab==='feed'?pFeed():S.tab==='you'?pSheet():pLab();
   if(S.tab==='rake'||S.tab==='feed'||S.tab==='you'||S.tab==='klik'||S.tab==='pow')return o;
   const G=goal(),F=fgoal(),ready=S.cash>=G&&S.fame>=F&&!S.hunted;
   return o+`<button type="button" class="goal ${ready?'pri':''}" data-a="run" ${ready?'':'disabled'}><u style="width:${clamp(Math.min(S.cash/G,S.fame/F)*100,0,100)}%"></u><span>${ready?'RUN FOR PRESIDENT · '+fmt(G/2):S.hunted?'HUNTED. GET A NEW FACE FIRST.':`PRESIDENCY: ${fmt(G)} + ${fnum(F)} FANS`}</span></button>`}
@@ -6332,7 +6333,112 @@ function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWor
   sndLabel();render();requestAnimationFrame(loop)}
 $('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
 setInterval(()=>{try{if(S&&S.phase==='war'&&!S.dlg&&R()<.5)say('<b class="hd">THE PRESS</b> '+CH22.press(),'cyan')}catch(_){}},45000);
-window.HS={get VH(){return H},KC,R22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+/* ===== v22 · THE OTHER SIDE, AND THE DAY JOB =====
+   VOICES: every substance talks while it is in you, like EVERCLEAR. Lines react to what just happened (R22).
+   SALVIA: a whole other game. Four versions, one per character. Arrows/WASD or tap. You come back eleven seconds later.
+   DATURA: the nightmare. Each time worse. The third time you do not come back.
+   JUICE: performance drugs. Hit harder, run faster, get tested.
+   CAREERS (desk tab): Dax is a film star (auditions, roles, premieres). Tomo fights in the cage and plays football. */
+const TRIP22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const VO={salvia:['THE GARDENER','#7fe07f',['You were always here. You just kept leaving.','The floor is a wall that has given up.','Count your fingers. Now count them again. One of them is mine.','{now} That is a story you told yourself. I was there. It was smaller.']],
+  datura:['THE HOST','#ef5d75',['Someone is standing behind the door. Do not open it. Open it.','Your hands are not yours. Give them back when you are done.','{now} I saw it too. I helped.','The people in the corner want to talk to you. There are no people in the corner.','Drink something. That is not water.']],
+  juice:['COACH','#f2c14e',['Again. AGAIN.','Pain is a rumour. Ignore rumours.','{now} Turn that into reps.','They test on Thursdays. Today is not Thursday. Probably.']],
+  high:['THE BLUE','#58d6c9',['The river has a pulse. You can hear it in your teeth.','{now} Funny. The blue thinks that is funny.','You are two seconds ahead of everyone. Use it.']]};
+ const now=()=>{try{const r=R22.about();return r?({kill:'The body.',nuke:'The flash.',leak:'The clip.',show:'Your face on the telly.',war:'The war.',rich:'The money.',broke:'The money that left.',potus:'The chair.',wanted:'The sirens.'})[r.k]||'':''}catch(_){return ''}};
+ function voice(){const f=S.fxs||{},k=f.datura>0?'datura':f.salvia>0?'salvia':f.juice>0?'juice':f.high>0?'high':null;if(!k)return;const v=VO[k];try{say(`<b style="color:${v[1]}">${v[0]}</b> ${P(v[2]).replace('{now}',now())}`,'violet')}catch(_){}}
+ setInterval(()=>{try{if(S&&S.ch&&S.phase==='trade'&&!S.dlg&&R()<.5)voice();const f=S&&S.fxs;if(f)['salvia','datura','juice'].forEach(k=>{if(f[k]>0)f[k]=Math.max(0,f[k]-5)})}catch(_){}},5000);
+ /* ---------- the other side ---------- */
+ const MODES={narc:['THE HALL OF MIRRORS','Find your real face. Gold is you. Everything pale is a liar.'],para:['THE WATCHERS','Stay out of their sight. When an eye opens, its row and column see you.'],insom:['THE CORRIDOR','The doors never end. Take the one that flickers green.'],gamb:['THE TABLE','The house deals forever. Higher or lower. UP or DOWN.']};
+ let T=null;
+ function open(){const ch=S.ch||'gamb',m=MODES[ch]||MODES.gamb,ov=document.createElement('div');ov.id='trip22';
+  ov.style.cssText='position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#e6e1d4;font:12px monospace;text-align:center;padding:16px';
+  ov.innerHTML=`<b style="font-size:16px;letter-spacing:.2em">${m[0]}</b><div style="max-width:420px">${m[1]}</div><canvas width="160" height="120" style="width:min(92vw,560px);image-rendering:pixelated;border:1px solid #333;touch-action:none"></canvas><div id="trip22s"></div><div style="color:#666">Arrows or WASD · tap where to go · ESC wakes you, at a cost</div>`;document.body.appendChild(ov);
+  const cv=ov.querySelector('canvas'),g=cv.getContext('2d'),st=ov.querySelector('#trip22s');
+  T={ch,t:45,me:{x:80,y:60},tgt:null,score:0,life:3,obj:[],lane:1,card:Math.ceil(R()*13),done:0,k:{},cv,g,st,ov,eyes:[],door:{y:-10,ok:0,n:0}};
+  if(ch==='para')for(let i=0;i<12;i++)T.eyes.push({x:12+(i%4)*45,y:14+Math.floor(i/4)*44,o:0,t:1+R()*3});
+  cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*160,y=(e.clientY-r.top)/r.height*120;if(T.ch==='gamb'){guess(y<60?1:-1);return}if(T.ch==='insom'){T.lane=x<53?0:x<106?1:2;return}T.tgt={x,y}});
+  T.kd=e=>{const c=e.code;T.k[c]=1;if(c==='Escape'){end(false,true);e.preventDefault();return}if(T.ch==='gamb'&&(c==='ArrowUp'||c==='KeyW'))guess(1);if(T.ch==='gamb'&&(c==='ArrowDown'||c==='KeyS'))guess(-1);if(T.ch==='insom'&&(c==='ArrowLeft'||c==='KeyA'))T.lane=Math.max(0,T.lane-1);if(T.ch==='insom'&&(c==='ArrowRight'||c==='KeyD'))T.lane=Math.min(2,T.lane+1);if(/Arrow/.test(c))e.preventDefault()};
+  T.ku=e=>{T.k[e.code]=0};addEventListener('keydown',T.kd,true);addEventListener('keyup',T.ku,true);let last=performance.now();
+  const loop=now=>{if(!T||T.done)return;const dt=Math.min(.05,(now-last)/1000);last=now;step(dt);draw(now);requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+ function guess(d){const n=Math.ceil(R()*13),ok=(d>0&&n>=T.card)||(d<0&&n<=T.card);T.card=n;if(ok)T.score++;else T.life--;T.flash=ok?'#7fe07f':'#ef5d75';T.ft=.3;if(T.score>=7)end(true);if(T.life<=0)end(false)}
+ function step(dt){const m=T.me,K=T.k;T.t-=dt;if(T.ft>0)T.ft-=dt;
+  if(T.ch==='narc'||T.ch==='para'){let vx=(K.ArrowRight||K.KeyD?1:0)-(K.ArrowLeft||K.KeyA?1:0),vy=(K.ArrowDown||K.KeyS?1:0)-(K.ArrowUp||K.KeyW?1:0);if(T.tgt&&!vx&&!vy){vx=T.tgt.x-m.x;vy=T.tgt.y-m.y;const l=Math.hypot(vx,vy);if(l<2)T.tgt=null;else{vx/=l;vy/=l}}m.x=Math.max(2,Math.min(158,m.x+vx*70*dt));m.y=Math.max(2,Math.min(118,m.y+vy*70*dt))}
+  if(T.ch==='narc'){if(T.obj.length<7&&R()<dt*3)T.obj.push({x:R()*160,y:R()*120,gold:R()<.3,vx:(R()-.5)*30,vy:(R()-.5)*30});T.obj.forEach(o=>{o.x+=o.vx*dt;o.y+=o.vy*dt;if(Math.hypot(o.x-m.x,o.y-m.y)<6){o.dead=1;if(o.gold)T.score++;else{T.life--;T.flash='#ef5d75';T.ft=.3}}});T.obj=T.obj.filter(o=>!o.dead&&o.x>-5&&o.x<165&&o.y>-5&&o.y<125);if(T.score>=6)end(true)}
+  if(T.ch==='para'){T.eyes.forEach(e=>{e.t-=dt;if(e.t<=0){e.o=!e.o;e.t=e.o?.9:1.5+R()*2.5;if(e.o&&(Math.abs(m.x-e.x-8)<8||Math.abs(m.y-e.y-6)<6)){T.life--;T.flash='#ef5d75';T.ft=.4}}});if(T.t<=0)end(true)}
+  if(T.ch==='insom'){const d=T.door;d.y+=(60+T.score*6)*dt;if(d.y>100){if(T.lane===d.ok)T.score++;else{T.life--;T.flash='#ef5d75';T.ft=.3}d.y=-10;d.ok=Math.floor(R()*3)}if(T.score>=12)end(true)}
+  if(T.life<=0)end(false);else if(T.t<=0&&!T.done)end(T.ch==='para')}
+ function draw(now){const g=T.g,h=(now/40)%360;g.fillStyle=`hsl(${h},40%,6%)`;g.fillRect(0,0,160,120);for(let i=0;i<60;i++){g.fillStyle=`hsla(${(h+i*7)%360},70%,50%,.15)`;g.fillRect(R()*160|0,R()*120|0,1,1)}
+  const m=T.me,body=(x,y,c)=>{g.fillStyle=c;g.fillRect(x-1,y-4,3,3);g.fillRect(x-2,y-1,5,5);g.fillRect(x-2,y+4,2,3);g.fillRect(x+1,y+4,2,3)};
+  if(T.ch==='narc'){T.obj.forEach(o=>{g.fillStyle=o.gold?'#f2c14e':'#c8c3d8';g.fillRect(o.x-3|0,o.y-3|0,6,6);g.fillStyle='#000';g.fillRect(o.x-2|0,o.y-1|0,1,1);g.fillRect(o.x+1|0,o.y-1|0,1,1)});body(m.x|0,m.y|0,'#fff')}
+  if(T.ch==='para'){T.eyes.forEach(e=>{g.fillStyle=e.o?'#ef5d75':'#3a2a3a';g.fillRect(e.x,e.y,16,8);if(e.o){g.fillStyle='rgba(239,93,117,.12)';g.fillRect(e.x,0,16,120);g.fillRect(0,e.y-2,160,12);g.fillStyle='#000';g.fillRect(e.x+6,e.y+2,4,4)}});body(m.x|0,m.y|0,'#fff')}
+  if(T.ch==='insom'){for(let l=0;l<3;l++){g.fillStyle='#222';g.fillRect(l*53+4,0,45,120)}const d=T.door;for(let l=0;l<3;l++){g.fillStyle=l===d.ok&&Math.sin(now/60)>0?'#7fe07f':'#5a4a3a';g.fillRect(l*53+12,d.y|0,29,10)}body(T.lane*53+26,104,'#fff')}
+  if(T.ch==='gamb'){g.fillStyle='#0d3a22';g.fillRect(20,20,120,80);g.fillStyle='#ece5cc';g.fillRect(64,36,32,46);g.fillStyle='#b0303a';g.font='18px monospace';g.fillText(['A','2','3','4','5','6','7','8','9','10','J','Q','K'][T.card-1],T.card===10?68:73,66);g.fillStyle='#7fe07f';g.fillText('▲',74,30);g.fillText('▼',74,114)}
+  if(T.ft>0){g.fillStyle=T.flash;g.globalAlpha=.25;g.fillRect(0,0,160,120);g.globalAlpha=1}
+  T.st.textContent=`${Math.max(0,Math.ceil(T.t))}s · ${'♥'.repeat(Math.max(0,T.life))} · ${T.score}`}
+ function end(win,woke){if(!T||T.done)return;T.done=1;removeEventListener('keydown',T.kd,true);removeEventListener('keyup',T.ku,true);T.ov.remove();const ch=T.ch;T=null;
+  S.fxs.salvia=0;if(woke){S.st.GUT=Math.max(0,S.st.GUT-1);say('You tear yourself out of it. Eleven seconds have passed. GUT -1.','rose')}
+  else if(win){const g=({narc:['CHARM',1,'You know which face is yours now. CHARM +1.'],para:['GUT',1,'You can feel when you are being watched. GUT +1.'],insom:['LOGIC',1,'Every door has a pattern. LOGIC +1.'],gamb:['NERVE',1,'You know what the next card is before it turns. NERVE +1.']})[ch]||['GUT',1,''];S.st[g[0]]+=g[1];S.paradox=Math.max(0,(S.paradox||0)-10);say(`Eleven seconds have passed. ${g[2]}`,'gold')}
+  else{S.cash*=.9;say('Eleven seconds have passed. You are on the floor and a tenth of your money is not where you left it.','rose')}
+  try{R22.note('trip')}catch(_){}try{save();render()}catch(_){}}
+ function datura(){S.dat=(S.dat||0)+1;S.fxs.datura=120;const n=S.dat;
+  const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:89;pointer-events:none;background:radial-gradient(circle,transparent 30%,rgba(90,0,10,.85));animation:dat22 1.4s steps(3) infinite;mix-blend-mode:multiply';document.body.appendChild(ov);setTimeout(()=>ov.remove(),n>=3?6000:20000);
+  if(!document.getElementById('dat22s')){const s=document.createElement('style');s.id='dat22s';s.textContent='@keyframes dat22{50%{filter:hue-rotate(40deg) blur(1px);transform:scale(1.02)}}';document.head.appendChild(s)}
+  if(n===1){say('<b style="color:#ef5d75">THE HOST</b> Welcome. Sit anywhere. Everyone here is dead except you. For now.','rose');return 'Your mouth is a desert. A man in the corner waves. Nobody is in the corner.'}
+  if(n===2){const lost=Math.round(S.cash*.3);S.cash-=lost;say('<b style="color:#ef5d75">THE HOST</b> You gave it to the woman with no face. She says thank you.','rose');return `Hours vanish. ${fmt(lost)} is gone. You were talking to a lamp post, generously.`}
+  setTimeout(()=>{try{die('datura')}catch(_){}},5500);return 'The Host pulls out a chair for you. You sit. You do not get up.'}
+ return {open,datura,voice}})();
+CAUSE.datura=['THE HOST','Datura. Three times. Found sitting very still at a table set for guests who never existed.'];
+{const wc0=DLG.wchem;DLG.wchem=(...a)=>{const n=wc0(...a);if(ndead(rkey('chemist')))return n;n.opts.splice(n.opts.length-1,0,
+  {t:'Salvia. $150',cost:()=>150,ok:()=>{S.fxs.salvia=60;setTimeout(()=>TRIP22.open(),300);return 'One deep breath. The bridge folds in half like a letter.'}},
+  {t:`Datura. $200${S.dat?' · '+'☠'.repeat(S.dat):''}`,cost:()=>200,ok:()=>TRIP22.datura()},
+  {t:'The juice. $400',cost:()=>400,ok:()=>{S.fxs.juice=240;return 'A syringe and a wink. Your arms feel borrowed from someone bigger. NERVE up while it lasts. They test athletes.'}});return n}}
+{const st0=ST;ST=function(k){let v=st0(k);const f=S.fxs||{};if(f.juice>0&&k==='NERVE')v+=2;if(f.datura>0)v+=k==='GUT'?3:k==='LOGIC'?-4:0;if(f.salvia>0&&k==='LOGIC')v-=2;return Math.max(0,v)}}
+
+
+/* ---------- the day job ---------- */
+const JOB22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const J=()=>{S.job22=S.job22||{roles:[],fights:{w:0,l:0},goals:0,ban:0,club:null,belt:0};return S.job22};
+ const DIR=['Mira Kovač','Hal Benning','Ozzie Tamura','Celeste Rook','Augusto Pina','June Okonkwo'],GN=['war film','romcom','heist','period drama','superhero sequel','art film nobody will see','horror','biopic of a dead president'];
+ const OPP=['"The Butcher" Varga','Deacon','Lila "Nine Lives" Moreau','Big Sunday','Ansel Vark','Rook Delaney','Mercy Adewale','Kid Hollow','Ivo "Static" Brandt','The Quiet Dane'],STY=['wrestler','striker','counter-puncher','brawler','submission artist'];
+ const CLUBS=['Carrow United','Northline Athletic','Real Estrella','FC Hollow','Kumo Tigers','Dynamo Kolesnik'];
+ const tag=()=>S.ch==='narc'?'SET':S.ch==='insom'?'ARENA':null;
+ function panel(){const j=J();if(S.ch==='narc'){const r=j.roles.slice(0,4);return `<div class="app lab"><div class="sec">THE SET · ${j.roles.length} films · ${fmt(S.fame)} fans</div>
+   <button type="button" class="card" data-a="job" data-v="aud">AUDITION<small>a ${P(GN)} for ${P(DIR)}. CHARM decides. Wired helps. Drunk does not.</small></button>
+   <button type="button" class="card" data-a="job" data-v="prem" ${r.length?'':'disabled'}>PREMIERE THE LAST ONE<small>red carpet, reviews, a fight in the toilets</small></button>
+   ${r.map(x=>`<div class="note"><b>${x.t}</b> · ${x.g} · dir. ${x.d} · ${x.rev||'in the edit'}</div>`).join('')}</div>`}
+  if(S.ch==='insom'){return `<div class="app lab"><div class="sec">THE ARENA · ${j.fights.w}-${j.fights.l}${j.belt?' · CHAMPION':''} · ${j.goals} goals${j.club?' · '+j.club:''}${j.ban>Date.now()?` · <span class="r">BANNED ${Math.ceil((j.ban-Date.now())/60000)} MIN</span>`:''}</div>
+   <button type="button" class="card" data-a="job" data-v="fight" ${j.ban>Date.now()?'disabled':''}>FIGHT IN THE CAGE<small>three rounds. strike, grapple or guard. read the opponent</small></button>
+   <button type="button" class="card" data-a="job" data-v="match" ${j.ban>Date.now()?'disabled':''}>PLAY A MATCH<small>${j.club||'trial at '+P(CLUBS)}. three moments. the crowd remembers</small></button>
+   ${S.fxs&&S.fxs.juice>0?'<div class="note r">You are juiced. Stronger now. They test after every fight.</div>':''}</div>`}return ''}
+ function role(){const j=J(),ok=R()*10<ST('CHARM')+((S.fxs||{}).wired>0?2:0)-((S.fxs||{}).drunk>0?2:0)+j.roles.length*.3;
+  if(!ok){try{post('flex')}catch(_){}return `"Thank you. We will be in touch." They will not. Someone films you crying in the car park.`}
+  const t=P(['THE','A','NO','LAST','RED','BLUE','COLD'])+' '+P(['HARBOUR','KINGDOM','WINTER','PROMISE','ORCHARD','WITNESS','SIGNAL','FURY']),pay=Math.round(2e4*Math.pow(2,Math.min(12,j.roles.length))*(1+Math.log10(1+S.fame)));
+  j.roles.unshift({t,g:P(GN),d:P(DIR)});S.cash+=pay;fameAdd(5e3*(1+j.roles.length));try{R22.note('famous')}catch(_){}return `You got it. ${t}. ${fmt(pay)} and a trailer with your name on the door.`}
+ function prem(){const j=J(),r=j.roles[0];if(!r)return '';const sc=Math.round(20+R()*70+ST('CHARM')*3);r.rev=sc+'% fresh';fameAdd(2e4*sc/50);
+  if(sc>80)try{HSW22&&HSW22.makeShow('premiere')}catch(_){}const drunk=(S.fxs||{}).drunk>0;if(drunk&&R()<.5){heatAdd(15);try{post('flex')}catch(_){}return `${r.t}: ${sc}%. You also punched a critic on the carpet. That is the photo everyone uses.`}
+  return `${r.t} opens. ${sc}%. ${sc>80?'"A star, finally behaving like one."':sc>50?'"Fine. He is fine."':'"Somebody should check on him."'}`}
+ function opp(){const j=J();return {n:P(OPP),s:P(STY),lv:1+j.fights.w*.6}}
+ const MOVES={STRIKE:['brawler','submission artist'],GRAPPLE:['striker','counter-puncher'],GUARD:['wrestler','brawler']};
+ function fightNode(o,rd,me,them){return {who:`THE CAGE · ROUND ${rd} · ${o.n.toUpperCase()}`,text:`${o.n} is a ${o.s}. You ${me}, them ${them}. The crowd is ${P(['screaming','silent','throwing things','chanting your name','chanting theirs'])}.${(S.fxs||{}).juice>0?' Your arms feel enormous.':''}`,
+  opts:Object.keys(MOVES).map(m=>({t:m,check:['NERVE',Math.round(6+o.lv-(MOVES[m].includes(o.s)?3:0)-((S.fxs||{}).juice>0?2:0))],ok:()=>({t:`${m}. It lands.`,next:me+1>=2||(rd>=3&&me+1>them)?'_jwin':rd>=3?'_jlose':'_jr'+(rd+1)+'_'+(me+1)+'_'+them}),fail:()=>({t:`${m}. They saw it coming.`,next:them+1>=2||(rd>=3&&them+1>=me)?'_jlose':rd>=3?'_jwin':'_jr'+(rd+1)+'_'+me+'_'+(them+1)})}))}}
+ function fight(){const o=opp();S.jo=o;for(let rd=1;rd<=3;rd++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)DLG['_jr'+rd+'_'+a+'_'+b]=()=>{S.dlg={id:'_jr'+rd+'_'+a+'_'+b,ctx:null};render()};
+  JOB22.cur=(id)=>{const m=/_jr(\d)_(\d)_(\d)/.exec(id);return fightNode(S.jo,+m[1],+m[2],+m[3])};S.dlg={id:'_jr1_0_0',ctx:null};render()}
+ function result(win){const j=J(),o=S.jo||opp(),juiced=(S.fxs||{}).juice>0;S.dlg=null;
+  if(win){j.fights.w++;const purse=Math.round(5e4*Math.pow(1.7,j.fights.w));S.cash+=purse;fameAdd(1e4*j.fights.w);if(j.fights.w>=5&&!j.belt){j.belt=1;try{HSW22&&HSW22.makeShow('belt')}catch(_){}}
+    if(juiced&&R()<.4){j.ban=Date.now()+10*60000;S.cash-=purse;j.fights.w--;heatAdd(10);try{post('flex');R22.note('leak')}catch(_){}say(`You beat ${o.n}. Then the test comes back. Stripped, fined the purse, banned for ten minutes of your life. Chat calls you a fraud. Chat keeps watching.`,'rose')}
+    else say(`You beat ${o.n}. ${fmt(purse)}. ${j.belt?'The belt is yours.':''}`,'gold')}
+  else{j.fights.l++;S.whp=Math.max(10,(S.whp||100)-40);say(`${o.n} beats you. You see the ceiling for a long time.`,'rose')}try{save()}catch(_){}render()}
+ function match(){const j=J(),club=j.club||P(CLUBS);let g=0;const m=[];for(let i=0;i<3;i++){const ok=R()*10<ST(P(['NERVE','GUT','LOGIC']))+((S.fxs||{}).juice>0?2:0);if(ok){g++;m.push(P(['A volley from nowhere.','Through the keeper\'s legs.','A header you will never be able to explain.','Curled in off the post.']))}else m.push(P(['Skied it into the stand.','The keeper reads you like a menu.','You slip. The away end sings about it.']))}
+  j.goals+=g;if(!j.club&&g>=2){j.club=club}const fee=g*Math.round(3e4*(1+j.goals*.4));S.cash+=fee;fameAdd(8e3*g);if(g===3)try{HSW22&&HSW22.makeShow('hat-trick')}catch(_){}
+  if((S.fxs||{}).juice>0&&R()<.3){j.ban=Date.now()+8*60000;heatAdd(8);m.push('Then the random test. Banned.')}
+  return `${club}. ${m.join(' ')} ${g} goal${g===1?'':'s'}. ${fmt(fee)}.${!S.job22.club||g<2?'':' '+club+' sign you.'}`}
+ return {tag,panel,role,prem,fight,result,match,cur:null}})();
+DLG._jwin=()=>JOB22.result(true);DLG._jlose=()=>JOB22.result(false);
+{const nd0=node;node=function(){const d=S.dlg;if(d&&/^_jr\d_\d_\d$/.test(d.id)&&JOB22.cur)return JOB22.cur(d.id);return nd0.apply(this,arguments)}}
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="job"]');if(!b||b.disabled)return;const v=b.dataset.v;audioStart();
+  if(v==='fight')return JOB22.fight();const t=v==='aud'?JOB22.role():v==='prem'?JOB22.prem():v==='match'?JOB22.match():'';if(t)say(t,'gold');save();render()});
+
+window.HS={get VH(){return H},KC,R22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
