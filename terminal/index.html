@@ -2242,6 +2242,36 @@ const PX22=(()=>{const cache={};
  const img=(src,w,h,extra)=>`<img src="${src}" width="${w}" height="${h}" style="image-rendering:pixelated;display:block;flex:none;${extra||''}" alt="">`;
  return {poster,img}})();
 
+/* ===== v22 · HYPER-REACTIVE =====
+   R22 watches the world every second and notes what changed (a death, a star, a bomb, a leak, a show, a war, a purchase,
+   a fortune made or lost, a new title). Anyone you then meet opens with the freshest thing, in their own words,
+   and the same memory feeds KLIK chat, the press and the TV. Accurate to now: that is the point. */
+const R22=(()=>{const P=a=>a[Math.floor(R()*a.length)];let last=null;
+ const st=()=>{const w=S.emp&&S.emp.w22;return {dead:(S.world&&S.world.dead||[]).length,want:S.wanted||0,rad:w?Object.keys(w.rad).length:0,shows:w?w.shows.length:0,leak:S.scandal||0,
+   war:S.emp&&S.emp.wars?Object.keys(S.emp.wars).length:0,own:S.emp?Object.keys(S.emp.own||{}).length:0,cash:S.cash||0,ph:S.phase,live:!!S.live,fame:S.fame||0}};
+ function note(k,d){S.recent=S.recent||[];S.recent.unshift(Object.assign({k,t:Date.now()},d||{}));if(S.recent.length>12)S.recent.length=12}
+ setInterval(()=>{try{if(!S||!S.ch||S.phase==='title'||S.phase==='pick')return;const n=st();if(last){
+   if(n.dead>last.dead){const d=S.world.dead[S.world.dead.length-1]||{};note('kill',{who:d.n||d.name||'someone'})}
+   if(n.want>last.want)note('wanted',{n:n.want});if(n.rad>last.rad){const w=S.emp.w22,k=Object.keys(w.rad).pop();note('nuke',{x:((window.HSEMP&&HSEMP.C||[]).find(c=>c[0]===k)||[0,'somewhere'])[1]})}
+   if(n.leak>last.leak)note('leak');if(n.shows>last.shows)note('show',{x:S.emp.w22.shows[0].t});if(n.war>last.war)note('war');if(n.own>last.own)note('bought');
+   if(n.cash>last.cash*2&&n.cash-last.cash>5e3)note('rich',{x:fmt(n.cash)});if(n.cash<last.cash*.5&&last.cash>2e3)note('broke',{x:fmt(last.cash-n.cash)});
+   if(n.ph!==last.ph&&n.ph==='war')note('potus');if(n.live&&!last.live)note('live');if(n.fame>Math.max(1e3,last.fame*3))note('famous')}last=n}catch(_){}},1000);
+ const L={kill:e=>[`"Is it true about ${e.who}?" They are already backing away.`,`"You are the one from the news. ${e.who}." Not a question.`,`They saw what happened to ${e.who}. Their hands stay where you can see them.`],
+  wanted:e=>[`"Police are all over the place looking for someone like you." They look at you a second too long.`,`"${'★'.repeat(e.n||1)}. They said it on the radio." They lower their voice. "Was that you?"`],
+  nuke:e=>[`"${e.x}." That is all they can say for a moment. Then: "Why?"`,`They have been crying. "My cousin was in ${e.x}." They do not ask if it was you. They know.`,`"Everyone is talking about ${e.x}. Everyone is talking about you."`],
+  leak:()=>[`"I watched the clip. Everyone watched the clip." They are grinning.`,`"Were you trying to start a war on stream?" They genuinely want to know.`],
+  show:e=>[`"I watched ${e.x} last night. Is that really you?"`,`"The actor is better looking." They mean it kindly.`,`"My mum loves ${e.x}. Can you sign something?"`],
+  war:()=>[`"The draft letters went out this morning." They look at you like you posted them.`,`"Are we winning?" They are not sure which side you are on.`],
+  bought:()=>[`"You bought a country. A country." They laugh, then stop.`,`"Do I have to call you sir now?"`],
+  rich:e=>[`"${e.x}. I saw the number." They stand a little straighter.`,`"Lend me a tenner." They are not joking.`],
+  broke:e=>[`"Heard you lost ${e.x}." Not unkind. Not kind either.`,`"Rough week?" They already know.`],
+  potus:()=>[`"Mr President." They almost bow. They almost laugh.`,`"I did not vote for you. Nobody I know did. And yet."`],
+  live:()=>[`They spot the phone. "Am I on? Hi chat."`,`"Are you streaming this? Turn it off." You do not.`],
+  famous:()=>[`"You are that guy." They take a photo without asking.`,`They nudge their friend and point at you.`]};
+ function line(){const r=(S.recent||[])[0];if(!r||Date.now()-r.t>180000||!L[r.k])return '';return P(L[r.k](r))}
+ function about(){const r=(S.recent||[])[0];return r&&Date.now()-r.t<180000?r:null}
+ return {note,line,about}})();
+
 /* ===== v22 · KLIK CHAT AND LEAKS =====
    kchatLine(): a grammar, not a list. Openers x cores x tails x emotes, every core with its own slots,
    and the core is chosen by what is happening right now (where you are, what you just did, what you own, what the world thinks).
@@ -2272,7 +2302,7 @@ const KC=(()=>{const P=a=>a[Math.floor(R()*a.length)],ch=p=>R()<p;
   war:[()=>`${P(['war','actual war','ww3'])} ${P(['on stream','speedrun','any%','is trending'])}`,()=>`my ${P(['cousin','brother','neighbour','uncle'])} ${P(['got drafted','is over there','is watching this from a bunker'])}`],
   tv:[()=>{const w=W22(),s=w&&w.shows[0];return s?`${P(['the actor in','the guy from','everyone in'])} ${s.t.toLowerCase()} ${P(['plays you better','is hotter','is more believable','deserves an award'])}`:`make a show about ${SN()}`},()=>`${P(['season 2','the finale','episode 4','the musical'])} ${P(['when','is better than this','spoiled this'])}`],
   leak:[()=>`${P(['CLIPPED','SCREENSHOTTED','ARCHIVED','SENT TO EVERY NEWSROOM'])} ${P(['💀','🗿','👀',''])}`,()=>`${P(['zoom in','pause at','frame by frame'])} ${P(['0:'+Math.floor(10+R()*49),'the left monitor','the desk','the folder'])}`,()=>`${P(['that is classified','that is a felony','that is treason','that is a war'])} ${P(['lol','bro','on stream','in 4k'])}`,()=>`${P(['foreign governments','the cia','russia','my nan','the press'])} ${P(['are in chat','took notes','are typing','saw that'])}`]};
- function line(ctx){const c=ctx||(S.kburst&&S.kburst.n>0?S.kburst.k:null);let pool=CORE.any;const r=R();
+ function line(ctx){const rb=R22.about(),map={kill:'kill',wanted:'wanted',nuke:'nuke',leak:'leak',show:'tv',war:'war',rich:'rich',broke:'poor'};const c=ctx||(S.kburst&&S.kburst.n>0?S.kburst.k:null)||(rb&&R()<.4?map[rb.k]:null);let pool=CORE.any;const r=R();
    if(c&&CORE[c]&&r<.85)pool=CORE[c];else if(S.phase==='war'&&r<.45)pool=CORE.potus;else if((S.wanted||0)>=1&&r<.4)pool=CORE.wanted;else if(S.loc==='world'&&r<.35)pool=CORE.street;else if(S.cash>1e8&&r<.3)pool=CORE.rich;else if(S.cash<5e3&&r<.3)pool=CORE.poor;
    else{const w=W22();if(w&&Object.keys(w.rad).length&&r<.5)pool=CORE.nuke;else if(w&&w.shows.length&&r<.4)pool=CORE.tv;else if(S.emp&&S.emp.wars&&Object.keys(S.emp.wars).length&&r<.5)pool=CORE.war}
    let t=P(OP)+P(pool)()+P(TL)+P(EM);if(ch(.25))t=t.toUpperCase();if(ch(.12))t=t.replace(/[aeiou]/,m=>m.repeat(2+Math.floor(R()*5)));return handle()+': '+t}
@@ -6030,7 +6060,8 @@ function pWalk(){const h=nearHot(),f=fxNames();
   ${S.stash>0?`<div class="read"><span>BURIED</span><span class="au">${fmt(S.stash)}</span></div>`:''}`}
 function pDlg(){const n=node(),d=S.dlg;let h=n.who?`<div class="who2">${n.who}</div>`:'';
   if(d.res)return h+`<div class="say">${d.res.checked?`<span class="${d.res.ok?'okc':'badc'}">[${d.res.ok?'SUCCESS':'FAILURE'}]</span> `:''}${d.res.t}</div><button type="button" class="pri" data-a="dcont">CONTINUE</button>`;
-  h+=`<div class="say">${n.text}</div>`;
+  if(n.who&&n.scene!=='desk'&&d.rx22!==d.id+(n.who||'')){d.rx22=d.id+(n.who||'');d.rxl=R22.line()||((R()<.5)?(()=>{try{return CH22.npc({})}catch(_){return ''}})():'')}
+  h+=(n.who&&d.rxl?`<div class="th" style="border-left-color:var(--gold)"><b style="color:var(--gold)">NOW</b> ${d.rxl}</div>`:'')+`<div class="say">${n.text}</div>`;
   (n.th||[]).forEach(t=>{if(ST(t[0])>=t[1])h+=`<div class="th"><b class="c${t[0]}">${t[0]}</b> ${t[2]}</div>`});
   n.opts.forEach((o,i)=>{const cost=o.cost?o.cost():0;
     h+=`<button type="button" class="card" data-a="dopt" data-v="${i}" ${cost>S.cash?'disabled':''}>${o.check?`<em class="c${o.check[0]}">[${o.check[0]} ${pct(o.check[0],o.check[1])}%]</em> `:''}${o.t}${cost&&!String(o.t).includes(fmt(cost))?` <em class="au">${fmt(cost)}</em>`:''}</button>`});
@@ -6301,7 +6332,7 @@ function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWor
   sndLabel();render();requestAnimationFrame(loop)}
 $('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
 setInterval(()=>{try{if(S&&S.phase==='war'&&!S.dlg&&R()<.5)say('<b class="hd">THE PRESS</b> '+CH22.press(),'cyan')}catch(_){}},45000);
-window.HS={get VH(){return H},KC,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},KC,R22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});

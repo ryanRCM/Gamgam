@@ -18,6 +18,12 @@ Loaded into every session. Keep it short: every line here costs tokens on every 
 - No subagents for anything a few tool calls can do.
 - Late patches wrap `render` (search `const r21=render`, `r23=render`): a fix may belong in the wrapper, not the original.
 
+## Hyper-reactive (locked, for game development and for writing in general)
+- Every conversation, meeting, chat line, headline and reaction reads the world **as it is right now** and says so: what you just did, who you are, how you look, what you own, where you are, what the world thinks.
+- Accuracy to the present moment is the power. A line that could be said at any time is filler; cut it or make it react.
+- In the game: record notable events as they happen (`R22.note`), and have people open with the freshest one. Chat, press, TV and NPCs all draw from the same live state.
+- In writing: open with what the reader is living through now, name the specifics, never the generic.
+
 ## Hard rules
 - Public repo: no personal details about real people in code, docs or commits.
 - Never publish to the live artifact unless Ryan says "publish".
