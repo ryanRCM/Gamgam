@@ -62,11 +62,26 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   ok(`${t} taxi closes the street menu`, await p.evaluate(() => !HS.S.wmenu && !!HS.S.dlg));
   await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
 
+  // Bug 10: with a conversation sheet open on a phone, you stand above the sheet, not under it.
+  if (vp.n === "phone") {
+    await p.evaluate(() => { HS.S.wmenu = false; HS.openD("wtaxi"); }); await p.waitForTimeout(900);
+    const fr = await p.evaluate(() => ({ top: document.getElementById("panel").getBoundingClientRect().top, meY: (HS.WR.me.y - HS.WR.cam.y) / HS.VH * innerHeight }));
+    ok(`${t} conversation sheet: you stay above it`, fr.top > 0 && fr.meY < fr.top, JSON.stringify(fr));
+    await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
+  }
+
   // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
   await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
   await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");
   const el = await p.evaluate(() => ({ ph: HS.S.phase, riv: HS.S.el && HS.S.el.riv }));
   ok(`${t} reload on election night resumes the election`, el.ph === "election" && el.riv < 60, JSON.stringify(el));
+
+  // Bugs 5 and 14: keyboard walks in the house, and the third hit of the blue needs a second press.
+  const kb = await p.evaluate(() => { const S = HS.S; S.phase = "trade"; S.el = null; S.dlg = null; S.loc = "in"; S.cus = false; S.px = S.tx = 100; HS.render();
+    dispatchEvent(new KeyboardEvent("keydown", { code: "KeyD", key: "d" })); const moved = S.tx > 100;
+    S.px = S.tx = 240; S.fxs.high = 60; S.fxs.hits = 2; dispatchEvent(new KeyboardEvent("keydown", { code: "KeyE", key: "e" }));
+    return { moved, alive: S.phase === "trade", armed: S.armed }; });
+  ok(`${t} keyboard walks in the house; the deadly pipe asks twice`, kb.moved && kb.alive && kb.armed === "pipe", JSON.stringify(kb));
 
   // Bug 4: one more character unlocks per life. Bug 13: GOD and BODY hidden from players.
   const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });

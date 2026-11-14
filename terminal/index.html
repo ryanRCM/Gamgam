@@ -905,7 +905,9 @@ const HOT={
 const walking=()=>S.phase==='trade'&&S.ch&&S.loc!=='desk';
 function nearHot(){let best=null,bd=15;HOT[S.loc].forEach(h=>{const d=Math.abs(h.x-S.px);if(d<bd){bd=d;best=h}});return best}
 const hv=v=>typeof v==='function'?v():v;
-function act(){const h=nearHot();if(!h||h.off)return;h.act();if(S.phase!=='trade'||S.dlg||S.loc==='world')return;sfx('ok');save();render();triggers()}
+function danger(h){return h&&((h.id==='pipe'&&S.fxs&&S.fxs.high>0&&S.fxs.hits>=2)||(h.id==='gnome'&&!(S.stash>0)&&S.cash>0))}
+function armedOk(h){if(!danger(h)){S.armed=null;return true}if(S.armed===h.id){S.armed=null;return true}S.armed=h.id;say(h.id==='pipe'?'THIS ONE KILLS YOU. Use it again if you mean it.':`Bury half your cash, ${fmt(S.cash*.5)}? Use the gnome again to dig.`,'rose');return false}
+function act(){const h=nearHot();if(!h||h.off)return;if(!armedOk(h)){render();return}h.act();if(S.phase!=='trade'||S.dlg||S.loc==='world')return;sfx('ok');save();render();triggers()}
 function drawInside(now){
   rect(0,0,W,104,'#6e4a22');for(let x=0;x<W;x+=20){rect(x,0,1,104,'#4f3316');rect(x+1,0,1,104,'#8a6030')}
   for(let y=6;y<100;y+=9)for(let x=(y*7)%20;x<W;x+=20)rect(x+5,y,7,1,'#7d5628');
@@ -3286,7 +3288,7 @@ function drawWH(now){const w=whState(),dt=Math.min(.1,(now-(WHL||now))/1000);WHL
 
 function drawWorld(now,frozen){if(!WR)buildWR();const m=WR.me,c=localChaos(),k=c/100,rad=here()!=='home'&&reg(here())&&reg(here()).rad;pxInit();LTS=[];SHD=[];BOXL=[];INROOM=null;vision();
   let sx=0,sy=0;if(WR.shake>0&&!still){sx=(R()-.5)*WR.shake*5;sy=(R()-.5)*WR.shake*5}
-  const g0=Math.round(H>W?H*.73:H*.76),X0=Math.round(WR.cam.x+sx),Y0=GY*TS-g0+Math.round(sy);WR.cam.y=Y0;const GS=g;g=PBX;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
+  const g0b=H>W?H*.73:H*.76,shF=WV&&document.body.classList.contains('dlg')?$('panel').getBoundingClientRect().height/WV.ch:0;WR.g0s=WR.g0s==null?g0b:WR.g0s+((shF>.05?Math.min(g0b,(1-shF)*H*.88):g0b)-WR.g0s)*.15;const g0=Math.round(WR.g0s),X0=Math.round(WR.cam.x+sx),Y0=GY*TS-g0+Math.round(sy);WR.cam.y=Y0;const GS=g;g=PBX;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
   /* sky */
   skyPx(g0,k);
   for(let i=0;i<46;i++){const x=((i*73-(X0>>5))%W+W)%W,y=(i*37)%Math.max(8,Math.round(g0*.62));if((i+Math.floor(now/700))%9)rect(x,y,1,1,i%4?'#6a6660':'#b9b4a8')}
@@ -5556,7 +5558,7 @@ try{const d0=DLG.door;DLG.door=()=>{const n=d0();n.opts=[{t:'Knock, like a perso
  html.pc .kh{display:inline-block;font:11px monospace;color:#6d6777;border:1px solid #3a3542;padding:0 4px;margin-left:6px;border-radius:3px}
  html.pc #pchelp{position:fixed;right:14px;bottom:10px;z-index:30;font:11px monospace;color:#5d5866;pointer-events:none}`;document.head.appendChild(st);
  const apply=()=>{document.documentElement.classList.toggle('pc',DESK());try{window.dispatchEvent(new Event('resize-pc'))}catch(_){}};apply();addEventListener('resize',apply);
- const help=document.createElement('div');help.id='pchelp';help.textContent='1-9 choose · ENTER continue · ESC close · A/D or ←/→ walk · SHIFT run · E use · TAB desk tabs';document.body.appendChild(help);
+ const help=document.createElement('div');help.id='pchelp';help.textContent='1-9 choose · ENTER continue · ESC close · A/D or ←/→ walk · SHIFT slow motion · E use · TAB desk tabs';document.body.appendChild(help);
  setInterval(()=>{help.style.display=document.documentElement.classList.contains('pc')&&!document.body.classList.contains('wm')?'':'none'},1000);
  /* keys */
  const vis=el=>el&&el.offsetParent!==null&&getComputedStyle(el).display!=='none';
@@ -6062,6 +6064,8 @@ $('panel').addEventListener('contextmenu',e=>{if(e.target.closest('[data-h]'))e.
 const KMAP={ArrowLeft:'L',KeyA:'L',ArrowRight:'R',KeyD:'R',ArrowUp:'J',KeyW:'J',Space:'J',ArrowDown:'D',KeyS:'D',KeyF:'F',KeyJ:'F'};
 window.addEventListener('keydown',e=>{if(!(S&&S.phase==='trade'&&S.loc==='world'&&!S.dlg))return;if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;const k=KMAP[e.code];
   if(k){KH[k]=1;e.preventDefault();audioStart()}else if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();worldAct()}else if(e.code==='KeyQ')cycleW();else if(e.code==='ShiftLeft'||e.code==='ShiftRight'){toggleFocus();render()}else if(e.code==='KeyX'||e.code==='KeyK')doSpin();else if(e.code==='KeyC'||e.code==='KeyL')doKick();else if(e.code==='KeyG'){makeRain();render()}else if(e.code==='KeyR')startReload()});
+window.addEventListener('keydown',e=>{if(!(S&&walking()&&S.loc!=='world'&&!S.dlg&&!S.cus))return;if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;const c=e.code;
+  if(c==='KeyA'||c==='ArrowLeft'){S.tx=clamp(S.px-24,10,310);S.autoAct=null;e.preventDefault()}else if(c==='KeyD'||c==='ArrowRight'){S.tx=clamp(S.px+24,10,310);S.autoAct=null;e.preventDefault()}else if(c==='KeyE'||c==='Enter'){if(nearHot()){e.preventDefault();act()}}});
 window.addEventListener('keyup',e=>{const k=KMAP[e.code];if(k)KH[k]=0});window.addEventListener('blur',()=>{for(const k in KH)KH[k]=0});
 
 let last=performance.now();
@@ -6093,7 +6097,7 @@ function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hin
   return false}
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
-window.HS={GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
