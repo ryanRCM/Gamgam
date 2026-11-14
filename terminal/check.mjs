@@ -53,6 +53,15 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   errs.length = 0; await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
   await act("continue"); await p.waitForTimeout(1200);
   ok(`${t} CONTINUE works after saving mid-conversation in the street`, errs.length === 0 && await p.evaluate(() => HS.S.dlg == null), errs[0] || "conversation kept open after load");
+  // Bugs 11 and 12: the street menu's close button is on screen, the help text is current, and a taxi closes the menu.
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.wmenu = true; HS.render(); }); await p.waitForTimeout(400);
+  const mn = await p.evaluate(() => { const b = document.querySelector('[data-a="wmclose"]'); const r = b && b.getBoundingClientRect(); const note = [...document.querySelectorAll("#panel .note")].map(n => n.textContent).join(" ");
+    return { on: !!b && r.bottom <= innerHeight + 1 && r.height > 0, stale: /thumb|Shift focus/.test(note) }; });
+  ok(`${t} street menu: close button on screen, no stale controls`, mn.on && !mn.stale, JSON.stringify(mn));
+  await act("taxi");
+  ok(`${t} taxi closes the street menu`, await p.evaluate(() => !HS.S.wmenu && !!HS.S.dlg));
+  await p.evaluate(() => { HS.S.dlg = null; HS.render(); });
+
   // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
   await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
   await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");

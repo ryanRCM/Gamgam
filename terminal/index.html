@@ -1462,7 +1462,7 @@ function endYear(){const w=S.war,Wd=S.world;
   else if(Wd.machine==='hidden'&&w.rewinds>4&&R()<.1*(w.rewinds-4))cause='paradox';
   else if(S.age>old&&R()<(S.age-old)*.015)cause='age';
   if(cause)die(cause);else{sfx('tick');save();render();if(S.ownedBy&&R()<.5)openD('demand')}}
-function die(cause){const w=S.war;S.dlg=null;S.phase='dead';S.dead={cause,years:w?w.years:0,peak:w?w.peak:0,held:w?mine().length:0};
+function die(cause){const w=S.war;if(S.cash>(S.peak||0))S.peak=S.cash;S.dlg=null;S.phase='dead';S.dead={cause,years:w?w.years:0,peak:w?w.peak:0,held:w?mine().length:0};
   S.world.rulers.push({name:S.name,years:S.dead.years,cause:CAUSE[cause][0],peak:S.dead.peak});S.dead.world=!!S.wdeath;
   S.world.dead=S.world.dead||[];S.world.dead.push({n:S.name,j:'you',by:S.wdeath?S.wdeath.by:CAUSE[cause][0].toLowerCase(),g:S.gen,y:S.world.year,h:S.wdeath&&S.wdeath.head?1:0});histAdd(S.name);
   flash('hit');sfx('bad');say(`${S.name} is gone. ${CAUSE[cause][0]}.`,'rose');save();render()}
@@ -2314,9 +2314,9 @@ function pWorldMenu(){const [ln,lt]=learned();return `<div class="who2">${WR?zon
   <button type="button" class="${S.live?'kend':'kgo'}" data-a="live">${S.live?'END STREAM · '+fnum(S.viewers||0)+' WATCHING':'GO LIVE ON KLIK'}<small>${S.live?'you are broadcasting your location':'tips, sponsors, fame. the street is the show'}</small></button>
   ${S.job?`<div class="read"><span class="au">DELIVERY → ${S.job.toN}</span><span>${fmt(S.job.pay)} · ${Math.ceil(S.job.t)}s</span></div>`:''}${(S.crew||[]).length?`<div class="read"><span class="hi">CREW: ${(S.crew||[]).map(id=>(S.world.people.find(p=>p.id===id)||{}).n).join(', ')}</span></div>`:''}
   <div class="read"><span class="ro">${S.world.dead.length} dead, for good</span><span>${(S.world.people||[]).filter(p=>p.alive).length} alive</span><span class="vi">HISTORY ${ln}/${lt}</span></div>
-  <div class="note">Left thumb moves: push up to jump, down to drop, jump into a wall to kick off it. Right thumb aims and shoots, and locks on to whoever is nearest that way. Keyboard: arrows, Space, F or mouse to shoot, Shift focus, X spin, C kick, E act.</div>
+  <div class="note">Tap the ground to walk there. Tap a person for the wheel: talk, give, punch and the rest. Tap the strip along the bottom to travel the street. Keyboard: A/D or arrows walk, E uses what is in front of you, F hits or shoots.</div>
   <button type="button" class="${GOD.on?'on':''}" data-a="god">GOD MODE ${GOD.on?'· ON':''}<small>you are the one watching. drag anyone, pull them apart, set the world</small></button>
-  <button type="button" class="pri" data-a="wmclose">BACK TO THE STREET</button>`}
+  <button type="button" class="pri" data-a="wmclose" style="position:sticky;bottom:0;z-index:2">BACK TO THE STREET</button>`}
 function drawHUDw(){const m=WR.me,sk=S.wanted||0;rect(5,5,66,6,'#07060c');rect(6,6,Math.max(0,Math.round(64*S.whp/100)),4,S.whp<35?'#ff5a6a':P.rose);if(S.arm>0)rect(6,10,Math.round(64*Math.min(1,S.arm/60)),1,P.cyan);
   for(let i=0;i<5;i++){const x=76+i*7;rect(x+1,5,3,5,i<sk?P.gold:'#2a2440');rect(x,6,5,3,i<sk?P.gold:'#2a2440')}
   text(WR.ui.z||zoneName(),5,15,1,'#cfc8e8');const c=fmt(S.cash);text(c,5,23,1,P.gold);
@@ -3203,10 +3203,10 @@ DLG.press=()=>{const w=S.war,ps=staffOf(1),q=w.approval<40?'"Your numbers are th
     {t:'Go for the reporter.',ok:fin(()=>{e5(4,5,2);w.pressH=1;return 'Your people love it. The room does not forget.'})},
     {t:'"No questions."',ok:fin(()=>{e5(-2);return 'You leave. The empty podium leads every broadcast.'})}]}};
 DLG.cab=()=>{const w=S.war;return {who:'THE CABINET ROOM',look:staffOf(0).look,text:w.staff.map(s=>`<b>${ROLES[s.role]}</b> ${s.n} · skill ${s.sk} · ${s.loy<30?'<span class="r">about to talk</span>':s.loy<55?'restless':'loyal'}`).join('<br>'),th:[['LOGIC',3,ROLES.map((r,i)=>r+': '+ROLED[i]).join('. ')+'.'],['GUT',4,'Anyone under thirty loyalty is already drafting the book.']],
-  opts:w.staff.map((s,i)=>({t:`Fire ${s.n}. Hire a new ${ROLES[s.role].toLowerCase().replace('the ','')}.`,ok:()=>{whSnap();w.staff[i]=mkStaff(s.role);w.staff.forEach((q,j)=>{if(j!==i)q.loy-=6});e5(-2);return `${s.n} carries a box to the car. ${w.staff[i].n} is at the desk by noon: skill ${w.staff[i].sk}.`},next:'cab'})).concat([{t:'A raise, for all of them.',cost:()=>goal()*.05,ok:()=>{w.staff.forEach(s=>s.loy=Math.min(100,s.loy+22));return 'Loyalty has a price. It is, for once, on the menu.'},next:'cab'},{t:'Leave them to it.',ok:()=>''}])}};
+  opts:w.staff.map((s,i)=>({t:`Fire ${s.n}. Hire a new ${ROLES[s.role].toLowerCase().replace('the ','')}.`,ok:()=>{if(w.fireY===w.years)return 'You already fired someone this year. One more and the story is you.';w.fireY=w.years;appr(-3);whSnap();w.staff[i]=mkStaff(s.role);w.staff.forEach((q,j)=>{if(j!==i)q.loy-=6});e5(-2);return `${s.n} carries a box to the car. ${w.staff[i].n} is at the desk by noon: skill ${w.staff[i].sk}.`},next:'cab'})).concat([{t:'A raise, for all of them.',cost:()=>goal()*.05,ok:()=>{w.staff.forEach(s=>s.loy=Math.min(100,s.loy+22));return 'Loyalty has a price. It is, for once, on the menu.'},next:'cab'},{t:'Leave them to it.',ok:()=>''}])}};
 CAUSE.voted=['VOTED OUT','You carried your own boxes to the car. Nobody held the door.'];
 {const ey0=endYear;endYear=function(){const w=S.war;if(!w)return ey0();whState();const left=w.cq.length;if(left){appr(-6*left);w.unrest+=4*left;say(`${left} thing${left>1?'s':''} left on the desk overnight. They got worse.`,'rose')}
-  w.staff.forEach(s=>{s.loy=clamp(s.loy+Math.round(R()*12-7),0,100);if(s.loy<25&&R()<.5){appr(-7);w.tension+=5;s.loy=45;say(`${s.n}, your ${ROLES[s.role].toLowerCase()}, has talked to a paper.`,'rose')}});S.cash+=goal()*.01*staffOf(3).sk;clampWar();
+  w.staff.forEach(s=>{s.loy=clamp(s.loy+Math.round(R()*12-7),0,100);if(s.loy<25&&R()<.5){appr(-7);w.tension+=5;s.loy=45;say(`${s.n}, your ${ROLES[s.role].toLowerCase().replace(/^the /,'')}, has talked to a paper.`,'rose')}});S.cash+=goal()*.01*staffOf(3).sk;clampWar();
   ey0();if(S.phase!=='war')return;w.orders=3+(staffOf(0).sk>=7?1:0);w.cq=newCrises(2+(w.tension>60?1:0));w.pressed=false;w.lastC=null;w.vis=null;w.view=null;w.px=w.tx=WHROOMS[0].x+34;S.paradox=Math.max(0,(S.paradox||0)-4);
   if(w.years%4===0){const ok=w.approval>=50;if(!ok){say(`Election night. ${Math.round(w.approval)}% approve. It is not enough.`,'rose');return die('voted')}w.terms=(w.terms||1)+1;flash('jump');sfx('ok');burst(160,90,50,[P.gold,P.cyan,P.rose],110);say(`RE-ELECTED with ${Math.round(w.approval)}% approving. Term ${w.terms} begins.`,'gold');post('win')}
   else say(`${S.world.year}. Year ${w.years%4+1} of term ${w.terms}. ${w.cq.length} new things on the desk.`,'gold');save();render()}}
@@ -3503,7 +3503,7 @@ DLG.tray=()=>{const w=S.war,c=trayCard(),nx=()=>w.tray>0?'tray':null,fin=fn=>()=
   const k=TRAY.ask[c.k],who=TRAY.who[c.a],x=TRAY.x[c.t],ch=yes=>()=>{const ef=yes?k[1]:k[2];e5(ef[0],ef[1],ef[2],ef[3]);if(R()<.4){const g=R()<.5;(w.fu=w.fu||[]).push({y:w.years+1,a:c.a,t:c.t,yes,g,txt:pick(g?TRAY.good:TRAY.bad)})}return yes?pick(['Signed.','Done. A pen is framed.','It is law by lunch.','You nod. Somewhere, a department is born.']):pick(['No.','It goes in the bin with the others.','You say you will think about it. Everyone knows what that means.','Refused. They leave by the wrong door.'])};
   return {who:`THE IN-TRAY · ${w.tray} LEFT THIS YEAR`,look:staffOf(c.a%4).look,text:`${who} ${k[0].replace('{x}',x)}.`,th:[['LOGIC',3,`${fnum(TCARDS)} of these exist. About four in ten come back next year.`]],
    opts:[{t:'Yes.',ok:fin(ch(true))},{t:'No.',ok:fin(ch(false))},{t:'"What is in it for me?"',check:['CHARM',9],ok:fin(()=>{S.cash+=goal()*.02;return ch(true)()+' An envelope changes hands on the way out.'}),fail:fin(()=>{e5(-3);return 'They write that down. In front of you.'})}]}};
-WHHOT[2].n=()=>{const w=S.war;if(w.tray==null)w.tray=6;return w.cq.length?'THE DESK · '+CRISES[w.cq[0]].t:w.tray>0?'THE IN-TRAY · '+w.tray:'THE DESK'};WHHOT[2].d=()=>{const w=S.war;if(w.tray==null)w.tray=6;return w.cq.length?`${w.cq.length} crisis${w.cq.length>1?'es':''} waiting`:w.tray>0?'small things. yes or no. they add up':'clear until tomorrow'};
+WHHOT[2].n=()=>{const w=S.war;if(w.tray==null)w.tray=6;return w.cq.length?'THE DESK · '+CRISES[w.cq[0]].t:w.tray>0?'THE IN-TRAY · '+w.tray:'THE DESK'};WHHOT[2].d=()=>{const w=S.war;if(w.tray==null)w.tray=6;return w.cq.length?`${w.cq.length} ${w.cq.length>1?'crises':'crisis'} waiting`:w.tray>0?'small things. yes or no. they add up':'clear until tomorrow'};
 WHHOT[2].act=()=>{const w=S.war;if(w.tray==null)w.tray=6;if(w.cq.length)openD('crisis',w.cq[0]);else if(w.tray>0)openD('tray');else say('The desk is clear. It will not last.')};
 {const ey1=endYear;endYear=function(){ey1();if(S.phase==='war'&&S.war){S.war.tray=6;S.war.card=null}}}
 /* ---- dev mode: tap the version five times. A panel in the house, god mode in the street menu. Not for players. ---- */
@@ -5830,7 +5830,7 @@ function pDlg(){const n=node(),d=S.dlg;let h=n.who?`<div class="who2">${n.who}</
   h+=`<div class="say">${n.text}</div>`;
   (n.th||[]).forEach(t=>{if(ST(t[0])>=t[1])h+=`<div class="th"><b class="c${t[0]}">${t[0]}</b> ${t[2]}</div>`});
   n.opts.forEach((o,i)=>{const cost=o.cost?o.cost():0;
-    h+=`<button type="button" class="card" data-a="dopt" data-v="${i}" ${cost>S.cash?'disabled':''}>${o.check?`<em class="c${o.check[0]}">[${o.check[0]} ${pct(o.check[0],o.check[1])}%]</em> `:''}${o.t}${cost?` <em class="au">${fmt(cost)}</em>`:''}</button>`});
+    h+=`<button type="button" class="card" data-a="dopt" data-v="${i}" ${cost>S.cash?'disabled':''}>${o.check?`<em class="c${o.check[0]}">[${o.check[0]} ${pct(o.check[0],o.check[1])}%]</em> `:''}${o.t}${cost&&!String(o.t).includes(fmt(cost))?` <em class="au">${fmt(cost)}</em>`:''}</button>`});
   if(d.id==='dip')h+=`<button type="button" data-a="dhang">HANG UP</button>`;
   return h}
 function timeBar(){
@@ -5960,7 +5960,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
   else if(a==='spin')doSpin();
   else if(a==='kick')doKick();
   else if(a==='rain'){makeRain();render()}
-  else if(a==='taxi'){if(WR)openD('wtaxi')}
+  else if(a==='taxi'){if(WR){S.wmenu=false;openD('wtaxi')}}
   else if(a==='wsel')wsel(v);
   else if(a==='cstep'){const L=S.draft.look,k=b.dataset.k,o=CUS[k],cur=L[k]===undefined?o[0]:L[k];let i=o.indexOf(cur);if(i<0)i=0;L[k]=o[(i+(+v)+o.length)%o.length];sfx('tick');render()}
   else if(a==='cset'){S.draft.look[b.dataset.k]=CUS[b.dataset.k][+v];sfx('tick');render()}
