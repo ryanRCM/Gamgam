@@ -438,7 +438,7 @@ const mine=()=>IDS.filter(k=>own(k)==='P');
 const goal=()=>1e9*Math.pow(4,S.gen-1),fgoal=()=>1e6*(1+.5*(S.gen-1));
 const regen=()=>sv('coil')*(S.scrap?1.5:1)/(mod().flux||1)/(S.fxs.wired>0?1.5:1);
 const qlab=i=>'Q'+(i%4+1)+' '+(S.world.year-14+Math.floor(i/4));
-const jcost=()=>Math.round(15+70*Math.abs(S.cur-S.t)/(N-1));
+const jcost=()=>Math.round((15+70*Math.abs(S.cur-S.t)/(N-1))*(1+((S.jt23||[]).filter(t=>Date.now()-t<40000).length)*.6));
 const canJump=()=>!(S.world&&S.world.broken)&&S.cur!==S.t&&S.cur>=N-1-sv('tether');
 const forceP=()=>Math.max(0,Math.ceil((jcost()-S.flux)/4));
 const memCap=()=>sv('memory')+(S.flags.key?1:0)+(S.flags.seen?1:0)+(S.flags.balloon||0);
@@ -475,7 +475,7 @@ function beginLife(chId){try{ERA22.apply()}catch(_){}try{WPN.fists.dmg=chId==='i
   S.tm=buildMod(chId,S.traits);
   openD('q0')}
 function save(){if(WR&&WR.me&&S.loc==='world'&&!WR.me.dead)S.wpos={x:WR.me.x,y:WR.me.y};try{localStorage.setItem('hindsight-v2',JSON.stringify(S))}catch(e){}slotTick()}
-let slotT=0,slotPh='';function slotTick(force){try{if(!S||!S.ch||S.dlg||!/trade|war|dead/.test(S.phase))return;const now=Date.now();if(!force&&now-slotT<60000&&S.phase===slotPh)return;slotT=now;slotPh=S.phase;
+let slotT=0,slotPh='';function slotTick(force){try{if(!S||!S.ch||S.dlg||!/trade|war|dead/.test(S.phase))return;const now=Date.now();if(!force&&now-slotT<60000&&S.phase===slotPh&&(localStorage.getItem('hindsight-slots')||'[]')!=='[]')return;slotT=now;slotPh=S.phase;
   const L=JSON.parse(localStorage.getItem('hindsight-slots')||'[]');L.unshift({at:now,n:S.name,ch:S.ch,cash:S.cash,ph:S.phase,yr:(S.world&&S.world.year)||0,g:S.gen,s:JSON.stringify(S)});localStorage.setItem('hindsight-slots',JSON.stringify(L.slice(0,4)))}catch(e){}}
 function say(t,c){logs.push({t,c:c||''});if(logs.length>2)logs.shift();$('lines').innerHTML=logs.map(l=>`<div class="${l.c}">${l.t}</div>`).join('')}
 function flash(kind){if(!still){fx=.35;fxKind=kind}}
@@ -1217,11 +1217,12 @@ const DLG={
    {t:'"Subpoena or leave."',check:['LOGIC',11],ok:()=>{S.heat=Math.max(0,S.heat-15);S.agentBar=90;return 'She has nothing on paper and you both know it. She will not be back until it is serious. Heat -15.'},fail:()=>{S.heat+=20;return 'She produces a subpoena from her jacket like a magician. Heat +20.'}}]}),
  arrest:()=>({who:AGN()+' · WITH COMPANY',face:'AGENT',text:'Six vehicles in a field with no road. "Step away from the keyboard." The clock on the wall is spinning.',
   th:[['GUT',3,'The cellar has a back way out. You have always known the cellar has a back way out.'],['LOGIC',3,'A good lawyer costs most of what you have. Prison costs all of it.']],
-  opts:[{t:'Run.',check:['GUT',10],ok:()=>{S.cash*=.5;S.heat=70;S.hunted=true;post('hunt');return 'Out through the cellar with half of everything. By morning your face is on every screen in the city. You are HUNTED: heat will not drop below 60 and no ballot will carry your name until you become someone else. (LAB: NEW FACE.)'},fail:()=>{die('prison');return ''}},
+  opts:[
    S.flags.bribed?{t:'Lawyer up. (Your envelope is Exhibit A.)',cost:()=>S.cash*.85,ok:()=>{S.heat=45;return 'The envelope makes it expensive. 85% of your money buys a very quiet settlement.'}}
-    :{t:'Lawyer up.',cost:()=>S.cash*.6,ok:()=>{S.heat=40;return '60% of your money becomes a man in a grey suit who makes it all go away.'}},
+    :{t:'Lawyer up.',cost:()=>Math.max(S.cash*.6,5000),ok:()=>{S.heat=40;return '60% of your money becomes a man in a grey suit who makes it all go away.'}},
+   {t:'Go quietly.',ok:()=>{S.heat=20;S.cash*=.8;try{ROOM23.go('cell','A cell, a bunk, a guard called Pell. Taped under the bunk, somehow: the machine.')}catch(_){}return 'Cuffs, a van, a cell. They take a fifth of what you have. They do not find the machine.'}},
    {t:'"Give me a handler. I will give you the future."',check:['LOGIC',10],ok:()=>{S.gov=true;S.hunted=false;S.heat=30;S.rel.vane-=40;return 'A long phone call to someone with no title. You are an asset now. Heat can never pass 60 again. The state takes 25% of every profit, forever, and the owner of this house will hear about it.'},fail:()=>{S.cash*=.4;S.heat=45;return 'They do not believe a word. The lawyers take 60% of your money to make that not matter.'}},
-   {t:'"You want to know how? Come and look."',ok:()=>{S.world.machine='public';die('vanished');return ''}}]}),
+   {t:'"You want to know how? Come and look."',ok:()=>{S.world.machine='public';die('vanished');return ''}},{t:'Run.',check:['GUT',10],ok:()=>{S.cash*=.5;S.heat=70;S.hunted=true;post('hunt');try{ROOM23.go('cabin','You run. By dawn you are in a cabin with no address, the machine on a kitchen table.')}catch(_){}return 'Out through the cellar with half of everything. By morning your face is on every screen in the city. You are HUNTED: heat will not drop below 60 and no ballot will carry your name until you become someone else. (LAB: NEW FACE.)'},fail:()=>{if(!S.flags.ran23){S.flags.ran23=1;S.cash*=.5;S.heat=90;try{ROOM23.go('cell','They catch you in the field. A cell, a bunk, and taped under it, somehow, the machine.')}catch(_){}return 'They catch you at the fence. Half your money is evidence now. You are in a cell, and the machine came with you.'}die('prison');return ''}}]}),
  copycat:()=>{const f=S.copy?S.copy.fame:0;return {who:'ON EVERY SCREEN',face:'COPY',text:`Someone wearing ${S.remade?'your old face':'your haircut and your voice'} is doing your predictions on television. Badly. The crowd adores them. ${fnum(f)} fans think that is you.`,
   th:[['GUT',3,'They are better at being you than you ever were.'],['LOGIC',3,'An impostor is a free decoy. Or a free scapegoat. Depends who pays them.']],
   opts:[{t:'Expose them, live, on their own show.',check:['CHARM',10],ok:()=>{S.fame+=f*1.2;S.copy=null;return 'You finish their sentences before they do. The audience turns in ninety seconds. Every fan comes home, and they bring friends.'},fail:()=>{S.copy=null;return 'The crowd picks the fake. You are escorted out of your own life. Those fans are gone for good.'}},
@@ -1283,6 +1284,7 @@ function triggers(){if(S.dlg||S.phase!=='trade')return;if(S.loc==='world'){if(S.
   if(S.heat<40)S.agentHot=false;
   if(S.heat>=100)return openD('arrest');
   if(S.heat>=S.agentBar&&!S.agentHot){S.agentHot=true;post('heat');return openD('agent')}
+  if(Date.now()-(S.beatT||0)<60000)return;
   if(!S.flags.v1&&S.earned>=1e5){S.flags.v1=1;return openD('vane1')}
   if(S.flags.v1&&!S.flags.v2&&(S.cash>=5e7||S.fame>=1e5)){S.flags.v2=1;return openD('vane2')}
   if(!S.flags.bk&&S.wins>=3&&!ndead('lucky')){S.flags.bk=1;return openD('bookie')}
@@ -1340,7 +1342,7 @@ function resolve(){S.ev.forEach(e=>{if(!e.used||e.done||e.q>S.t)return;e.done=tr
     say(`${e.title}: ${e.out}. Your bet pays ${fmt(win)}.`,'gold');post('bet',{o:e.odds})}
   else{const f=fameAdd(600*Math.exp(.11*e.q)*e.odds/4);heatAdd(5);say(`${e.title}: ${e.out}. Your video called it. +${fnum(f)} fans.`,'cyan');post('vid',{e:e.title})}})}
 function track(){if(S.cash>S.peak)S.peak=S.cash;wealth();if(S.towerQ==null&&S.cash>=1e6){S.towerQ=S.t;say('A tower with your name on it now stands in the city. It always has.','gold');post('tower')}}
-function doJump(){if(!canJump())return;const fp=forceP();try{MACH22.use(fp>0)}catch(_){}if(fp){S.flux=0;if(awake()){pdx(fp);say(`Not enough flux. You forced it. Paradox +${fp}.`,'violet')}else{heatAdd(fp);say(`Not enough flux. You forced it and browned out half the county. Heat +${fp}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
+function doJump(){if(!canJump())return;const fp=forceP();try{S.jt23=(S.jt23||[]).filter(t=>Date.now()-t<40000);S.jt23.push(Date.now());if(S.jt23.length===4)say('<b class="hd">THE MACHINE</b> The fan screams. Jumping this fast costs more flux each time. Let it cool.','violet')}catch(_){}try{MACH22.use(fp>0)}catch(_){}if(fp){S.flux=0;const fq=Math.min(8,fp);if(awake()){pdx(fq);say(`Not enough flux. You forced it. Paradox +${fq}.`,'violet')}else{heatAdd(fq);say(`Not enough flux. You forced it and browned out half the street. Heat +${fq}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
   if(d!==N-1&&S.vis[d]){if(awake()){const rv=mod().revisit||20;pdx(rv);say(`You have been to ${qlab(d)} before. You nearly saw yourself. Paradox +${rv}.`,'violet')}else if(!S.flags.rv){S.flags.rv=1;say(`You have been to ${qlab(d)} before. Harmless, for now. Once the timeline is damaged, this is how you meet yourself.`,'violet')}}
   if(d!==N-1)S.vis[d]=1;
   const lost=S.mem.filter(id=>{const e=S.ev.find(x=>x.id===id);return e.done||e.used});S.mem=S.mem.filter(id=>!lost.includes(id));
@@ -1351,7 +1353,7 @@ function doBuy(frac){const amt=S.cash*frac;if(amt<.01)return;const h=S.hold[S.as
   meddle(S.asset,i,k,true);save();render();triggers()}
 function doSell(){const h=S.hold[S.asset];if(!h.u)return;const i=S.t,v0=h.u*S.mk[S.asset][i],k=v0/depth(S.asset,i);let val=v0/(1+k/2);
   ripple(S.asset,i,1/(1+Math.min(3,k)*.6));meddle(S.asset,i,k,false);if(S.allin){S.allin=false;val=Math.max(0,val+(val-h.cost))}const profit=val-h.cost;
-  if(profit>0){hype(S.kcat==='mkt'?30:10,'CASHED OUT');const cut=earn(profit);val-=cut;if(!pubTax())heatAdd(14*Math.log10(val/h.cost+1));sfx('ok');burst(160,100,16,[P.gold,'#ffe08a']);
+  if(profit>0){hype(S.kcat==='mkt'?30:10,'CASHED OUT');const cut=earn(profit);val-=cut;if(!pubTax())heatAdd(14*Math.log10(val/h.cost+1)*clamp(profit/2e6,.08,1));sfx('ok');burst(160,100,16,[P.gold,'#ffe08a']);
     say(`Sold ${ASSETS[S.asset].sym} for ${fmt(val)}.${cut>0?' '+fmt(cut)+' went to others.':''}`,'gold')}
   else{sfx('bad');say(`Sold ${ASSETS[S.asset].sym} at a loss.`,'rose')}
   S.cash+=val;h.u=0;h.cost=0;track();save();render();triggers()}
@@ -5104,7 +5106,7 @@ try{const P=(window.AudioScheduledSourceNode||{}).prototype;if(P){const s0=P.sta
    The desk had ten tabs on screen at once. Now four: MONEY, SOCIAL, POWER, YOU, and only the chosen one opens its few.
    Shorts make noise. A small one: one guy notices. A big one: threads, videos, memes. A short left open for years
    becomes a running joke with a day counter, and closing it sets everything off. CHIRP for the posts, REELS for the videos. */
-{const TG={money:['mkt','alm','bet','rake'],social:['feed','klik'],power:['pow','lab'],you:['you','job']},TGN={money:'MONEY',social:'SOCIAL',power:'POWER',you:'YOU'};
+{const TG={money:['mkt','alm','bet','rake'],social:['feed','klik'],power:['pow','lab'],you:['you','job'],room:['room','feeds','phone','agents','bldg']},TGN={money:'MONEY',social:'SOCIAL',power:'POWER',you:'YOU',room:'ROOM'};
  const tgOf=t=>{for(const k in TG)if(TG[k].includes(t))return k;return 'money'},LAST={};
  const css=document.createElement('style');css.textContent=`
  .tg19{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 6px}
@@ -5124,7 +5126,7 @@ try{const P=(window.AudioScheduledSourceNode||{}).prototype;if(P){const s0=P.sta
   const cur=tgOf(S.tab);LAST[cur]=S.tab;const up=p.querySelector('button[data-a=getup]');
   const bar=document.createElement('div');bar.className='tg19';
   Object.keys(TG).forEach(k=>{const b=document.createElement('button');b.type='button';b.textContent=TGN[k];if(k===cur)b.className='on';b.onclick=ev=>{ev.stopPropagation();S.tab=LAST[k]&&TG[k].includes(LAST[k])?LAST[k]:TG[k][0];try{sfx('tick')}catch(_){}render()};bar.appendChild(b)});
-  if(up){const u=up.cloneNode(true);u.textContent='STREET';u.onclick=ev=>{ev.stopPropagation();up.click()};bar.appendChild(u);up.style.display='none'}
+  if(up){up.style.display='none'}
   const row=btns[0].parentElement;row.parentElement.insertBefore(bar,row);
   const keep=TG[cur];btns.forEach(b=>{b.style.display=keep.includes(b.dataset.v)?'':'none'});
   const rows=new Set(btns.map(b=>b.parentElement));rows.forEach(r=>{const vis=[...r.children].filter(c=>c.style.display!=='none');if(!vis.length)r.style.display='none';else{r.classList.add('sub19')}});
@@ -6233,11 +6235,11 @@ function pSheet(){const tabs=[['info','INFO'],['skills','SKILLS'],['health','HEA
     +(S.world.rulers.length?`<div class="sec">BEFORE YOU</div><div class="list">${S.world.rulers.slice(-4).reverse().map(r=>`<div><b>${r.name}</b> · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}</div>`).join('')}</div>`:'')}
   return o+'</div>'}
 function pTrade(){if(S.cus)return pCustom();if(S.loc==='world')return S.wmenu?pWorldMenu():pWorld();if(S.loc!=='desk')return pWalk();
-  const tabs=[['mkt','MARKET'],['alm','SEEK'],['rake','RAKE'],['feed','CHIRP'],['klik','KLIK'],['pow','POWER'],['lab','LAB'],['you','YOU']].concat(JOB22.tag()?[['job',JOB22.tag()]]:[]),ab=ABIL[S.ch];
+  const tabs=[['mkt','MARKET'],['alm','SEEK'],['rake','RAKE'],['feed','CHIRP'],['klik','KLIK'],['pow','POWER'],['lab','LAB'],['you','YOU']].concat(JOB22.tag()?[['job',JOB22.tag()]]:[]).concat([['room','THIS ROOM'],['feeds','FEEDS'],['phone','PHONE'],['agents','AGENTS'],['bldg','BUILDING']]),ab=ABIL[S.ch];
   let o=`<div class="row r5">${tabs.map(t=>`<button type="button" class="tab t-${t[0]} ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}<button type="button" class="tab t-up" data-a="getup">UP</button></div>
   <button type="button" id="ab" class="abil" data-a="abil" ${S.abT>0?'disabled':''}>${ab.n}<small id="abs">${S.abT>0?'ready in '+Math.ceil(S.abT)+'s':ab.d}</small></button>`;
   if(awake())o+=`<div class="pdx">PARADOX ${Math.round(S.paradox)}% · ${pdxHint()}</div>`;
-  o+=S.tab==='job'?JOB22.panel():S.tab==='klik'?pKlik():S.tab==='pow'?timeBar()+pPower():S.tab==='mkt'?timeBar()+pMarket():S.tab==='alm'?timeBar()+pSeek():S.tab==='rake'?pRake():S.tab==='feed'?pFeed():S.tab==='you'?pSheet():pLab();
+  o+=ROOM23.locked()?`<div class="app lab"><div class="sec">LIGHTS OUT</div><div class="note">The guard is at the bars. The machine is under the bunk for ${S.cell23.lock} more seconds.</div></div>`:S.tab==='room'?ROOM23.panel():S.tab==='feeds'?DESK23.feeds():S.tab==='phone'?DESK23.phone():S.tab==='agents'?DESK23.agents():S.tab==='bldg'?DESK23.bldg():S.tab==='job'?JOB22.panel():S.tab==='klik'?pKlik():S.tab==='pow'?timeBar()+pPower():S.tab==='mkt'?timeBar()+pMarket():S.tab==='alm'?timeBar()+pSeek():S.tab==='rake'?pRake():S.tab==='feed'?pFeed():S.tab==='you'?pSheet():pLab();
   if(S.tab==='rake'||S.tab==='feed'||S.tab==='you'||S.tab==='klik'||S.tab==='pow')return o;
   const G=goal(),F=fgoal(),ready=S.cash>=G&&S.fame>=F&&!S.hunted;
   return o+`<button type="button" class="goal ${ready?'pri':''}" data-a="run" ${ready?'':'disabled'}><u style="width:${clamp(Math.min(S.cash/G,S.fame/F)*100,0,100)}%"></u><span>${ready?'RUN FOR PRESIDENT · '+fmt(G/2):S.hunted?'HUNTED. GET A NEW FACE FIRST.':`PRESIDENCY: ${fmt(G)} + ${fnum(F)} FANS`}</span></button>`}
@@ -6311,7 +6313,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
   else if(a==='cus'){const L=S.draft.look,o=CUS[v],i=o.indexOf(L[v]===undefined?o[0]:L[v]);L[v]=o[(i+1)%o.length];sfx('tick');render()}
   else if(a==='cusback'){S.cus=false;S.draft=null;render()}
   else if(a==='cusgo'){S.cus=false;if(S.phase==='trade'){S.look=JSON.parse(JSON.stringify(S.draft.look));const nm=String(S.draft.name||'').replace(/[<>&"]/g,'').trim().slice(0,18);if(nm)S.name=nm;S.draft=null;sfx('ok');post('build');save();render()}else beginLife(CHARS[S.pick].id)}
-  else if(a==='getup'){S.loc='in';S.px=S.tx=60;sfx('tick');render()}
+  else if(a==='getup'){S.tab='room';sfx('tick');render()}
   else if(a==='act')act();
   else if(a==='abil'){const ab=ABIL[S.ch];if(S.abT>0)return;ab.use();S.abT=ab.cd;sfx('jump');flash('jump');say(`${ab.n}. ${ab.d}`,'violet');save();render()}
   else if(a==='dopt')choose(+v);
@@ -6422,7 +6424,7 @@ function loopB(now){const dt=Math.min(.1,(now-last)/1000);last=now;
   if(now-lastSave>5000&&S.phase!=='title'){lastSave=now;save()}
 }
 function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hindsight-v2'))}catch(e){s=null}}
-  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){if(S.el){S.el.live=true;S.el.riv=Math.max(0,(S.el.riv||0)-20);S.recount=1}else S.phase='trade'}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);try{ERA22.apply()}catch(_){}if(S.name)say(`Welcome back, ${S.name}.`,'gold');if(S.recount){S.recount=0;say('THE RECOUNT. The machine remembers the count differently. Your rival loses ground.','gold')}return true}
+  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){if(S.el){S.el.live=true;S.el.riv=Math.max(0,(S.el.riv||0)-20);S.recount=1}else S.phase='trade'}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);try{ERA22.apply()}catch(_){}if(S.phase==='trade'&&S.loc!=='desk'){S.loc='desk';WR=null}if(S.name)say(`Welcome back, ${S.name}.`,'gold');if(S.recount){S.recount=0;say('THE RECOUNT. The machine remembers the count differently. Your rival loses ground.','gold')}return true}
   return false}
 function start(data){try{setTimeout(()=>ERA22.apply(),0)}catch(_){}if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
@@ -6769,7 +6771,171 @@ const FIELD22=(()=>{const FX=x=>(16+x/320*46)*TS;
    HOT.out.filter(h=>h.id!=='road'&&h.id!=='door').forEach(h=>WR.hot.push({f22:1,x:FX(h.x),y:gy,get n(){return typeof h.n==='function'?h.n():h.n},get d(){return typeof h.d==='function'?h.d():h.d},get off(){return h.off},act:()=>{if(!armedOk(h))return;S.loc='out';try{h.act()}finally{if(S.loc==='out')S.loc='world'}}}))}
  return {out,add}})();
 {const bw0=buildWR;buildWR=function(){const r=bw0.apply(this,arguments);try{FIELD22.add()}catch(_){}return r}}
-window.HS={get VH(){return H},KC,R22,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+/* ===== v23 · THE FIRST TEN MINUTES =====
+   The market remembers a buyer who is always right: every winning round trip on the same moment lifts that low and
+   flattens that high, so the same trick pays less each time. Story scenes queue: one a minute. A raid is always
+   announced: EVERCLEAR warns at heat 70 and again at 85. */
+{const BEATS=['vane1','vane2','vane3','agent','bookie','goons','copycat','rakesue','gala','spons'];const od0=openD;openD=function(id){if(BEATS.includes(id))S.beatT=Date.now();return od0.apply(this,arguments)}}
+{const db0=doBuy;doBuy=function(f){S.lb23=S.lb23||{};S.lb23[S.asset]=S.t;return db0.apply(this,arguments)}
+ const ds0=doSell;doSell=function(){const a=S.asset,h=S.hold[a],bi=(S.lb23||{})[a],i=S.t,c0=S.cash,cost=h&&h.cost;const r=ds0.apply(this,arguments);
+  try{if(bi!=null&&cost&&S.cash>c0+cost&&bi!==i){const k=Math.min(4,(S.cash-c0)/cost),f=Math.pow(k,.45);for(let j=-1;j<=1;j++){if(S.mk[a][bi+j]!=null)S.mk[a][bi+j]*=Math.pow(f,1-Math.abs(j)*.5);if(S.mk[a][i+j]!=null&&i+j!==N-1)S.mk[a][i+j]/=Math.pow(f,(1-Math.abs(j)*.5)*.4)}S.warp[a][bi]+=.8;
+    S.rt23=(S.rt23||0)+1;if(S.rt23===3)say('<b class="hd">EVERCLEAR</b> The market is starting to recognise you. Same low, same high, smaller win. Mix it up.','violet')}}catch(_){}return r}}
+setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade')return;if(S.heat>=70&&!S.hw70){S.hw70=1;say('<b class="hd">EVERCLEAR</b> Heat 70. Somebody has opened a file with your name on it. Stop winning for a while. Lose something on purpose.','rose')}if(S.heat>=85&&!S.hw85){S.hw85=1;flash('hit');say('<b class="hd">EVERCLEAR</b> HEAT 85. They are coming. Fifteen more and there are cars in the field. Go quiet, pay someone, or get ready.','rose')}if(S.heat<60){S.hw70=0;S.hw85=0}}catch(_){}},1000);
+/* ===== v23 · THE MACHINE IS THE GAME =====
+   You never get up. You are always sat at the machine; the room around it moves (house, cell, cabin, bunker, oval office,
+   penthouse, station) and each room has its own look and rules. The world outside keeps running, and reaches you through
+   windows: FEEDS (city cams, the street, the TV), PHONE (calls you must handle, skill-based and procedural), AGENTS (your
+   hands outside: hire, send, wait for the report, hope they come back loyal), BUILDING (the flats you let: tenants, dossiers,
+   the ministry's daily directive, report or protect, and someone is watching you too), and THIS ROOM. */
+const ROOM23=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const ROOMS={house:['THE HOUSE IN THE FIELD','A crate, a car battery, the dog asleep on your foot. Full access. No protection.'],
+  cell:['A CELL · PRECINCT 9','The machine is taped under the bunk. Ninety seconds of screen before the guard comes past. Bribe him for more, or serve your time.'],
+  cabin:['A CABIN, NO ADDRESS','A kitchen table, a slow satellite link, pines. No KLIK: a stream would give you away. Heat cools twice as fast.'],
+  bunker:['THE BUNKER','Concrete, a green bulb, tins. The feeds are mostly green. The machine is the last bright thing for miles.'],
+  oval:['THE OVAL OFFICE','The same gutted laptop on a much better desk. The cabinet is on the other screens. Every leak is worse here.'],
+  penthouse:['THE PENTHOUSE','Glass on three sides, the city below. Fame comes to you. So does heat.'],
+  station:['AN ORBITAL STATION','The Earth turns in the window. Markets are a light-second late; nobody else notices.']};
+ const R0=()=>{S.room23=S.room23||'house';return S.room23};
+ function go(id,why){if(!ROOMS[id])return;const was=R0();if(was===id)return;S.room23=id;S.cell23=id==='cell'?{left:240,scr:90,lock:0}:null;try{R22.note('room',{x:ROOMS[id][0]})}catch(_){}
+   say(`<b class="hd">${ROOMS[id][0]}</b> ${why||ROOMS[id][1]}`,'gold');try{save();render()}catch(_){}}
+ function tick(){if(!S||!S.ch)return;const r=R0();
+   if(S.phase==='war'&&r!=='oval'){S.room23pre=r;go('oval','You are sworn in by video call. You never leave the chair. The office comes to you.')}
+   if(S.phase==='trade'&&r==='oval')go(S.room23pre||'house','The office is gone. The chair is not.');
+   if(r==='cell'&&S.phase==='trade'&&!S.dlg){const c=S.cell23||(S.cell23={left:240,scr:90,lock:0});if(c.lock>0){c.lock--;if(!c.lock){c.scr=90;say('The guard moves on. The machine comes back out from under the bunk.','cyan');render()}}else{c.scr--;if(c.scr===10)say('Footsteps on the walkway. Ten seconds.','rose');if(c.scr<=0){c.lock=30;say('LIGHTS OUT. The guard is at the bars. The machine goes back under the bunk for thirty seconds.','rose');render()}}
+     c.left--;if(c.left<=0){go('house','Released. A plastic bag with your things in it. The machine was never in the bag.')}}
+   if(r==='cabin'&&S.heat>0)S.heat=Math.max(0,S.heat-.3);
+   if(r==='penthouse'&&S.phase==='trade'){S.fame=(S.fame||0)*1.0004+5;heatAdd(.05)}}
+ setInterval(()=>{try{tick()}catch(_){}},1000);
+ const locked=()=>R0()==='cell'&&S.cell23&&S.cell23.lock>0;
+ const MOVES=[['cabin','MOVE TO A CABIN',()=>S.hunted||S.heat>=50,()=>2e4,'when the heat is high or you are hunted'],['bunker','GO DOWN TO THE BUNKER',()=>{try{return chaos()>=50||Object.keys((S.emp&&S.emp.w22&&S.emp.w22.rad)||{}).length>=1}catch(_){return false}},()=>5e5,'once the world starts to burn'],
+  ['penthouse','BUY THE PENTHOUSE',()=>S.cash>=1e9,()=>3e8,'once you are a billionaire'],['station','BOOK A BERTH ON THE STATION',()=>{try{return ERA22.era(S.world.year)[1]!=='THE NOW'}catch(_){return false}},()=>5e9,'once there are ships'],['house','GO HOME',()=>true,()=>0,'the field, the dog']];
+ function panel(){const r=R0(),c=S.cell23,cpi=(()=>{try{return INF22.cpi()}catch(_){return 1}})();
+   let h=`<div class="app lab"><div class="sec">THIS ROOM · ${ROOMS[r][0]}</div><div class="note">${ROOMS[r][1]}</div>`;
+   if(r==='cell'&&c)h+=`<div class="read"><span>sentence left ${c.left}s</span><span>${c.lock?'<span class="ro">machine hidden '+c.lock+'s</span>':'screen time '+c.scr+'s'}</span></div><div class="row r2"><button type="button" data-a="room23" data-v="bribe" ${S.cash<2e3*cpi?'disabled':''}>BRIBE THE GUARD<small>${fmt(2e3*cpi)} · +60s screen</small></button><button type="button" data-a="room23" data-v="escape">ESCAPE<small>GUT check · or a longer sentence</small></button></div>`;
+   else if(r!=='oval')h+=MOVES.filter(m=>m[0]!==r&&m[2]()).map(m=>`<button type="button" data-a="room23" data-v="${m[0]}" ${S.cash<m[3]()*cpi?'disabled':''}>${m[1]}<small>${m[3]()?fmt(m[3]()*cpi)+' · ':''}${m[4]}</small></button>`).join('');
+   return h+'</div>'}
+ function act(v){const cpi=(()=>{try{return INF22.cpi()}catch(_){return 1}})(),c=S.cell23;
+   if(v==='bribe'&&c){const f=2e3*cpi;if(S.cash<f)return;S.cash-=f;c.scr+=60;c.lock=0;say('Pell pockets it. "I did not see anything. I never see anything."','gold')}
+   else if(v==='escape'&&c){if(roll('GUT',9)){S.hunted=true;go('cabin','Through the laundry, over a wall, into a car that was not waiting for you. A cabin by morning.')}else{c.left+=120;c.lock=30;say('Caught in the laundry. Two more minutes on the sentence and the machine goes under the bunk.','rose')}}
+   else{const m=MOVES.find(q=>q[0]===v);if(!m)return;const f=m[3]()*cpi;if(S.cash<f)return;S.cash-=f;go(v)}
+   try{save();render()}catch(_){}}
+ /* the room, painted around the desk */
+ function paint(now){if(!S||S.loc!=='desk'||S.phase==='title'||S.phase==='pick')return;const r=R0();if(r==='house')return;try{if(typeof wmode==='function'&&wmode())return}catch(_){}
+   const A=(c,a)=>{g.globalAlpha=a;g.fillStyle=c;g.fillRect(0,0,W,H);g.globalAlpha=1};
+   if(r==='cell'){A('#1a1d24',.35);g.fillStyle='#3a3f4a';for(let x=8;x<W;x+=22)g.fillRect(x,0,4,H*.55);g.fillRect(0,4,W,4);if(S.cell23&&S.cell23.lock){A('#000',.75);g.fillStyle='#ef5d75';g.font='10px monospace';g.fillText('LIGHTS OUT · '+S.cell23.lock,W/2-40,H/2)}}
+   if(r==='cabin'){A('#3a2414',.28);g.fillStyle='#4a2e18';for(let y=0;y<H*.55;y+=12)g.fillRect(0,y,W,2);g.fillStyle='#1f3a24';for(let i=0;i<7;i++){const x=20+i*42;g.beginPath();g.moveTo(x,60);g.lineTo(x+12,20);g.lineTo(x+24,60);g.fill()}}
+   if(r==='bunker'){A('#0e1a10',.45);g.fillStyle='#7fe07f';g.globalAlpha=.15+.05*Math.sin(now/300);g.fillRect(W/2-30,0,60,8);g.globalAlpha=1;g.fillStyle='#2a2f2a';for(let x=0;x<W;x+=40)g.fillRect(x,0,2,H*.55)}
+   if(r==='oval'){A('#14204a',.3);for(let i=0;i<7;i++){g.fillStyle=i%2?'#ece5cc':'#b0303a';g.fillRect(W-30,6+i*4,18,4)}g.fillStyle='#2a3a6a';g.fillRect(W-30,6,8,12);g.fillStyle='#f2c14e';g.fillRect(0,H*.55,W,2)}
+   if(r==='penthouse'){A('#0a0a1a',.35);for(let i=0;i<70;i++){g.fillStyle=(i*37%5)?'#f2c14e':'#58d6c9';g.fillRect((i*53)%W,(i*29)%Math.floor(H*.5),1,1)}}
+   if(r==='station'){A('#000',.45);for(let i=0;i<60;i++){g.fillStyle='#fff';g.fillRect((i*71)%W,(i*43)%Math.floor(H*.5),1,1)}g.fillStyle='#3d5a80';g.beginPath();g.arc(W*.8,H*.6,60,Math.PI,2*Math.PI);g.fill()}
+   g.fillStyle='rgba(0,0,0,.6)';g.fillRect(4,4,ROOMS[r][0].length*5+8,11);g.fillStyle='#f2c14e';g.font='8px monospace';g.fillText(ROOMS[r][0],8,12)}
+ return {go,panel,act,paint,locked,cur:R0,ROOMS}})();
+
+const DESK23=(()=>{const P=a=>a[Math.floor(R()*a.length)],nm=()=>P(FIRST)+' '+P(LASTN),cpi=()=>{try{return INF22.cpi()}catch(_){return 1}};
+ /* ---------------- FEEDS ---------------- */
+ function feeds(){const w=S.world||{},x=(S.emp&&S.emp.w22)||{},sh=(w.legend||[])[0],ppl=(w.people||[]).slice(0,8);
+   setTimeout(()=>{const box=document.getElementById('feeds23');if(box)try{CAMS22.mount(box)}catch(_){}},0);
+   return `<div class="app lab"><div class="sec">FEEDS · LIVE FROM EVERYWHERE YOU ARE NOT</div><div id="feeds23"></div>
+    <div class="sec" style="margin-top:6px">THE STREET OUTSIDE</div>${ppl.map(p=>`<div class="read"><span>${p.n}${p.alive?'':' †'}</span><span>${p.alive?(p.occ||p.job||'walking'):'remembered'}</span></div>`).join('')||'<div class="note">Nobody out there yet.</div>'}
+    <div class="sec" style="margin-top:6px">THE TV IN THE CORNER</div><div class="note">${sh?`${sh.net} is showing <b>${sh.t}</b>. ${sh.actor}.`:'Snooker. Then the news. Then snooker.'}</div>
+    ${(x.news||[]).slice(0,3).map(n=>`<div class="note" style="color:${n.col||'inherit'}">${n.y} · ${n.t}</div>`).join('')}</div>`}
+ /* ---------------- PHONE ---------------- */
+ const CALLERS=[
+  ['rival',()=>{const e=(S.world&&S.world.elite)||[];const p=e.length?P(e.filter(q=>q.alive)):{n:'Cassius Vane'};return {who:p.n,role:'a rival',why:`"You are trading where I trade. Stop, or I start trading where you live."`}}],
+  ['reporter',()=>({who:nm(),role:P(['The Ledger','Channel 9','KLIK News','a podcast with no listeners'])+' reporter',why:(()=>{try{const r=R22.about();return r?`"I am running a story about ${({rich:'your money',kill:'the death',market:'the crash',leak:'the leak',show:'the show',nuke:'the bomb',war:'the war',room:'where you are'})[r.k]||'you'} tonight. Comment?"`:'"People are asking how you always know. Do you want to answer before I do?"'}catch(_){return '"Comment?"'}})()})],
+  ['leader',()=>{const C=(window.HSEMP&&HSEMP.C)||[];const c=C.length?P(C):[0,'A COUNTRY',0,'A leader'];return {who:c[3],role:c[1],why:`"Your name keeps coming up in my cabinet. I would like it to stop."`,c}}],
+  ['ministry',()=>({who:'THE MINISTRY',role:'a voice with no name',why:`"Your building. Your quota. Your file is thicker than it was last week."`})],
+  ['home',()=>({who:({narc:'Your mum',para:'A number you blocked',insom:'Coach Dube',gamb:'Your ex-wife'})[S.ch]||'Someone from before',role:'from before all this',why:({narc:'"I saw you on the telly. You looked tired, love. Are you eating?"',para:'Breathing. Then: "We know where the old flat was."',insom:'"Kid. The test. I know who switched the samples."',gamb:'"I am not calling for money. I am calling to say I hope you are well. Are you?"'})[S.ch]||'"Is it you?"'})]];
+ function call(){if(S.dlg||S.phase!=='trade'||ROOM23.locked())return;S.ring23=0;const c=P(CALLERS),d=c[1]();S.call23={k:c[0],...d,ang:2+Math.floor(R()*6),tm:P(['PROUD','COWARD','GREEDY','ZEALOT'])};flash('jump');try{sfx('tick')}catch(_){}openD('call23')}
+ DLG.call23=()=>{const c=S.call23||{},P2=a=>a[Math.floor(R()*a.length)],W={PROUD:{CHARM:-3,NERVE:3},COWARD:{NERVE:-4},GREEDY:{PAY:.5},ZEALOT:{LOGIC:-2,PAY:9}}[c.tm]||{},dc=st=>Math.max(3,Math.round(5+c.ang*.6+(W[st]||0)));
+   const win=t=>()=>{fx(true);return t},lose=t=>()=>{fx(false);return t};
+   function fx(ok){const k=c.k;if(k==='rival'){if(!ok){S.cash*=.95;say(`${c.who} shorts everything you touch for a day. You lose a twentieth.`,'rose')}}if(k==='reporter'){if(ok)S.fame=(S.fame||0)*1.03;else{heatAdd(10);try{R22.note('leak')}catch(_){}}}if(k==='leader'&&c.c&&S.emp){S.emp.rel=S.emp.rel||{};S.emp.rel[c.c[0]]=Math.max(-100,Math.min(100,(S.emp.rel[c.c[0]]||0)+(ok?15:-25)))}if(k==='ministry'){const b=BLD();b.watch=Math.max(0,Math.min(100,b.watch+(ok?-15:15)))}if(k==='home'&&ok){S.st.GUT=Math.min(9,S.st.GUT+0);S.paradox=Math.max(0,(S.paradox||0)-5)}}
+   const POOL=[()=>({t:P2(['Be charming.','Make them laugh.','Agree with everything, then nothing.']),check:['CHARM',dc('CHARM')],ok:win(P2(['They laugh despite themselves. The call ends warmer than it started.','"Fine. Fine." They hang up first, which is how you know you won.'])),fail:lose('The charm lands like a dropped tray.')}),
+    ()=>({t:P2(['Walk them through the numbers.','Tell them what it would cost them.','Ask them a question they cannot answer.']),check:['LOGIC',dc('LOGIC')],ok:win('Silence on the line. Then: "Noted."'),fail:lose('They had better numbers.')}),
+    ()=>({t:P2(['Threaten them, quietly.','Say nothing until they fill the silence.','Tell them you are recording.']),check:['NERVE',dc('NERVE')],ok:win('You hear them swallow. The call ends on your terms.'),fail:lose('They are not scared. Now they are interested.')}),
+    ()=>({t:P2(['Listen for what they are not saying.','Answer the question they should have asked.']),check:['GUT',dc('GUT')],ok:win('You hear it: they are more frightened than you are.'),fail:lose('You heard the wrong thing.')}),
+    ()=>({t:'Tell them how their week ends. (20 flux)',check:['GUT',Math.max(3,dc('GUT')-3)],ok:()=>{S.flux=Math.max(0,(S.flux||0)-20);fx(true);return 'You tell them about Thursday. They go very quiet. They will remember this call on Thursday.'},fail:()=>{S.flux=Math.max(0,(S.flux||0)-20);fx(false);return 'They laugh. Thursday will prove you right, which does not help now.'}})];
+   const o=POOL.sort(()=>R()-.5).slice(0,3).map(f=>f());
+   o.push(c.k==='home'?{t:'Say you love them, and hang up before they can answer.',ok:()=>{S.paradox=Math.max(0,(S.paradox||0)-8);return 'The line clicks. The room is very quiet.'}}:{t:'Hang up.',ok:lose('You hang up. It will not be the last call.')});
+   return {who:`☎ ${c.who} · ${c.role||''}`.toUpperCase(),text:c.why||'"..."',th:[['GUT',4,`${({PROUD:'Proud.',COWARD:'Scared under it.',GREEDY:'They want something.',ZEALOT:'A believer.'})[c.tm]||''} Anger ${c.ang}/9.`]],opts:o}};
+ setInterval(()=>{try{if(S&&S.ch&&S.phase==='trade'&&S.loc==='desk'&&!S.dlg&&Date.now()-(S.callT||0)>(70+R()*60)*1000&&Date.now()-(S.beatT||0)>20000){S.callT=Date.now();S.ring23=1;try{sfx('tick')}catch(_){}setTimeout(()=>{try{if(S.ring23)call()}catch(_){}},8000)}}catch(_){}},5000);
+ function phone(){return `<div class="app lab"><div class="sec">PHONE</div><div class="note">Calls come in on their own. Every one is different: who it is, how angry, what they want. GUT tells you what kind of person is on the line.</div>
+   <button type="button" data-a="desk23" data-v="call">CALL SOMEONE BACK<small>whoever last tried you, or whoever is next</small></button></div>`}
+ /* ---------------- AGENTS ---------------- */
+ const ROLES={FIXER:[['BUY A JUDGE','heat -40',a=>{S.heat=Math.max(0,S.heat-40)}],['DIG UP DIRT ON A RIVAL','a rich-list rival loses a tenth',a=>{const e=(S.world.elite||[]).filter(q=>q.alive);if(e.length){const p=P(e);p.cash*=.9;return p.n}}]],
+  LAWYER:[['MAKE THE SEC GO AWAY','SEC -50',a=>{S.eco=S.eco||{sec:0};S.eco.sec=Math.max(0,S.eco.sec-50)}],['GET YOU OUT','leave a cell now',a=>{if(ROOM23.cur()==='cell')ROOM23.go('house','Released on a technicality your lawyer invented.')}]],
+  HACKER:[['BUG A TENANT','reveals one tenant\'s secret',a=>{const t=BLD().t.find(q=>!q.seen&&!q.gone);if(t){t.seen=1;return t.n}}],['READ A RIVAL\'S EMAIL','next news arrives early',a=>{try{ECO22.news()}catch(_){}}]],
+  MUSCLE:[['LEAN ON A TENANT','a tenant pays double rent',a=>{const t=BLD().t.find(q=>!q.gone);if(t){S.cash+=400*cpi();return t.n}}],['GUARD THE DOOR','heat -15, wanted cleared',a=>{S.heat=Math.max(0,S.heat-15);S.wanted=0}]],
+  'STAND-IN':[['MAKE A PUBLIC APPEARANCE','fame +5%, approval up if president',a=>{S.fame=(S.fame||0)*1.05;try{if(S.war&&typeof appr==='function')appr(4)}catch(_){}}]]};
+ const AG=()=>{S.ag23=S.ag23||{list:[],cand:null,log:[]};return S.ag23};
+ function cands(){const r=Object.keys(ROLES);return [0,1,2].map(()=>({id:Math.floor(R()*1e9),n:nm(),role:P(r),comp:1+Math.floor(R()*9),loy:1+Math.floor(R()*9),wage:Math.round((200+R()*1800)*cpi())}))}
+ function agents(){const A=AG();if(!A.cand)A.cand=cands();const now=Date.now();
+   return `<div class="app lab"><div class="sec">AGENTS · YOUR HANDS OUTSIDE</div><div class="note">You never leave the chair. They do. Competence decides if it works; loyalty decides if they come back yours.</div>
+   ${A.list.map(a=>`<div class="card" style="text-align:left"><b>${a.n}</b> · ${a.role} · skill ${a.comp} · loyalty ${a.loy}${a.busy>now?` · <span class="au">out on a job, back in ${Math.ceil((a.busy-now)/1000)}s</span>`:''}${a.gone?' · <span class="ro">gone</span>':''}
+     ${!a.gone&&!(a.busy>now)?`<div class="row r2" style="margin-top:6px">${ROLES[a.role].map((m,i)=>`<button type="button" data-a="desk23" data-v="send:${a.id}:${i}">${m[0]}<small>${m[1]}</small></button>`).join('')}</div>`:''}</div>`).join('')}
+   <div class="sec" style="margin-top:6px">FOR HIRE</div>${A.cand.map(c=>`<button type="button" class="card" data-a="desk23" data-v="hire:${c.id}" ${S.cash<c.wage*5?'disabled':''}>${c.n} · ${c.role}<small>skill ${c.comp} · loyalty ${c.loy} · ${fmt(c.wage*5)} to start</small></button>`).join('')}
+   ${A.log.slice(0,4).map(l=>`<div class="note">${l}</div>`).join('')}</div>`}
+ function send(id,i){const A=AG(),a=A.list.find(q=>q.id===id);if(!a||a.gone)return;const m=ROLES[a.role][i];a.busy=Date.now()+(20+R()*25)*1000;say(`${a.n} leaves to ${m[0].toLowerCase()}. You watch the door close on a feed.`,'cyan');
+   setTimeout(()=>{try{const ok=R()*10<a.comp+1;let line;if(R()*14>a.loy+6&&R()<.4){a.gone=1;const st=Math.round(S.cash*.08);S.cash-=st;heatAdd(15);line=`${a.n} did not come back. ${fmt(st)} went with them, and someone at the Ministry has a new file.`;try{CONS22.tie('leak',{})}catch(_){}}
+     else if(ok){const who=m[2](a);a.loy=Math.min(10,a.loy+1);line=`${a.n} is back. ${m[0]}: done${who?' ('+who+')':''}. ${P(['They want a raise.','They did not ask questions.','They looked at you differently.'])}`}
+     else{a.loy=Math.max(1,a.loy-1);heatAdd(5);line=`${a.n} is back with nothing but a story. ${m[0]} failed. Someone saw them.`}
+     A.log.unshift(line);say(`<b class="hd">AGENT</b> ${line}`,ok?'gold':'rose');render()}catch(_){}},a.busy-Date.now())}
+ /* ---------------- BUILDING (the watcher and the watched) ---------------- */
+ const SECRETS=[['hides cash under the floor','HOARDING'],['writes for an underground paper','DISSENT'],['has been to the bridge at night','THE BRIDGE'],['deals the blue from the back room','DEALING'],['is an undercover agent','STATE'],['is planning to leave the country','LEAVING'],['talks to someone about a machine','THE MACHINE'],['has done nothing wrong at all','NOTHING']];
+ const FUT=['will be arrested before the quarter ends','will win money on a horse','will die in a fire on the third floor unless someone warns them','will report you, if nobody reports them first','will fall in love with the tenant below','will leave without paying','will be fine, completely fine'];
+ function tenant(){const s=P(SECRETS);return {id:Math.floor(R()*1e9),n:nm(),job:P(['nurse','driver','student','cook','teacher','nobody knows','night guard','retired']),age:19+Math.floor(R()*60),sec:s[0],cat:s[1],fut:P(FUT),seen:0,fsee:0,gone:0,warned:0}}
+ const BLD=()=>{S.bld23=S.bld23||{t:[0,1,2,3,4,5].map(tenant),day:1,dir:null,done:0,watch:5,dayT:Date.now(),log:[]};return S.bld23};
+ const DIRS=['HOARDING','DISSENT','THE BRIDGE','DEALING','LEAVING','THE MACHINE'];
+ function day(){const b=BLD();b.dir={cat:P(DIRS),quota:1+Math.floor(R()*2),pay:Math.round((800+R()*2400)*cpi())};b.done=0;b.dayT=Date.now()}
+ setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade')return;const b=BLD();if(!b.dir)day();if(Date.now()-b.dayT>150000){if(b.done<b.dir.quota){b.watch=Math.min(100,b.watch+12);say(`<b class="hd">THE MINISTRY</b> Quota missed: ${b.dir.cat}. Your own file grows. (Watched ${b.watch}%)`,'rose')}else{S.cash+=b.t.filter(t=>!t.gone).length*120*cpi()}b.day++;day();
+   if(b.watch>=100&&!S.dlg){b.watch=60;openD('watch23')}}}catch(_){}},3000);
+ DLG.watch23=()=>({who:'THE MINISTRY · AT YOUR DOOR',text:'Two of them, polite, with a folder that has your photograph clipped to the front. "We watch the watchers too."',th:[['GUT',4,'They want a name more than they want you.']],
+  opts:[{t:'Give them a name. Any name.',ok:()=>{const b=BLD(),t=b.t.find(q=>!q.gone);if(t){t.gone=1;b.t.push(tenant());b.watch=20;try{CONS22.tie('kill',{who:t.n})}catch(_){}return `You say "${t.n}". They thank you. ${t.n} is gone by morning. Nobody asks where.`}return 'There is nobody left to give them.'}},
+   {t:'Explain yourself.',check:['CHARM',9],ok:()=>{BLD().watch=30;return 'They write something down. They leave. They will be back.'},fail:()=>{try{ROOM23.go('cell','The folder was a warrant. A cell. The machine, somehow, under the bunk.')}catch(_){}return 'The folder was a warrant.'}},
+   {t:'Pay them to lose the folder.',cost:()=>Math.max(5e3,S.cash*.15),ok:()=>{BLD().watch=10;return 'The folder goes into a shredder you can hear from the hallway.'}}]});
+ function bldg(){const b=BLD();if(!b.dir)day();const left=Math.max(0,150-Math.round((Date.now()-b.dayT)/1000));
+   return `<div class="app lab"><div class="sec">THE BUILDING · DAY ${b.day} · ${left}s LEFT</div>
+   <div class="note">BUG ${fmt(300*cpi())} reveals a secret · FUTURE 20 flux shows tomorrow · REPORT to the Ministry · WARN them, at a risk.</div><div class="note" style="border-left:2px solid var(--rose);padding-left:8px">THE MINISTRY DIRECTIVE: report anyone involved in <b>${b.dir.cat}</b>. Quota ${b.done}/${b.dir.quota}. Pays ${fmt(b.dir.pay)} each. You are being watched: <span class="${b.watch>60?'ro':''}">${b.watch}%</span>.</div>
+   ${b.t.map(t=>`<div class="card" style="text-align:left${t.gone?';opacity:.45':''}"><b>${t.n}</b>, ${t.age} · ${t.job}${t.gone?' · <span class="ro">taken</span>':''}
+     <div class="note">${t.seen?'SECRET: '+t.sec+'.':'Secret: unknown. Bug the flat to find out.'}${t.fsee?' TOMORROW: '+t.fut+'.':''}</div>
+     ${t.gone?'':`<div class="row r4" style="margin-top:4px"><button type="button" class="tk" data-a="desk23" data-v="bug:${t.id}" ${t.seen||S.cash<300*cpi()?'disabled':''}>BUG</button><button type="button" class="tk" data-a="desk23" data-v="fut:${t.id}" ${t.fsee||(S.flux||0)<20?'disabled':''}>FUTURE</button><button type="button" class="tk" data-a="desk23" data-v="rep:${t.id}">REPORT</button><button type="button" class="tk" data-a="desk23" data-v="warn:${t.id}" ${t.warned?'disabled':''}>WARN</button></div>`}</div>`).join('')}
+   ${b.log.slice(0,3).map(l=>`<div class="note">${l}</div>`).join('')}</div>`}
+ function bact(v,id){const b=BLD(),t=b.t.find(q=>q.id===id);if(!t||t.gone)return;let line='';
+   if(v==='bug'){const f=300*cpi();if(S.cash<f)return;S.cash-=f;t.seen=1;line=`The camera in ${t.n}'s light fitting works. ${t.n} ${t.sec}.`;if(t.cat==='STATE'){b.watch=Math.min(100,b.watch+10);line+=' They found the camera. They work for the Ministry. Your file grows.'}}
+   if(v==='fut'){if((S.flux||0)<20)return;S.flux-=20;t.fsee=1;line=`The machine shows ${t.n} tomorrow: ${t.n} ${t.fut}.`}
+   if(v==='rep'){t.gone=1;const match=t.cat===b.dir.cat;if(match){b.done++;S.cash+=b.dir.pay;b.watch=Math.max(0,b.watch-8);line=`You report ${t.n}. A van at four in the morning. ${fmt(b.dir.pay)} lands in your account.`}else{b.watch=Math.max(0,b.watch-2);line=`You report ${t.n} for something they did not do. The Ministry takes them anyway. No money: it was not what they asked for.`}
+     try{CONS22.tie('kill',{who:t.n})}catch(_){}b.t.push(tenant())}
+   if(v==='warn'){t.warned=1;if(t.cat==='STATE'){b.watch=Math.min(100,b.watch+25);line=`You warn ${t.n}. ${t.n} thanks you and writes it down. ${t.n} works for the Ministry.`}else{line=/fire/.test(t.fut)?`You warn ${t.n} about the third floor. On Thursday there is a fire. ${t.n} is not in it. A cake appears at your door.`:`You warn ${t.n}. They pack a bag. They look at you like you are either very kind or very dangerous.`;if(/report you/.test(t.fut))t.fut='will not report you now'}}
+   b.log.unshift(line);say(`<b class="hd">BUILDING</b> ${line}`,v==='rep'?'rose':'cyan');try{save();render()}catch(_){}}
+ function click(v){const [k,a,b]=String(v).split(':');if(k==='call'){S.callT=Date.now();call();return}if(k==='hire'){const A=AG(),c=A.cand.find(q=>q.id===+a);if(!c||S.cash<c.wage*5)return;S.cash-=c.wage*5;A.list.push(c);A.cand=A.cand.filter(q=>q!==c);if(!A.cand.length)A.cand=cands();say(`${c.n} works for you now. ${c.role}. They do not ask what the machine does.`,'gold');save();render();return}
+   if(k==='send')return send(+a,+b);if(['bug','fut','rep','warn'].includes(k))return bact(k,+a)}
+ return {feeds,phone,agents,bldg,click,call,BLD}})();
+
+/* ---- wiring: the ROOM group replaces STREET; nobody gets up any more ---- */
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="desk23"],[data-a="room23"]');if(!b||b.disabled)return;audioStart();if(b.dataset.a==='room23')ROOM23.act(b.dataset.v);else DESK23.click(b.dataset.v)});
+{const d3=draw;draw=function(now){d3(now);try{ROOM23.paint(now)}catch(_){}}}
+{const gl3=goLive;goLive=function(on){if(on&&ROOM23.cur()==='cabin'){say('Not from the cabin. A stream would show the pines, and the pines would show them where you are.','rose');render();return}return gl3(on)}}
+
+/* ---- the room is clickable: everything on the desk does something ---- */
+const HOT23=(()=>{const SP=[['window',25,0,172,56,'THE WINDOW · FEEDS',()=>{S.tab='feeds'}],['chirp',176,0,300,56,'CHIRP · WHAT THEY SAY',()=>{S.tab='feed'}],['keys',108,170,252,197,'THE KEYBOARD · KLIK',()=>{S.tab='klik'}],
+  ['dog',0,163,44,200,'THE DOG',()=>{S.paradox=Math.max(0,(S.paradox||0)-1);S.heat=Math.max(0,(S.heat||0)-1);say(P(['The dog sighs and puts his head on your foot. Heat and paradox ease, a little.','He has been here through all of it. He does not judge.','You scratch his ear. For a second there is no machine.']),'cyan')}],
+  ['mug',256,166,292,197,'THE MUG · COFFEE',()=>{S.fxs.wired=Math.max(S.fxs.wired||0,45);say('Cold coffee. You drink it anyway. WIRED: LOGIC +1, CHARM -1.','gold')}],
+  ['phone',294,166,320,198,'THE PHONE',()=>{if(S.ring23){S.ring23=0;DESK23.call()}else S.tab='phone'}]];
+ const P=a=>a[Math.floor(R()*a.length)];let hov=null;
+ const pos=e=>{const r=scr.getBoundingClientRect();return [(e.clientX-r.left)/r.width*320,(e.clientY-r.top)/r.height*200]};
+ const on=()=>S&&S.phase==='trade'&&S.loc==='desk'&&!S.dlg&&!S.cus&&!(typeof wmode==='function'&&wmode())&&!ROOM23.locked();
+ const at=(x,y)=>SP.find(s=>x>=s[1]&&x<=s[3]&&y>=s[2]&&y<=s[4]);
+ scr.addEventListener('pointerdown',e=>{if(!on())return;const [x,y]=pos(e),s=at(x,y);if(!s)return;e.stopImmediatePropagation();e.preventDefault();audioStart();try{sfx('tick')}catch(_){}s[6]();try{save()}catch(_){}render()},true);
+ scr.addEventListener('pointermove',e=>{if(!on()){hov=null;return}const [x,y]=pos(e);hov=at(x,y)||null;scr.style.cursor=hov?'pointer':''});
+ scr.addEventListener('pointerleave',()=>{hov=null});
+ function paint(now){if(!S||S.loc!=='desk'||S.phase!=='trade'||S.cus)return;try{if(typeof wmode==='function'&&wmode())return}catch(_){}
+   const rg=S.ring23&&Math.floor(now/120)%2,px=300+(rg?1:0);g.fillStyle=S.ring23?'#ef5d75':'#2a2433';g.fillRect(px,178,14,9);g.fillStyle='#14121c';g.fillRect(px+2,174,10,4);g.fillStyle=S.ring23?'#fff':'#5d5866';g.fillRect(px+4,181,6,3);
+   if(S.ring23){g.fillStyle='#ef5d75';g.font='7px monospace';g.fillText('RING',px-4,172)}
+   if(hov){g.strokeStyle='#f2c14e';g.lineWidth=1;g.strokeRect(hov[1]+.5,hov[2]+.5,hov[3]-hov[1]-1,hov[4]-hov[2]-1);const t=hov[5],w=t.length*4.6+8,x=Math.min(320-w-2,Math.max(2,hov[1])),y=hov[2]>20?hov[2]-12:hov[4]+2;g.fillStyle='rgba(0,0,0,.8)';g.fillRect(x,y,w,11);g.fillStyle='#f2c14e';g.font='8px monospace';g.fillText(t,x+4,y+8)}
+   if(!S.flags.hot23){S.flags.hot23=1;say('Everything on the desk does something. Tap the window, the phone, the dog, the mug.','cyan')}}
+ return {paint}})();
+{const d4=draw;draw=function(now){d4(now);try{HOT23.paint(now)}catch(_){}}}
+window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});

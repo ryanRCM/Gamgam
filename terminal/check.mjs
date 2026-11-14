@@ -53,6 +53,10 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   errs.length = 0; await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
   await act("continue"); await p.waitForTimeout(1200);
   ok(`${t} CONTINUE works after saving mid-conversation in the street`, errs.length === 0 && await p.evaluate(() => HS.S.dlg == null), errs[0] || "conversation kept open after load");
+  // v23: you never leave the chair. A save made out in the street continues at the desk.
+  ok(`${t} v23: CONTINUE from a street save lands at the desk`, await p.evaluate(() => HS.S.loc === "desk"));
+  // The street still runs as simulation; the checks below drive it directly.
+  await p.evaluate(() => { HS.enterWorld(); }); await p.waitForTimeout(500);
   // Bugs 11 and 12: the street menu's close button is on screen, the help text is current, and a taxi closes the menu.
   await p.evaluate(() => { HS.S.dlg = null; HS.S.wmenu = true; HS.render(); }); await p.waitForTimeout(400);
   const mn = await p.evaluate(() => { const b = document.querySelector('[data-a="wmclose"]'); const r = b && b.getBoundingClientRect(); const note = [...document.querySelectorAll("#panel .note")].map(n => n.textContent).join(" ");
@@ -98,6 +102,12 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   // Bug 19: no market twice on one BOARD (40 boards).
   const dup = await p.evaluate(() => { let bad = 0; for (let i = 1; i <= 40; i++) { HS.S.bx = { seed: i * 7919, slip: {}, peek: {}, open: [], done: [], n: 0 }; const q = HS.btBoard().map(m => m.q); if (q.length !== 8 || new Set(q).size !== 8) bad++ } return bad; });
   ok(`${t} BOARD never lists a market twice`, dup === 0, dup + " bad boards");
+
+  // v23: the ROOM group opens every window at the desk, and reporting a tenant pays when it matches the directive.
+  const v23 = await p.evaluate(() => { const S = HS.S; S.phase = "trade"; S.loc = "desk"; S.dlg = null; S.cus = false; const seen = [];
+    for (const t of ["room", "feeds", "phone", "agents", "bldg"]) { S.tab = t; HS.render(); seen.push(document.getElementById("panel").innerText.length > 80) }
+    const D = HS.DESK23(), b = D.BLD(), t = b.t.find(q => !q.gone); t.cat = b.dir.cat; const c0 = S.cash; D.click("rep:" + t.id); return { seen, paid: S.cash > c0 } });
+  ok(`${t} v23: desk windows render and the Ministry pays for a matching report`, v23.seen.every(Boolean) && v23.paid, JSON.stringify(v23));
 
   // Bug 4 (now v22): all four characters are open from the first life. Bug 13: GOD and BODY hidden from players.
   const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });
