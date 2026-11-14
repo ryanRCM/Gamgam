@@ -53,6 +53,17 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   errs.length = 0; await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
   await act("continue"); await p.waitForTimeout(1200);
   ok(`${t} CONTINUE works after saving mid-conversation in the street`, errs.length === 0 && await p.evaluate(() => HS.S.dlg == null), errs[0] || "conversation kept open after load");
+  // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
+  await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
+  await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");
+  const el = await p.evaluate(() => ({ ph: HS.S.phase, riv: HS.S.el && HS.S.el.riv }));
+  ok(`${t} reload on election night resumes the election`, el.ph === "election" && el.riv < 60, JSON.stringify(el));
+
+  // Bug 4: one more character unlocks per life. Bug 13: GOD and BODY hidden from players.
+  const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });
+  ok(`${t} a second life unlocks a second character`, lk.filter(Boolean).length === 2, JSON.stringify(lk));
+  const dev = await p.evaluate(() => ["bGod", "bBody"].map(id => { const b = document.getElementById(id); return !b || getComputedStyle(b).display === "none"; }));
+  ok(`${t} GOD and BODY are hidden from players`, dev.every(Boolean), JSON.stringify(dev));
   await ctx.close();
 }
 await browser.close(); srv.close();

@@ -449,7 +449,7 @@ function genLeaders(w){IDS.forEach(k=>w.lead[k]={name:pick(FIRST)+' '+pick(LASTN
 function genCity(seed){const r=rng(seed);CITY=[];for(let i=0;i<90;i++){const q=-25+r()*200;CITY.push({q,x:r()*2-1,w:2+r()*3,h:4+r()*8+Math.max(0,q)*.1})}}
 function genMarket(seed){const r=rng(seed),v=x=>Array.isArray(x)?x[0]+r()*(x[1]-x[0]):x;
   const crash=[10+Math.floor(r()*12),26+Math.floor(r()*10),42+Math.floor(r()*10)];
-  const dud=r()<.12;
+  const dud=r()<.12&&!(S&&S.gen===1);
   const mk=ASSETS.map((d,ix)=>{const a=v(d.a),b=ix===0&&dud?a*(2+r()*6):v(d.b),ph=r()*6.283;let n=0;const p=[];
     for(let i=0;i<N;i++){n=(n+(r()-.5)*2*d.nz)*.9;const t=i/(N-1);let x=Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*t+d.amp*Math.sin(i/d.per*6.283+ph)+n);
       crash.forEach(c=>{if(i===c)x*=.5;if(i===c+1)x*=.7});p.push(x)}
@@ -3508,7 +3508,7 @@ WHHOT[2].act=()=>{const w=S.war;if(w.tray==null)w.tray=6;if(w.cq.length)openD('c
 {const ey1=endYear;endYear=function(){ey1();if(S.phase==='war'&&S.war){S.war.tray=6;S.war.card=null}}}
 /* ---- dev mode: tap the version five times. A panel in the house, god mode in the street menu. Not for players. ---- */
 function devPanel(){return `<div class="sec">DEV</div><div class="row r4">${[['m','+$1M'],['b','+$1B'],['f','FLUX'],['h','HEAT 0'],['p','PARADOX 0'],['w','WAKE PDX'],['fa','+50K FANS'],['pr','PRESIDENT']].map(q=>`<button type="button" class="tk" data-a="dev" data-v="${q[0]}">${q[1]}</button>`).join('')}</div>`}
-{const pw0=pWalk;pWalk=function(){return pw0()+`<button type="button" class="card" data-a="god">GOD MODE · ${GOD.on?'ON':'OFF'}<small>nothing can hurt you</small></button>`+(DEV?devPanel():'')};
+{const pw0=pWalk;pWalk=function(){return pw0()+(!DEV?'':`<button type="button" class="card" data-a="god">GOD MODE · ${GOD.on?'ON':'OFF'}<small>nothing can hurt you</small></button>`)+(DEV?devPanel():'')};
  const pt1=pTitle;pTitle=function(){return pt1().replace('<div class="blurb">v7 · THE WHITE HOUSE</div>',`<button type="button" data-a="voice">VOICE LINES · ${VOICE?'ROBOT':'OFF'}<small>a test voice reads dialogue aloud. real recordings come later</small></button><div class="blurb" data-a="devtap">v8.5 · THE BODY${DEV?' · DEV':''}</div>`)};let taps=0;
  $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v;
    if(a==='devtap'){if(++taps>=5){taps=0;DEV=!DEV;try{localStorage.setItem('hs-dev',DEV?'1':'0')}catch(_){}render()}}
@@ -5170,6 +5170,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
 #panel.t21>button small{font:12px/1.3 Georgia,serif;color:#7d7787;display:block;margin-top:2px;text-transform:none;letter-spacing:0}
 #panel.t21>button.pri{font-size:26px!important;border-left-color:#c85a5a!important;color:#fff!important}
 #panel.t21>button:hover,#panel.t21>button:active{border-left-color:#c85a5a!important;color:#fff!important}
+body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{display:none!important}
 #panel.t21 .more21{display:none}#panel.t21.open .more21{display:block}
 #panel.t21 .vtag{font:11px monospace;color:#5d5866;padding:6px 12px}`;document.head.appendChild(st);
  const MORE=['dev','voice','xboss','xgames'];
@@ -5508,7 +5509,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
 
 /* ================= v22 · SECOND PLAYTEST ================= */
 /* title menu: NEW LIFE, SAVES, ROADMAP. everything else lives in More */
-{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
+{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{document.body.classList.toggle('dev',!!DEV);const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
 /* the roadmap: a picture you can read in five seconds, and the systems behind the game */
 {const SYS=[['Reaction engine','Every action becomes posts, quote-posts, videos and memes from 13 kinds of people with faces',70],['Takedown stage','Menu-picked kills play as staged close-ups with voices',65],['Procedural bodies','One pixel body for everyone: walk, fight, fall, smoke, drink, injure',60],['Living street','Witnesses with memory, needs, routines, police calls',55],['Markets and shorts','Price paths, depth, shorts that age into legends',60],['RAKE and bookies','Mines to the last tile, banks you can break, lawsuits, snipers',50],['Presidency','White House rooms, crises, terms, re-election',70],['State visits','Parody capitals, leaders as boss fights, deals that change the country',45],['Wars and ruins','Wars you can visit before, during and after; damage that stays',40],['Propaganda','Your face on every wall once you are rich enough, slogans from what you did',35],['Body and needs','Injuries, bleeding, treatment, hunger, sleep, drink, drugs',55],['Streaming','KLIK: webcam at home, camera outside, a chat that reacts',50],['8-head sprite bible','Every character rebuilt on realistic 8-head pixel proportions',10],['Procedural cities','Streets, rooms and countries generated from a few rules',30],['Procedural dialogue','Tens of thousands of lines from small grammars, never the same twice',40]];
  const css=document.createElement('style');css.textContent=`.rm22 h4{font:700 11px HSPixel,monospace;letter-spacing:.22em;color:#8a8494;margin:16px 0 8px}.rm22 .tl{position:relative;padding-left:18px;border-left:2px solid #2a2630}
@@ -5798,8 +5799,10 @@ function pTitle(){let has=false;try{const s=JSON.parse(localStorage.getItem('hin
   <button type="button" data-a="saves">SAVES<small>export a code, import one, move devices</small></button>
   <button type="button" data-a="dev">DOWNLOAD THE WHOLE GAME<small>one file. everything in it. runs anywhere</small></button>`}
 function pRoad(){return `<div class="who2">ROADMAP · TARGETS, NOT PROMISES</div>`+ROADMAP.map(r=>`<div class="ev"><div><b class="${r[0]==='SHIPPED'?'g':r[0]==='PORT'?'vi':r[0]==='NEXT'?'au':''}">${r[2]}</b> <i class="hi">${r[1]}</i><br>${r[3]}</div><button type="button" disabled>${r[0]}</button></div>`).join('')+`<button type="button" class="pri" data-a="roadback">BACK</button>`}
+const UNL=['gamb','narc','para','insom'];function unlN(){let n=S&&S.gen||1;try{n=Math.max(n,+localStorage.getItem('hindsight-unlock')||1);localStorage.setItem('hindsight-unlock',String(n))}catch(e){}return Math.min(4,n)}
+const isUnl=id=>UNL.indexOf(id)<unlN();
 function pPick(){if(S.cus)return pCustom();const c=CHARS[S.pick],a=ABIL[c.id];
-  return `<div class="row r4">${CHARS.map((x,i)=>`<button type="button" class="tab ${i===S.pick?'on':''}" data-a="pick" data-v="${i}">${x.id==='gamb'?x.tag.replace('THE ',''):'LOCKED'}</button>`).join('')}</div>
+  return `<div class="row r4">${CHARS.map((x,i)=>`<button type="button" class="tab ${i===S.pick?'on':''}" data-a="pick" data-v="${i}">${isUnl(x.id)?x.tag.replace('THE ',''):'LOCKED<small>live '+(UNL.indexOf(x.id)+1)+' lives</small>'}</button>`).join('')}</div>
   <div class="who2">${c.tag}</div><div class="say">${c.creed}</div>
   <div class="stats">${Object.keys(c.st).map(k=>`<span class="c${k}">${k} ${c.st[k]}</span>`).join('')}</div>
   <div class="list"><div><b>+</b> ${c.perk}</div><div><span class="ro">-</span> ${c.flaw}</div><div><span class="vi">${a.n}</span> ${a.d}</div></div>
@@ -5934,7 +5937,7 @@ function pDead(){const d=S.dead,c=CAUSE[d.cause],rs=S.world.rulers.slice(-4).rev
   <div class="list">${d.years?`<div>Ruled <b>${d.years}</b> years · peak <b>${d.peak}</b>/14 lands · died holding <b>${d.held}</b></div>`:'<div>Never reached the chair. Peak fortune <b>'+fmt(S.peak)+'</b>.</div>'}
   <div>The world: <span class="vi">${stage()} · chaos ${Math.round(chaos())}%</span> · <span class="ro">${(S.world.dead||[]).length} dead, for good</span>${S.wdeath?' · killed by '+S.wdeath.by:''}</div>
   ${rs.map(r=>`<div><b>${r.name}</b> · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}</div>`).join('')}${S.world.seeded?`<div><span class="hi">The seed ships ${S.world.seeded.by} paid for are still flying.</span></div>`:''}</div>
-  <button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
+  ${(()=>{const n=unlN(),nx=n<4?CHM[UNL[n]]:null;return nx?`<div class="say" style="color:var(--gold)">UNLOCKED NEXT LIFE: ${nx.tag}. ${nx.perk}</div>`:''})()}<button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
   ${S.flags.ngp&&S.war&&S.war.united?'<button type="button" class="pri big" data-a="meet">SOMEONE IS WAITING<small>he has been in every window</small></button>':''}
   ${S.war&&S.war.united?'<button type="button" class="big" data-a="ngp">NEW GAME PLUS<small>same soul, same skills, every memory. The world is not how you left it.</small></button>':''}`}
 function render(){if(S&&S.loc!=='world')S.wmenu=false;hud();const p=$('panel'),ph=S.phase;
@@ -5968,7 +5971,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
       say(ok?'Download started: hindsight.html, '+Math.round(src.length/1024)+' KB. The whole game in one file.':'This viewer blocked the download.',ok?'gold':'rose')})}
   else if(a==='new'){setFace(null);logs=[];$('lines').innerHTML='';S={v:2,gen:1,world:newWorld(),phase:'pick',pick:3,prevSk:null};genCity(S.world.cseed);save();render()}
   else if(a==='continue'){load();render()}
-  else if(a==='pick'){if(CHARS[+v].id!=='gamb'){say('Locked. The Gambler goes first.','rose');return}S.pick=+v;sfx('tick');render()}
+  else if(a==='pick'){if(!isUnl(CHARS[+v].id)){say(`Locked. ${CHARS[+v].tag} unlocks after life ${UNL.indexOf(CHARS[+v].id)}.`,'rose');return}S.pick=+v;sfx('tick');render()}
   else if(a==='be'){const c=CHARS[S.pick];S.draft={look:lookOf(c.look),name:S.gen===1?c.name:pick(FIRST)+' '+pick(LASTN),traits:[]};S.cus=true;S.cusTab='face';sfx('tick');render()}
   else if(a==='ctab'){S.cusTab=v;sfx('tick');render()}
   else if(a==='trait'){const T=S.draft.traits=S.draft.traits||[],i=T.indexOf(v);if(i>=0)T.splice(i,1);else T.push(v);sfx(i>=0?'tick':'ok');render()}
@@ -6086,7 +6089,7 @@ function loopB(now){const dt=Math.min(.1,(now-last)/1000);last=now;
   if(now-lastSave>5000&&S.phase!=='title'){lastSave=now;save()}
 }
 function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hindsight-v2'))}catch(e){s=null}}
-  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){S.phase='trade';S.el=null}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);if(S.name)say(`Welcome back, ${S.name}.`,'gold');return true}
+  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){if(S.el){S.el.live=true;S.el.riv=Math.max(0,(S.el.riv||0)-20);S.recount=1}else S.phase='trade'}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);if(S.name)say(`Welcome back, ${S.name}.`,'gold');if(S.recount){S.recount=0;say('THE RECOUNT. The machine remembers the count differently. Your rival loses ground.','gold')}return true}
   return false}
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
