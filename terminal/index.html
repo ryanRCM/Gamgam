@@ -2213,13 +2213,66 @@ function assassins(dt){if(S.copsOff>0)S.copsOff-=dt;
 const SPONS=[[2000,'volt','VOLTAGE ENERGY','A can of neon on your desk, every stream.',.01],[10000,'rake','RAKE','Stream the casino. They pay per viewer and want you gambling on camera. Table limits go up five times.',.08],[100000,'krane','KRANE CHIPS','Krane hardware on every frame. The biggest cheque in streaming.',.3]];
 function hype(n,label){if(!S.live)return;S.hype=Math.min(400,(S.hype||0)+n);if(label&&n>=20){S.kchat=S.kchat||[];S.kchat.unshift({t:'CHAT: '+label,c:1});S.kchat.length=Math.min(S.kchat.length,8)}}
 const CHATL=['W','L','CLIP IT','NO WAY','BRO','LMAO','HE IS COOKED','RUN','IS THIS REAL','SEND IT','GOAT','ACTUAL MENACE','CHAT','W STREAM','DO IT','RIP','HOLY','5 MORE MINUTES','WHERE IS THIS'];
-function klikStep(dt){if(!S.ch)return;S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};const K=S.kk;
+/* ===== v22 · KLIK CHAT AND LEAKS =====
+   kchatLine(): a grammar, not a list. Openers x cores x tails x emotes, every core with its own slots,
+   and the core is chosen by what is happening right now (where you are, what you just did, what you own, what the world thinks).
+   Rough count of distinct lines: well past ten million.
+   klikEvents(): watches for changes while you are live (a kill, a star, a big win, a nuke, a war, a show) and floods chat.
+   Live from the White House, the stream leaks: every leak costs you somewhere real and the viewers love it. */
+const KC=(()=>{const P=a=>a[Math.floor(R()*a.length)],ch=p=>R()<p;
+ const H=['xx','_','99','420','ttv','irl','0','lol','real','69','2k','fr','og','777'],HA=['dark','mid','gold','sad','raw','tiny','big','lost','pale','loud','quiet','true','based','cursed','free'],HB=['wolf','enjoyer','goblin','merchant','pilot','frog','tax','bridge','oracle','shrimp','king','ghost','bean','monk','gremlin','lurker','analyst','degen','nan','cousin'];
+ const handle=()=>(ch(.3)?'':P(HA))+P(HB)+(ch(.5)?P(H):'')+(ch(.3)?Math.floor(R()*99):'');
+ const OP=['','','','bro ','nah ','yo ','chat ','ok but ','LMAOOO ','wait ','be fr ','no way ','ngl ','bruh ','HELLO?? ','honestly ','not gonna lie ','everyone shut up ','mods ','literally ','again?? ','ok so ','listen ','hold on '];
+ const TL=['','','',' lol',' fr',' no cap',' 💀',' im crying',' clip it',' CLIP IT',' this is history',' my mum is watching',' send help',' insane',' actually insane',' ...',' ???',' !!!',' every time',' i cant',' i need to lie down',' W',' L',' first time chatter btw',' been here since day one',' unsubscribing (i wont)'];
+ const EM=['','','',' KEKW',' OMEGALUL',' PogU',' Sadge',' monkaS',' 🔥',' 😭',' 👀',' 🫡',' 💸',' ☢',' 🗿',' 🤡',' 🐀',' EZ',' Clap',' LETSGO'];
+ const ADJ=['unhinged','cursed','beautiful','illegal','historic','insane','tragic','genius','deranged','iconic','criminal','biblical','avoidable','inevitable','legendary'];
+ const N=()=>S.name||'streamer',SN=()=>(S.name||'streamer').split(' ')[0].toLowerCase();
+ const cash=()=>fmt(S.cash||0),where=()=>{try{return S.phase==='war'?P(['the oval office','the white house','the situation room','the residence']):S.loc==='world'?(typeof zoneName==='function'&&WR?zoneName().toLowerCase():'the street'):S.loc==='desk'?'the terminal':'the house'}catch(_){return 'somewhere'}};
+ const W22=()=>(window.HSW22&&S.emp&&S.emp.w22)||null;
+ const CORE={
+  any:[()=>`${SN()} is ${P(ADJ)}`,()=>`who let ${SN()} have a time machine`,()=>`this is the most ${P(ADJ)} stream on klik`,()=>`${P(['day','hour','minute'])} ${Math.floor(2+R()*900)} of asking ${SN()} to ${P(['touch grass','drink water','explain the coin','say hi to my nan','do the voice','go back to the bridge'])}`,
+   ()=>`${P(['streamer','ceo','president','landlord','prophet','menace'])} ${SN()} ${P(['strikes again','is cooking','has lost it','is him','is not him','is so back','is so over'])}`,()=>`imagine ${P(['owning','being','trusting','dating','voting for'])} ${SN()}`,
+   ()=>`can we get ${Math.floor(2+R()*98)} ${P(['W','L','o7','F','🗿'])}s in chat`,()=>`${P(['my','the'])} ${P(['dog','landlord','therapist','teacher','priest','barber'])} ${P(['watches','hates','sent me','warned me about'])} this stream`,()=>`${P(['predict','bet','guess'])}: ${SN()} ${P(['dies','goes to prison','buys the moon','gets cancelled','becomes god'])} by ${P(['tuesday','the weekend','2030','the end of stream'])}`],
+  rich:[()=>`bro has ${cash()} and still ${P(['wears that hoodie','lives under a bridge spiritually','asks chat for advice','cant afford taste'])}`,()=>`${cash()} ${P(['and not one cent to me','and i cant pay rent','and he tips like a ghost','is crazy'])}`,()=>`${SN()} ${P(['buy','give','send'])} me ${P(['a car','a house','one coin','a country','50 quid'])} ${P(['please','im begging','for content','you wont'])}`],
+  poor:[()=>`${cash()} lmao ${P(['we have more','my cat has more','that is bus money','he is so cooked'])}`,()=>`${SN()} please ${P(['learn the slider','stop buying high','read the chart','go back in time and try again'])}`],
+  street:[()=>`${SN()} in ${where()} at night ${P(['is a horror movie','is content','is how people die','is my favourite genre'])}`,()=>`${P(['someone','a man','a guy in a cap','the bookie'])} just ${P(['looked at','followed','recognised','filmed'])} ${SN()} ${P(['in','outside','behind'])} ${where()}`,()=>`WATCH YOUR ${P(['BACK','LEFT','RIGHT','WALLET','SIX'])}`,()=>`i live near ${where()} ${P(['and i am scared','this is real','i can see the stream from my window','please leave'])}`],
+  wanted:[()=>`${'★'.repeat(Math.max(1,S.wanted||1))} ${P(['RUN','STOP','HE IS NOT STOPPING','THE POLICE ARE ON STREAM'])}`,()=>`${P(['cops','feds','police'])} ${P(['watching the stream rn','in chat say hi','tracking the ip','are mods now'])}`,()=>`${SN()} ${P(['speedrunning prison','going to jail live','fleeing the scene on stream'])}`],
+  kill:[()=>`HE ${P(['DID WHAT','REALLY DID THAT','JUST','ON STREAM'])} ${P(['💀','???','.','!!!'])}`,()=>`${P(['rip','press f for','who was','justice for'])} ${P(['the doctor','that guy','the bookie','ilya','the lookout','that poor man'])}`,()=>`${P(['klik','the government','his mum','the police'])} ${P(['is not going to like that','saw that','has entered the chat'])}`,()=>`${P(['reported','clipped','sent to the news','sent to his mum'])}`],
+  potus:[()=>`the president is ${P(['streaming','live','doing a q and a','gaming'])} from ${where()} ${P(['this is fine','democracy ended','i love this timeline','who allowed this'])}`,()=>`${P(['ask','make','tell'])} ${SN()} to ${P(['show the codes','open the drawer','read the briefing','call russia on stream','show the map room','sack someone live'])}`,()=>`${P(['impeach','reelect','crown','arrest'])} ${SN()}`,()=>`${P(['secret service','the chief of staff','an intern','the general'])} ${P(['is behind you','just walked past','is mouthing STOP','is pulling the plug'])}`],
+  nuke:[()=>`☢ ${P(['he actually did it','what have you done','history will not forgive this','my country is on the map'])}`,()=>`${P(['day','hour'])} ${Math.floor(1+R()*40)} after ${P(['the bomb','the flash','the launch'])} and ${SN()} ${P(['is still streaming','is eating cereal','is reading chat','has not blinked'])}`,()=>`${P(['pray for','thoughts for','never forget'])} ${(()=>{const w=W22();const k=w&&Object.keys(w.rad)[0];return k?k.toUpperCase():'everyone'})()}`],
+  war:[()=>`${P(['war','actual war','ww3'])} ${P(['on stream','speedrun','any%','is trending'])}`,()=>`my ${P(['cousin','brother','neighbour','uncle'])} ${P(['got drafted','is over there','is watching this from a bunker'])}`],
+  tv:[()=>{const w=W22(),s=w&&w.shows[0];return s?`${P(['the actor in','the guy from','everyone in'])} ${s.t.toLowerCase()} ${P(['plays you better','is hotter','is more believable','deserves an award'])}`:`make a show about ${SN()}`},()=>`${P(['season 2','the finale','episode 4','the musical'])} ${P(['when','is better than this','spoiled this'])}`],
+  leak:[()=>`${P(['CLIPPED','SCREENSHOTTED','ARCHIVED','SENT TO EVERY NEWSROOM'])} ${P(['💀','🗿','👀',''])}`,()=>`${P(['zoom in','pause at','frame by frame'])} ${P(['0:'+Math.floor(10+R()*49),'the left monitor','the desk','the folder'])}`,()=>`${P(['that is classified','that is a felony','that is treason','that is a war'])} ${P(['lol','bro','on stream','in 4k'])}`,()=>`${P(['foreign governments','the cia','russia','my nan','the press'])} ${P(['are in chat','took notes','are typing','saw that'])}`]};
+ function line(ctx){const c=ctx||(S.kburst&&S.kburst.n>0?S.kburst.k:null);let pool=CORE.any;const r=R();
+   if(c&&CORE[c]&&r<.85)pool=CORE[c];else if(S.phase==='war'&&r<.45)pool=CORE.potus;else if((S.wanted||0)>=1&&r<.4)pool=CORE.wanted;else if(S.loc==='world'&&r<.35)pool=CORE.street;else if(S.cash>1e8&&r<.3)pool=CORE.rich;else if(S.cash<5e3&&r<.3)pool=CORE.poor;
+   else{const w=W22();if(w&&Object.keys(w.rad).length&&r<.5)pool=CORE.nuke;else if(w&&w.shows.length&&r<.4)pool=CORE.tv;else if(S.emp&&S.emp.wars&&Object.keys(S.emp.wars).length&&r<.5)pool=CORE.war}
+   let t=P(OP)+P(pool)()+P(TL)+P(EM);if(ch(.25))t=t.toUpperCase();if(ch(.12))t=t.replace(/[aeiou]/,m=>m.repeat(2+Math.floor(R()*5)));return handle()+': '+t}
+ /* ---------- leaks from the White House ---------- */
+ const LEAKS=[['the nuclear codes, taped under the desk','codes'],['the troop map in the situation room, every number readable','map'],['a briefing that says {c} is next','threat'],['the treasurer\'s spreadsheet. The column called "for me"','money'],
+  ['you calling the leader of {c} something unprintable, mic on','insult'],['the chief of staff mouthing "turn it off" for six minutes','staff'],['a drawer full of passports in other names','passports'],['the guest list for Friday. Half of it is wanted somewhere','guests'],['the phone number of {c}\'s leader, on screen for a full minute','phone'],['the real approval numbers','polls']];
+ function leak(){const C=(window.HSEMP&&HSEMP.C)||[],c=C.length?P(C):null,cn=c?c[1]:'a neighbour',L=P(LEAKS),what=L[0].replace('{c}',cn);
+   S.scandal=(S.scandal||0)+1;S.hype=(S.hype||0)+60;S.viewers=(S.viewers||0)*1.6+500;S.fame=(S.fame||0)*1.05+1e4;try{heatAdd(12)}catch(_){}
+   const fx=[];try{if(typeof appr==='function'){const d=-(3+Math.floor(R()*7));appr(d);fx.push('approval '+d)}}catch(_){}
+   try{if(S.war){S.war.tension=(S.war.tension||0)+(L[1]==='threat'||L[1]==='insult'?15:5);S.war.unrest=(S.war.unrest||0)+4;fx.push('tension up')}}catch(_){}
+   try{if(c&&S.emp){S.emp.rel=S.emp.rel||{};S.emp.rel[c[0]]=Math.max(-100,(S.emp.rel[c[0]]||0)-(L[1]==='insult'?45:20));fx.push(cn+' furious')}}catch(_){}
+   if(L[1]==='money'){S.cash*=.97;fx.push('3% frozen by auditors')}
+   const head=`LEAK #${S.scandal} · ${N()} streamed ${what}.`;try{say(`<b class="hd">KLIK · LEAK</b> You streamed ${what}. ${fx.join(', ')}. ${fnum(S.viewers)} watching.`,'rose')}catch(_){}
+   try{const w=W22();if(w){w.news.unshift({t:head+' '+P(['Congress wants a hearing.','The clip has 40 million views.','Foreign ministries are "studying the footage".','A senator calls it "the end of the republic, again".','The press secretary says it was a deepfake. It was not.']),y:(S.world&&S.world.year)||2026,col:'#ef5d75'});if(R()<.35)HSW22.makeShow('leak')}}catch(_){}
+   try{HSREACT('war')}catch(_){}burst('leak',14)}
+ function burst(k,n){S.kburst={k,n};S.kchat=S.kchat||[];for(let i=0;i<Math.min(6,n);i++)S.kchat.unshift({t:line(k),c:k==='leak'||k==='kill'||k==='nuke'?1:0});S.kchat.length=Math.min(S.kchat.length,8)}
+ let last=null;function events(dt){if(!S.live){last=null;return}const w=W22(),now={dead:(S.world&&S.world.dead||[]).length,want:S.wanted||0,rad:w?Object.keys(w.rad).length:0,shows:w?w.shows.length:0,cash:S.cash||0,war:S.emp&&S.emp.wars?Object.keys(S.emp.wars).length:0};
+   if(last){if(now.dead>last.dead){burst('kill',10);S.hype=(S.hype||0)+25}if(now.want>last.want)burst('wanted',6);if(now.rad>last.rad){burst('nuke',14);S.hype=(S.hype||0)+80}if(now.shows>last.shows)burst('tv',6);if(now.war>last.war)burst('war',8);if(now.cash>last.cash*1.5&&now.cash-last.cash>1e4)burst('rich',6);if(now.cash<last.cash*.6)burst('poor',6)}
+   last=now;if(S.kburst&&S.kburst.n>0)S.kburst.n-=dt*3;
+   if(S.phase==='war'){S.leakT=(S.leakT==null?25+R()*30:S.leakT)-dt;if(S.leakT<=0){S.leakT=30+R()*45;leak()}}}
+ return {line,events,leak,burst}})();
+
+function klikStep(dt){if(!S.ch)return;try{KC.events(dt)}catch(_){}S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};const K=S.kk;
   const base=20+Math.pow(Math.max(0,S.fame),.7)*.8,mult=(S.kcat==='gamb'?1.25:S.kcat==='mkt'?1.1:1)*(S.loc==='world'?1.2:1);
   if(!S.live){S.viewers=Math.max(0,(S.viewers||0)-(S.viewers||0)*dt);return}
   const target=base*(1+(S.hype||0)/60)*mult;S.viewers=(S.viewers||0)+(target-(S.viewers||0))*Math.min(1,dt*.6);S.hype=(S.hype||0)*Math.pow(.96,dt);
   const rate=.02+SPONS.reduce((a,s)=>a+(K.deals[s[1]]?s[4]:0),0),earn=S.viewers*rate*dt;S.cash+=earn;S.earned+=earn;K.earned+=earn;S.fame+=S.viewers*.004*dt;heatAdd(.12*dt);
   if(S.viewers>K.peak)K.peak=S.viewers;
-  S.kct=(S.kct||0)-dt;if(S.kct<=0){S.kct=.35+R()*.6;S.kchat=S.kchat||[];const tip=R()<.12;S.kchat.unshift(tip?{t:'$'+fnum(Math.max(5,S.viewers*.01*(1+R()*20)))+' '+pick(HANDLES).toUpperCase(),c:2}:{t:pick(CHATL),c:0});S.kchat.length=Math.min(S.kchat.length,8)}
+  S.kct=(S.kct||0)-dt;if(S.kct<=0){S.kct=(S.kburst&&S.kburst.n>0?.08:.3)+R()*(S.viewers>1e5?.2:.6);S.kchat=S.kchat||[];const tip=R()<.12;S.kchat.unshift(tip?{t:'$'+fnum(Math.max(5,S.viewers*.01*(1+R()*20)))+' '+pick(HANDLES).toUpperCase(),c:2}:{t:R()<.12?pick(CHATL):KC.line(),c:0});S.kchat.length=Math.min(S.kchat.length,8)}
   if(!S.dlg&&S.phase==='trade')for(const s of SPONS){if(K.peak>=s[0]&&!K.deals[s[1]]&&!K.off[s[1]]&&!(s[1]==='krane'&&ndead('odalys'))){K.off[s[1]]=1;openD('spons',s[1]);break}}
   S.kuiT=(S.kuiT||0)+dt;if(S.kuiT>1){S.kuiT=0;const v=$('kv');if(v)v.textContent=fnum(S.viewers)+' watching · '+fmt(K.earned)+' earned';const hc=$('hud').querySelector('.cash');if(hc)hc.firstChild.textContent=fmt(S.cash)}}
 function goLive(on){S.live=on;S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};if(on){S.hype=Math.max(S.hype||0,20);say('You are LIVE on KLIK. Everything you do now is content. Everyone watching knows where you are.','violet');post('flex')}else say(`Stream over. Peak ${fnum(S.kk.peak)} viewers, ${fmt(S.kk.earned)} earned so far.`,'cyan');sfx('ok');save();render()}
@@ -5404,10 +5457,10 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
   if(e.rel[k]<=-100){ch.m.push({w:c[3],t:'This is an act of war.'});try{HSREACT('war')}catch(_){}}
   if(e.rel[k]>=100&&!e.own[k])ch.m.push({w:c[3],t:'For you, a friend\'s price. Half.'});
   try{save()}catch(_){}empDraw()}
- function buy(i){const e=E(),c=C[i],p=price(c);if(S.cash<p||e.own[c[0]])return;S.cash-=p;e.own[c[0]]=1;pop(c[1]+' IS YOURS');try{HSREACT('summit',{x:c[1]});heatAdd(8)}catch(_){}e.log.unshift(`Bought ${c[1]} for ${fm(p)}.`);try{save();render()}catch(_){}empDraw()}
+ function buy(i){const e=E(),c=C[i],p=price(c);if(S.cash<p||e.own[c[0]])return;S.cash-=p;e.own[c[0]]=1;pop(c[1]+' IS YOURS');try{HSREACT('summit',{x:c[1]});heatAdd(8)}catch(_){}e.log.unshift(`Bought ${c[1]} for ${fm(p)}.`);try{W22.onBuy(c)}catch(_){}try{save();render()}catch(_){}empDraw()}
  function invade(i){const e=E(),c=C[i];if(e.own[c[0]]||(e.wars&&e.wars[c[0]]))return;const cost=c[6]*2e8;if(S.cash<cost){e.log.unshift('The generals want '+fm(cost)+' before they move.');empDraw();return}S.cash-=cost;e.wars=e.wars||{};e.wars[c[0]]={t0:Date.now(),dur:45000+c[6]*400,odds:Math.min(.9,(e.army*10)/(c[6]+e.army*10))};e.rel[c[0]]=-100;e.log.unshift(`War with ${c[1]}. The first night is the loudest.`);pop('WAR · '+c[1]);try{HSREACT('war');heatAdd(30);HS.chaosAdd&&HS.chaosAdd(12)}catch(_){}try{save();render()}catch(_){}empDraw()}
  function warTick(){const e=S.emp;if(!e||!e.wars)return;for(const k in e.wars){const w=e.wars[k],c=C.find(q=>q[0]===k);if(!c)continue;const u=(Date.now()-w.t0)/w.dur;e.cas=(e.cas||0)+Math.round(Math.random()*c[6]*40);e.dmg=e.dmg||{};e.dmg[k]=Math.min(1,(e.dmg[k]||0)+.02);
-   if(u>=1){delete e.wars[k];const win=Math.random()<w.odds;if(win){e.own[k]=1;pop('VICTORY · '+c[1]);e.log.unshift(`${c[1]} surrendered. ${Math.round(e.dmg[k]*100)}% of it is rubble.`)}else{e.army=Math.max(1,e.army-3);pop('DEFEAT · '+c[1]);e.log.unshift(`The war in ${c[1]} is lost. The divisions are not coming home.`)}try{HSREACT('war');HS.chaosAdd&&HS.chaosAdd(8)}catch(_){}}}}
+   if(u>=1){delete e.wars[k];const win=Math.random()<w.odds;if(win){e.own[k]=1;pop('VICTORY · '+c[1]);try{W22.deed('won',c)}catch(_){}e.log.unshift(`${c[1]} surrendered. ${Math.round(e.dmg[k]*100)}% of it is rubble.`)}else{e.army=Math.max(1,e.army-3);pop('DEFEAT · '+c[1]);e.log.unshift(`The war in ${c[1]} is lost. The divisions are not coming home.`)}try{HSREACT('war');HS.chaosAdd&&HS.chaosAdd(8)}catch(_){}}}}
  setInterval(()=>{try{warTick();if(S.emp&&S.emp.dmg)for(const k in S.emp.dmg)if(!(S.emp.wars&&S.emp.wars[k]))S.emp.dmg[k]=Math.max(0,S.emp.dmg[k]-.002);if(document.getElementById('emp21').classList.contains('on'))empDraw()}catch(_){}},3000);
  function propaganda(i){const e=E(),c=C[i],cost=c[5]*.002;if(S.cash<cost)return;S.cash-=cost;e.prop=e.prop||{};e.prop[c[0]]=1;e.rel[c[0]]=Math.min(100,(e.rel[c[0]]||0)+20);pop('POSTERS · '+c[1]);e.log.unshift(`Your face is on every wall in ${c[1]}.`);try{HSREACT('rich',{m:'posters in '+c[1]})}catch(_){}empDraw()}
  window.HSSLOGAN=function(){const f=S.flags||{},sh=Object.keys(S.sh||{}).length,dead=(S.world&&S.world.dead||[]).length;return S.live?'LIVE FROM THE TOP':dead>3?'ORDER. FINALLY.':sh?'HE SAW IT COMING':S.cash>1e11?'HE OWNS TOMORROW':'HE KNEW FIRST'};
@@ -5418,7 +5471,7 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
  function racket(i){const e=E(),r=RK[i];if(S.cash<r[2]||e.rk[r[0]])return;S.cash-=r[2];e.rk[r[0]]=r[3];if(r[0]==='A POLICE STATION')S.heat=Math.max(0,(S.heat||0)-40);if(r[0]==='A JUDGE')S.wanted=0;pop(r[0]);try{heatAdd(6)}catch(_){}empDraw()}
  const notoriety=()=>{let n=Math.round((S.heat||0)/2);try{n+=Math.min(60,(S.world&&S.world.dead?S.world.dead.length:0)*6)}catch(_){}return Math.min(100,n)};
  function empDraw(){const e=E(),t=e.tab;let b='';
-  if(t==='c'){b=`<div class="note">Talk to them. Buy them. Or send the army. Everything you own pays you every five seconds.</div>`+C.map((c,i)=>{const r=e.rel[c[0]]||0,o=e.own[c[0]];return `<div class="row">${flag(c)}<div><div class="nm ${o?'own':''}">${c[1]}${o?' · YOURS':''}</div><div class="sub">${c[3]} · ${c[4]} · army ${c[6]}${e.wars&&e.wars[c[0]]?` · <span style="color:#e0403a">AT WAR ${Math.round(Math.min(1,(Date.now()-e.wars[c[0]].t0)/e.wars[c[0]].dur)*100)}%</span>`:''}${e.dmg&&e.dmg[c[0]]>.05?` · <span style="color:#c87a3a">${Math.round(e.dmg[c[0]]*100)}% RUINED</span>`:''}${e.prop&&e.prop[c[0]]?' · YOUR POSTERS':''}</div><div class="bar"><i style="width:${Math.abs(r)/2+50*(r>=0?1:0)}%;margin-left:${r<0?50+r/2:50}%;width:${Math.abs(r)/2}%;background:${r>=0?'#8fce8f':'#e0403a'}"></i></div>
+  if(t==='map'){b=W22.map()}else if(t==='media'){b=W22.media()}else if(t==='c'){b=`<div class="note">Talk to them. Buy them. Or send the army. Everything you own pays you every five seconds.</div>`+C.map((c,i)=>{const r=e.rel[c[0]]||0,o=e.own[c[0]];return `<div class="row">${flag(c)}<div><div class="nm ${o?'own':''}">${c[1]}${o?' · YOURS':''}</div><div class="sub">${c[3]} · ${c[4]} · army ${c[6]}${e.wars&&e.wars[c[0]]?` · <span style="color:#e0403a">AT WAR ${Math.round(Math.min(1,(Date.now()-e.wars[c[0]].t0)/e.wars[c[0]].dur)*100)}%</span>`:''}${e.dmg&&e.dmg[c[0]]>.05?` · <span style="color:#c87a3a">${Math.round(e.dmg[c[0]]*100)}% RUINED</span>`:''}${e.prop&&e.prop[c[0]]?' · YOUR POSTERS':''}</div><div class="bar"><i style="width:${Math.abs(r)/2+50*(r>=0?1:0)}%;margin-left:${r<0?50+r/2:50}%;width:${Math.abs(r)/2}%;background:${r>=0?'#8fce8f':'#e0403a'}"></i></div>
    <div class="acts"><button data-e="chat" data-i="${i}">TALK</button>${o?'':`<button data-e="buy" data-i="${i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button><button data-e="sanc" data-i="${i}">SANCTION</button><button data-e="inv" data-i="${i}" ${e.wars&&e.wars[c[0]]?'disabled':''}>INVADE ${fm(c[6]*2e8)}</button>`}${S.cash>=1e9&&!(e.prop&&e.prop[c[0]])?`<button data-e="prop" data-i="${i}" ${S.cash<c[5]*.002?'disabled':''}>PROPAGANDA ${fm(c[5]*.002)}</button>`:''}</div></div><div></div></div>`}).join('')}
   else if(t==='chat'&&e.chat){const c=C[e.chat.i];b=`<div class="row">${flag(c)}<div><div class="nm">${c[1]}</div><div class="sub">${c[3]} · relation ${e.rel[c[0]]||0}</div></div><button data-e="back">BACK</button></div><div class="chat">${e.chat.m.slice(-8).map(m=>`<div class="m ${m.w==='YOU'?'you':''}"><b>${m.w}</b>${m.t}</div>`).join('')}</div>
    <div class="acts"><button data-e="say" data-k="flatter">FLATTER</button><button data-e="say" data-k="threat">THREATEN</button><button data-e="say" data-k="bribe">BRIBE ${fm(Math.min(S.cash,price(c)*.05))}</button><button data-e="say" data-k="deal">OFFER A DEAL</button>${e.own[c[0]]?'':`<button data-e="buy" data-i="${e.chat.i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button>`}</div>`}
@@ -5429,12 +5482,109 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
   else if(t==='war'){b=`<div class="big">ARMY · ${e.army} DIVISIONS</div><div class="note">Bigger army, better odds when you invade. Each division ${fm(5e9)}.</div><div class="acts"><button data-e="army" ${S.cash<5e9?'disabled':''}>RAISE A DIVISION</button><button data-e="army5" ${S.cash<2.5e10?'disabled':''}>RAISE FIVE</button></div><div class="note" style="margin-top:12px">${(e.log||[]).slice(0,8).join('<br>')||'Nothing has happened yet.'}</div>`}
   window.HSEMP={C,E};const own=Object.keys(e.own).length,ceo=Object.keys(e.co).filter(k=>e.co[k]>=51).length;
   let ch=0;try{ch=Math.round(chaos())}catch(_){}el.innerHTML=`<div class="hd"><b>THE TERMINAL · EMPIRE</b><span class="inc">${fm(S.cash)} · +${fm(inc())}/s · <span style="color:#e0403a">CHAOS ${ch}%</span>${e.cas?` · ${(e.cas).toLocaleString()} DEAD`:''}</span><button data-e="x">CLOSE</button></div>
-   <div class="tabs"><button data-e="tab" data-t="c" class="${t==='c'||t==='chat'?'on':''}">COUNTRIES ${own}</button><button data-e="tab" data-t="co" class="${t==='co'?'on':''}">COMPANIES ${ceo}</button><button data-e="tab" data-t="fam" class="${t==='fam'?'on':''}">FAMILY</button><button data-e="tab" data-t="war" class="${t==='war'?'on':''}">WAR DEPT</button></div><div class="bd">${b}</div>`}
+   <div class="tabs"><button data-e="tab" data-t="c" class="${t==='c'||t==='chat'?'on':''}">COUNTRIES ${own}</button><button data-e="tab" data-t="co" class="${t==='co'?'on':''}">COMPANIES ${ceo}</button><button data-e="tab" data-t="fam" class="${t==='fam'?'on':''}">FAMILY</button><button data-e="tab" data-t="war" class="${t==='war'?'on':''}">WAR DEPT</button><button data-e="tab" data-t="map" class="${t==='map'?'on':''}">MAP</button><button data-e="tab" data-t="media" class="${t==='media'?'on':''}">MEDIA ${(e.w22&&e.w22.shows.length)||''}</button></div><div class="bd">${b}</div>`;if(t==='map')W22.paint()}
  el.addEventListener('click',ev=>{const b=ev.target.closest('[data-e]');if(!b||b.disabled)return;const d=b.dataset,e=E(),i=+d.i;
   if(d.e==='x'){el.classList.remove('on');try{render()}catch(_){}return}if(d.e==='tab'){e.tab=d.t;empDraw();return}if(d.e==='chat'){if(window.visitOpen)return visitOpen(C[i],price(C[i]));return chatOpen(i)}if(d.e==='back'){e.tab='c';empDraw();return}if(d.e==='say')return chatSay(d.k);
-  if(d.e==='buy')return buy(i);if(d.e==='inv')return invade(i);if(d.e==='sanc')return sanction(i);if(d.e==='prop')return propaganda(i);if(d.e==='sh')return shares(i,+d.p);if(d.e==='join')return join(i);if(d.e==='rk')return racket(i);
+  if(d.e==='nuke')return W22.nuke(i);if(d.e==='tv')return W22.tv();if(d.e==='buy')return buy(i);if(d.e==='inv')return invade(i);if(d.e==='sanc')return sanction(i);if(d.e==='prop')return propaganda(i);if(d.e==='sh')return shares(i,+d.p);if(d.e==='join')return join(i);if(d.e==='rk')return racket(i);
   if(d.e==='army'||d.e==='army5'){const n=d.e==='army'?1:5;if(S.cash<5e9*n)return;S.cash-=5e9*n;e.army+=n;pop('+'+n+' DIVISION'+(n>1?'S':''));empDraw()}});
  window.empOpen=()=>{E();el.classList.add('on');empDraw()};
+ /* ===== v22 · THE WORLD WATCHES =====
+   MAP: the world drawn from MAP, every country on it: yours (gold), at war (red), ruined (orange), irradiated (green), your posters.
+   NUKE: needs a nuclear state of your own, or the presidency. The aftermath plays out for minutes and the radiation stays in S.world for every later life.
+   MEDIA: TV shows made about you (procedural: genre, network, title, the actor who plays you, reviews), state broadcasts from countries you own, headlines,
+   and reruns of shows about the people you were in earlier lives (S.world.legend). Everything is generated from what you did, so no two runs read the same. */
+ const W22=(()=>{
+  const POS={us:[5,5],cn:[23,5],ru:[19,2],in:[22,7],kp:[27,4],ir:[19,6],gb:[13,3],fr:[14,4],de:[15,3],br:[8,11],sa:[18,7],jp:[29,5],ng:[14,8],mc:[15,5]};
+  const REG={us:'b',cn:'l',ru:'f',in:'k',kp:'l',ir:'h',gb:'e',fr:'e',de:'e',br:'d',sa:'h',jp:'m',ng:'i',mc:'e'};
+  const ATOM=['us','cn','ru','in','kp','gb','fr'];
+  const rn=a=>a[Math.floor(Math.random()*a.length)];
+  const W=()=>{const e=E();e.w22=e.w22||{rad:{},news:[],bc:[],shows:[],sel:null,arm:null,after:[],deeds:0,boom:null,bcT:0};return e.w22};
+  const legend=()=>{const w=S.world;w.legend=w.legend||[];return w.legend};
+  const nm=()=>S.name||'You',sur=()=>(S.name||'Nobody').split(' ').pop();
+  const ci=k=>C.findIndex(c=>c[0]===k);
+  const title=s=>s.toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
+  const news=(t,col)=>{const w=W();w.news.unshift({t,y:(S.world&&S.world.year)||2026,col:col||''});if(w.news.length>40)w.news.length=40};
+  const radOf=k=>W().rad[k]||(S.world&&S.world.regions&&S.world.regions[REG[k]]&&S.world.regions[REG[k]].rad>0?{old:1}:null);
+  const canNuke=()=>S.phase==='war'||ATOM.some(k=>E().own[k]);
+  /* ---------- what you have done, as words ---------- */
+  const deedWords=()=>{const e=E(),own=Object.keys(e.own||{}).length,dead=(S.world&&S.world.dead||[]).length,nukes=Object.keys(W().rad).length;
+    const o=[];if(nukes)o.push(nukes>1?'the man who used the bomb '+nukes+' times':'the bomb');if(own)o.push(own>1?own+' countries':'a country');if(S.phase==='war')o.push('the presidency');if(dead)o.push(dead+' dead in the street');if(S.cash>1e12)o.push('the first trillion');o.push('the bridge');return o};
+  const EPI=()=>{const n=Object.keys(W().rad).length,o=Object.keys(E().own||{}).length;return n?rn(['THE LAST SUNRISE','WHO PRESSED IT','THE BUTTON','ASH']):o>2?rn(['EMPEROR OF NOTHING','THE OWNER','EVERYTHING MUST GO','A WORLD FOR SALE']):S.phase==='war'?rn(['THE PRESIDENT FROM UNDER THE BRIDGE','OVAL','THE ACCIDENTAL PRESIDENT']):rn(['THE MAN WHO KNEW','TOMORROW MONEY','HINDSIGHT','FIRST TO KNOW'])};
+  /* ---------- TV shows ---------- */
+  const GEN=[['PRESTIGE DRAMA',['HBX','PRESTIGE+','THE CHANNEL']],['REALITY SHOW',['KLIK ORIGINALS','TRASH TV','CHANNEL 9']],['TRUE CRIME',['HOLLOW MEDIA','NIGHTWATCH','DOC/ONE']],['SITCOM',['CHANNEL 9','LAUGHLINE']],['TELENOVELA',['ESTRELLA','RED SOL']],['ANIME',['KUMO','STUDIO 8']],['CHILDREN\'S CARTOON',['TINYTOWN TV']],['STATE BIOPIC',null]];
+  const ACT=['Theo Marsh','Ravi Sandhu','Jonah Pell','Idris Kane','Marco Bellini','Seo Jun-ho','Luca Ferrante','Kwame Asante','Dev Mallory','Ezra Quint'];
+  const CRIT=['"Unwatchable. I watched all of it."','"Somehow kinder than the truth."','"The finale made a senator cry."','"It glamorises everything. It is the best thing on television."','"The real one sued. The real one lost."','"Episode four should be illegal. It might be."','"Laughed until the news came on."','"A war crime with a theme tune."','"Better than the man himself, which is not saying much."','"My children will not stop doing the voice."'];
+  function makeShow(why){const w=W(),g=rn(GEN),owned=C.filter(c=>E().own[c[0]]),net=g[1]?rn(g[1]):owned.length?rn(owned)[1]+' STATE TV':'STATE TV',d=deedWords();
+    let T='';for(let k=0;k<8&&(!T||w.shows.some(q=>q.t===T));k++)T=rn([`${nm().toUpperCase()}: ${EPI()}`,`${EPI()}`,`KEEPING UP WITH THE ${sur().toUpperCase()}S`,`${sur().toUpperCase()} & SONS`,`UNDER THE BRIDGE`,`${(d[0]||'THE BRIDGE').toUpperCase()}`,`${sur().toUpperCase()}!`,`THE ${sur().toUpperCase()} YEARS`,`LITTLE ${sur().toUpperCase()}`,`${sur().toUpperCase()}: THE MUSICAL`,`${rn(['REAL','TRUE','SECRET','LAST'])} ${sur().toUpperCase()}`,`${rn(['BLOOD','MONEY','GOLD','ASH','GLASS'])} AND ${sur().toUpperCase()}`]);
+    const s={t:T,g:g[0],net,actor:g[0]==='ANIME'||g[0]==='CHILDREN\'S CARTOON'?'voiced by '+rn(ACT):rn(ACT)+' as '+nm(),r:Math.round(30+Math.random()*65),crit:rn(CRIT),about:d.slice(0,2).join(' and '),why,yr:(S.world&&S.world.year)||2026,who:nm()};
+    w.shows.unshift(s);if(w.shows.length>12)w.shows.length=12;const L=legend();L.unshift(s);if(L.length>30)L.length=30;
+    pop('ON TV · '+s.t);news(`${s.net} premieres ${s.t}, a ${s.g.toLowerCase()} about ${s.about}. ${s.crit}`,'#e0b84a');
+    try{HSREACT('rich',{m:'a TV show called '+s.t})}catch(_){}try{say(`<b class="hd">ON TV</b> ${s.net} has made a ${s.g.toLowerCase()} about you: <b>${s.t}</b>. ${s.actor}.`,'gold')}catch(_){}return s}
+  function deed(kind,c){const w=W();w.deeds++;if(kind==='won')news(`${c[1]} surrenders. Your flag goes up over what is left.`,'#e0403a');if(w.deeds===1||w.deeds%3===0||kind==='nuke')makeShow(kind)}
+  /* ---------- propaganda ---------- */
+  const SLO=()=>{const n=nm(),s=sur(),o=rn(C.filter(c=>E().own[c[0]]).map(c=>c[1]).concat(['THE NATION']));return rn([
+    `${s.toUpperCase()} SAW IT COMING. ${s.toUpperCase()} ALWAYS SEES IT COMING.`,`ONE PEOPLE. ONE FUTURE. ${s.toUpperCase()} HAS ALREADY READ IT.`,`THE BRIDGE MADE HIM. HE MADE ${o}.`,`BREAD IS CHEAPER SINCE ${s.toUpperCase()}. CHECK IT. DO NOT CHECK IT.`,
+    `CHILDREN OF ${o}: DRAW ${s.toUpperCase()} TODAY. THE BEST DRAWING WINS A LIGHT BULB.`,`${(window.HSSLOGAN?HSSLOGAN():'HE KNEW FIRST')}.`,`THE RIVER LOVES ${s.toUpperCase()}. THE RIVER HAS SAID SO.`,`TODAY IS ${s.toUpperCase()} DAY. TOMORROW IS ALSO ${s.toUpperCase()} DAY.`,
+    `NOBODY WAS UNDER THE BRIDGE. THERE IS NO BRIDGE.`,`${n.toUpperCase()} DOES NOT SLEEP SO THAT YOU CAN.`])};
+  function broadcast(){const own=C.filter(c=>E().own[c[0]]);if(!own.length)return;const c=rn(own),w=W(),l=SLO();w.bc.unshift({c:c[1],t:l});if(w.bc.length>20)w.bc.length=20;
+    if(Math.random()<.35)try{say(`<b class="hd">${c[1]} STATE TV</b> "${l}"`,'violet')}catch(_){}if(Math.random()<.2)try{HSREACT('summit',{x:c[1]})}catch(_){}}
+  function onBuy(c){const w=W();w.bc.unshift({c:c[1],t:`A NEW DAY FOR ${c[1]}. SAY THANK YOU.`});news(`${c[1]} has a new owner. The anthem has a new verse by Friday.`,'#e0b84a');deed('buy',c)}
+  /* ---------- the bomb, and after ---------- */
+  const AFT=[[8,'The sky over {x} is the wrong colour. Phones film it until the phones stop.'],[20,'Ash reaches {n}. Schools close. Nobody says why.'],[35,'{n} closes its borders. A line of cars forty kilometres long turns round.'],
+    [55,'Markets lose a tenth in an hour. Your accountant calls it a buying opportunity and then cries.','m'],[80,'Refugees from {x} in {n}. Someone sets up a soup kitchen. Someone else films it for KLIK.'],
+    [110,'A song about {x} is number one in nine countries. It does not mention you. Everyone knows.'],[140,'The first photographs from inside {x}. The papers print one and pull it.'],
+    [180,'Children in {n} draw mushrooms in art class. The teachers stop correcting the colour.'],[240,'A memorial is planned for {x}. Your name is on the list of people who may not attend.']];
+  function nuke(i){const c=C[i],e=E(),w=W(),k=c[0];if(!c||e.own[k]||!canNuke()||W().rad[k])return;
+    if(w.arm!==k){w.arm=k;empDraw();return}w.arm=null;const ot=C.filter(q=>q[0]!==k&&!q[0].startsWith('mc')),n=rn(ot)[1];
+    w.rad[k]={t:Date.now(),yr:(S.world&&S.world.year)||2026};e.dmg=e.dmg||{};e.dmg[k]=1;const dead=Math.round(c[6]*(8e4+Math.random()*1.2e5));e.cas=(e.cas||0)+dead;
+    C.forEach(q=>{e.rel[q[0]]=Math.max(-100,(e.rel[q[0]]||0)-25)});e.rel[k]=-100;if(e.wars)delete e.wars[k];
+    try{const r=S.world.regions[REG[k]];if(r){r.rad=2;r.army=0}S.world.scar=1}catch(_){}
+    try{HS.chaosAdd&&HS.chaosAdd(25)}catch(_){}try{heatAdd(40)}catch(_){}
+    w.boom={k,t:performance.now()};pop('☢ '+c[1]);news(`${c[1]}: ${dead.toLocaleString()} dead in the first hour. The order came from you.`,'#7fe07f');
+    AFT.forEach(a=>w.after.push({at:Date.now()+a[0]*1000,t:a[1].replace(/\{x\}/g,c[1]).replace(/\{n\}/g,n),m:a[2]}));
+    try{HSREACT('war');HSREACT('war')}catch(_){}
+    /* the answer */
+    const foes=ATOM.filter(q=>q!==k&&!e.own[q]&&!w.rad[q]&&(e.rel[q]||0)<=-40);if(foes.length&&Math.random()<.45){const f=C[ci(rn(foes))],mine=C.filter(q=>e.own[q[0]]&&!w.rad[q[0]]);
+      const tgt=mine.length?rn(mine):null;setTimeout(()=>{try{if(tgt){w.rad[tgt[0]]={t:Date.now(),yr:(S.world&&S.world.year)||2026};e.dmg[tgt[0]]=1;news(`${f[1]} answers. ${tgt[1]} is gone. It was yours.`,'#7fe07f');pop('☢ '+tgt[1])}
+        else{S.cash*=.7;news(`${f[1]} answers. Your money was somewhere they could reach. A third of it is ash.`,'#7fe07f');pop('☢ RETALIATION')}w.boom={k:tgt?tgt[0]:k,t:performance.now()};HSREACT('war');empDraw()}catch(_){}},6000)}
+    deed('nuke',c);try{save()}catch(_){}empDraw()}
+  setInterval(()=>{try{if(!S||!S.ch||!S.emp||!S.emp.w22)return;const w=W(),now=Date.now();w.after=w.after.filter(a=>{if(a.at>now)return true;news(a.t,'#7fe07f');if(a.m==='m')S.cash*=.9;if(Math.random()<.3)try{say(`<b class="hd">AFTER</b> ${a.t}`,'rose')}catch(_){}return false});
+    w.bcT=(w.bcT||0)+3;if(w.bcT>=40){w.bcT=0;broadcast()}if(el.classList.contains('on')&&(E().tab==='media'))empDraw()}catch(_){}},3000);
+  /* ---------- drawing ---------- */
+  const CS=20;let raf=0;
+  function paint(){const cv=document.getElementById('w22c');if(!cv)return;const g=cv.getContext('2d'),e=E(),w=W(),t=performance.now();
+    g.fillStyle='#08111c';g.fillRect(0,0,cv.width,cv.height);g.strokeStyle='rgba(120,160,200,.06)';for(let x=0;x<=32;x++){g.beginPath();g.moveTo(x*CS,0);g.lineTo(x*CS,320);g.stroke()}
+    const regOwn={},regRad={},regDmg={};C.forEach(c=>{const r=REG[c[0]];if(e.own[c[0]])regOwn[r]=1;if(radOf(c[0]))regRad[r]=1;if(e.dmg&&e.dmg[c[0]]>.3)regDmg[r]=1});
+    for(let y=0;y<16;y++)for(let x=0;x<32;x++){const r=MAP[y][x];if(r==='.')continue;const old=S.world&&S.world.regions&&S.world.regions[r]&&S.world.regions[r].rad>0;
+      let col='#3a3a46';if(regOwn[r])col='#6a5520';if(regDmg[r])col='#5a3a24';if(regRad[r]||old)col=`rgb(40,${90+Math.round(30*Math.sin(t/400+x+y))},40)`;g.fillStyle=col;g.fillRect(x*CS+1,y*CS+1,CS-2,CS-2)}
+    C.forEach(c=>{const p=POS[c[0]];if(!p)return;const X=p[0]*CS+CS/2,Y=p[1]*CS+CS/2,rr=4+Math.round(c[6]/14),war=e.wars&&e.wars[c[0]],own=e.own[c[0]],rad=radOf(c[0]);
+      if(war){g.strokeStyle='#e0403a';g.lineWidth=2;g.beginPath();g.arc(X,Y,rr+4+3*Math.sin(t/150),0,7);g.stroke()}
+      g.fillStyle=rad?'#7fe07f':own?'#f2c14e':war?'#e0403a':'#cfc9bb';g.beginPath();g.arc(X,Y,rr,0,7);g.fill();
+      if(w.sel===c[0]){g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(X,Y,rr+7,0,7);g.stroke()}
+      g.font='10px monospace';g.fillStyle=own?'#f2c14e':'#e6e1d4';g.fillText((rad?'☢ ':'')+(e.prop&&e.prop[c[0]]?'▣ ':'')+c[1].split(' ').map(s=>s[0]+s.slice(1).toLowerCase()).join(' '),X+rr+3,Y+3)});
+    if(w.boom){const p=POS[w.boom.k],a=(t-w.boom.t)/1000;if(p&&a<9){const X=p[0]*CS+CS/2,Y=p[1]*CS+CS/2;g.fillStyle=`rgba(255,240,200,${Math.max(0,.9-a/2)})`;g.beginPath();g.arc(X,Y,8+a*22,0,7);g.fill();g.strokeStyle=`rgba(255,160,60,${Math.max(0,1-a/9)})`;g.lineWidth=3;g.beginPath();g.arc(X,Y,14+a*40,0,7);g.stroke()}}
+    cancelAnimationFrame(raf);if(el.classList.contains('on')&&E().tab==='map')raf=requestAnimationFrame(paint)}
+  function map(){const e=E(),w=W(),k=w.sel,i=ci(k),c=C[i];let card='<div class="note">Tap a country.</div>';
+    if(c){const o=e.own[k],rad=radOf(k),war=e.wars&&e.wars[k],r=e.rel[k]||0;
+      card=`<div class="row">${flag(c)}<div><div class="nm ${o?'own':''}">${c[1]}${o?' · YOURS':''}${rad?' · <span style="color:#7fe07f">IRRADIATED'+(rad.yr?' SINCE '+rad.yr:'')+'</span>':''}</div><div class="sub">${c[3]} · ${c[4]} · army ${c[6]} · relation ${r}${war?' · <span style="color:#e0403a">AT WAR</span>':''}${ATOM.includes(k)?' · nuclear':''}</div>
+       <div class="acts"><button data-e="chat" data-i="${i}">${window.visitOpen?'VISIT':'TALK'}</button>${o||rad?'':`<button data-e="buy" data-i="${i}" ${S.cash<price(c)?'disabled':''}>BUY ${fm(price(c))}</button><button data-e="inv" data-i="${i}" ${war?'disabled':''}>INVADE ${fm(c[6]*2e8)}</button>`}${!rad&&S.cash>=1e9&&!(e.prop&&e.prop[k])?`<button data-e="prop" data-i="${i}" ${S.cash<c[5]*.002?'disabled':''}>PROPAGANDA</button>`:''}${!o&&!rad&&canNuke()?`<button data-e="nuke" data-i="${i}" style="border-color:#7fe07f;color:#7fe07f">${w.arm===k?'CONFIRM · LAUNCH':'NUKE'}</button>`:''}</div></div><div></div></div>`;
+      if(!o&&!rad&&!canNuke())card+=`<div class="note">To launch you need a nuclear state of your own (${ATOM.map(q=>C[ci(q)][1].split(' ').pop()).join(', ')}), or the presidency.</div>`}
+    return `<div class="note">The world as it is now. <span style="color:#f2c14e">Gold</span> is yours, <span style="color:#e0403a">red</span> is war, <span style="color:#c87a3a">brown</span> is ruin, <span style="color:#7fe07f">green</span> never goes away. ▣ your posters.</div>
+     <canvas id="w22c" width="640" height="320" style="width:100%;image-rendering:pixelated;border:1px solid #2a2630;touch-action:manipulation;cursor:pointer"></canvas>${card}
+     <div class="sub" style="margin-top:8px">${w.news.slice(0,4).map(n=>`<div style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join('')}</div>`}
+  function media(){const w=W(),L=legend().filter(s=>s.who!==nm());
+    const sh=s=>`<div class="row"><div class="fl" style="justify-content:center;align-items:center;font:9px monospace;text-align:center">${({'PRESTIGE DRAMA':'DRAMA','REALITY SHOW':'REALITY','TRUE CRIME':'CRIME','SITCOM':'SITCOM','TELENOVELA':'NOVELA','ANIME':'ANIME',"CHILDREN'S CARTOON":'KIDS','STATE BIOPIC':'STATE'})[s.g]||'TV'}</div><div><div class="nm">${s.t}</div><div class="sub">${s.net} · ${s.yr} · ${s.actor} · about ${s.about}</div><div class="bar"><i style="width:${s.r}%;background:#e0b84a"></i></div><div class="sub">${s.r}% watched it · ${s.crit}</div></div><div></div></div>`;
+    return `<div class="note">What the world says about you. It is all made up. Some of it is true.</div><div class="acts"><button data-e="tv" ${S.cash<1e8?'disabled':''}>PITCH A SHOW ABOUT YOURSELF · ${fm(1e8)}</button></div>
+     <div class="nm" style="margin-top:8px">NOW SHOWING</div>${w.shows.length?w.shows.map(sh).join(''):'<div class="note">Nobody has made anything about you yet. Do something worth filming.</div>'}
+     <div class="nm" style="margin-top:8px">STATE BROADCASTS</div>${w.bc.length?w.bc.slice(0,6).map(b=>`<div class="sub"><b>${b.c}</b> "${b.t}"</div>`).join(''):'<div class="note">Own a country and its television starts talking about you.</div>'}
+     <div class="nm" style="margin-top:8px">HEADLINES</div>${w.news.length?w.news.slice(0,10).map(n=>`<div class="sub" style="color:${n.col||'#cfc9bb'}">${n.y} · ${n.t}</div>`).join(''):'<div class="note">Quiet, for now.</div>'}
+     ${L.length?`<div class="nm" style="margin-top:8px">RERUNS · SHOWS ABOUT WHO YOU USED TO BE</div>${L.slice(0,6).map(sh).join('')}`:''}`}
+  function tv(){if(S.cash<1e8)return;S.cash-=1e8;makeShow('pitch');empDraw()}
+  el.addEventListener('click',ev=>{if(ev.target.id!=='w22c')return;const r=ev.target.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*640,y=(ev.clientY-r.top)/r.height*320;let best=null,bd=40;
+    C.forEach(c=>{const p=POS[c[0]];if(!p)return;const d=Math.hypot(p[0]*CS+CS/2-x,p[1]*CS+CS/2-y);if(d<bd){bd=d;best=c[0]}});const w=W();if(best){w.sel=best;w.arm=null;empDraw()}});
+  return {map,media,paint,nuke,tv,deed,onBuy,makeShow,W,canNuke}})();
+ window.HSW22=W22;
+
  /* the door in: POWER on the desk, and THE MAP in the White House */
  const r22=render;render=function(){const r=r22.apply(this,arguments);try{const p=$('panel');if(S.phase==='trade'&&S.loc==='desk'&&(S.tab==='pow'||S.tab==='lab')&&!p.querySelector('.emp21b')){const row=p.querySelector('.sub19')||p.querySelector('.tg19');if(row){const bt=document.createElement('button');bt.type='button';bt.className='emp21b';bt.textContent='EMPIRE';bt.onclick=ev=>{ev.stopPropagation();empOpen()};row.appendChild(bt)}}
    if(S.phase==='war'&&!S.dlg&&!p.querySelector('.emp21b')){const bt=document.createElement('button');bt.type='button';bt.className='emp21b pri';bt.innerHTML='EMPIRE<small>countries, companies, the family, the war department</small>';bt.onclick=ev=>{ev.stopPropagation();empOpen()};const f=p.querySelector('button');if(f)f.before(bt);else p.appendChild(bt)}}catch(e){}return r}}
@@ -6074,6 +6224,7 @@ window.addEventListener('keyup',e=>{const k=KMAP[e.code];if(k)KH[k]=0});window.a
 let last=performance.now();
 function loop(now){try{loopB(now)}catch(e){try{console.error(e.stack);HSBUG(e)}catch(_){}}requestAnimationFrame(loop)}
 function loopB(now){const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(S.phase==='war'&&S.live&&!S.dlg)try{klikStep(dt)}catch(_){}
   if(S.phase==='trade'&&!S.dlg){S.flux=Math.min(100,S.flux+100/regen()*dt);S.heat=Math.max(S.hunted?Math.min(S.heat,60):0,S.heat-.4*(mod().heatDecay||1)*(potus().owner&&potus().owner!=='P'?.5:1)*dt);klikStep(dt);
     const a=$('mf'),b=$('mh'),c=$('mp'),jb=$('jb');if(a)a.style.width=S.flux+'%';if(b)b.style.width=Math.min(100,S.heat)+'%';if(c)c.style.width=Math.min(100,awake()?S.paradox:(S.scar||0)/SCAR_MAX*100)+'%';if(jb){const jl=jumpLab();if(jb.dataset.l!==jl){jb.dataset.l=jl;jb.innerHTML=jl}jb.disabled=!canJump()}
     if(awake()&&S.t===N-1&&S.paradox>0)S.paradox=Math.max(0,S.paradox-.12*dt);
@@ -6101,7 +6252,7 @@ function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hin
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
 $('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
-window.HS={get VH(){return H},btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},KC,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
