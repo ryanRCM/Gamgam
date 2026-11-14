@@ -223,3 +223,46 @@ Fable played; Opus read the code behind the two blockers. Both are real, and eac
 2. Then items 3 to 5 of the Locked List (guns, punches, police): they're the first things anyone clips.
 3. Then the cold open (the guided first trade inside 40 seconds), the highest-ranked item outside "Fix first".
 4. Run a second playtest on the "Not reached yet" list above, starting with markets in depth and dying in the street. It should only start once 1 and 2 are live, so it isn't fighting broken saves.
+
+## Bugs into features: four times the impact, the other way round
+
+The rule: every bug gets fixed, and then the thing it broke becomes a feature four times as strong, pointing the other way. If a bug lost you one thing, the feature gives you four. Format: bug → the 4x feature.
+
+### Blockers
+1. CONTINUE dies after a reload → **Four save slots, each with a thumbnail and a timestamp, plus a "rewind the save" button.** Loading a save becomes a time-travel move in its own right: go back to any of your last four saves, in character ("the machine remembers four of you").
+2. SAVES shows no buttons → **Share a life.** EXPORT makes a short code, plus a postcard image showing your face, cash, title and cause of death. Anyone can paste the code and play from that moment, so a stream ends with "try my run".
+3. Reload on election night eats the fee → **The recount.** If the reload happens on election night, you get a free recount scene with four possible twists. Losing your connection turns into a story.
+4. Three characters locked → **All four playable, plus an unlock for each.** The other three characters come back as rivals in your world, and beating one unlocks them. Four characters, four rivals, four reasons to replay.
+
+### Major
+5. Keyboard walking dead in the house and field → **Full keyboard and gamepad everywhere, plus four-way dash moves** (dash, slide, vault, roll) wherever you can walk.
+6. SHIFT doesn't run → **Four speeds**: sneak, walk, run, sprint. Sneaking lowers heat and sprinting raises it, so speed becomes a choice.
+7. SHOOT misses and kills a bystander → **Aim locks onto the person you chose, and DEADEYE can mark four targets at once.** If a bystander does die, the city remembers it: a candle, a news line, a relative who comes looking later.
+8. PUNCH never lands → **A lunge, then four-hit combos** (jab, cross, hook, finisher), and the finisher triggers a slow-motion close-up that's easy to clip.
+9. "Run." does nothing → **A real chase with four ways out**: rooftops, the sewer, a taxi, or a crowd you blend into. Each escape has its own short cutscene.
+10. The camera ignores the bottom sheet → **Cinematic framing.** When a conversation opens, the camera zooms to a two-shot of you and the other person, with four shot types it picks between by mood.
+11. BACK TO THE STREET is off-screen → **Quick travel from anywhere**: one button, four favourite spots you pin yourself.
+12. The menu lists controls that don't exist → **A live controls card** that shows only what works right now, with a four-second animated demo of each move.
+13. Dev tools shown to players → **A real cheat-code system** for streamers: four named codes per character that chat can vote on, clearly marked "CHEATED" on the death screen.
+14. One tap can end the run or halve your cash → **HOLD to confirm on anything big, plus a four-second "the machine hesitates" window** where you can rewind the choice for paradox.
+15. One life in eight gets a worthless coin → **Make the dud a story.** If your coin is worthless, a stranger offers a trade, and in one life out of four that trade becomes the biggest win of the run.
+16. Sacking the press secretary is free → **Four staff with their own lives.** Every firing costs approval, and fired staff come back as leakers, rivals, authors of tell-all books, or allies.
+
+### Minor
+17. Peak fortune wrong on the death screen → **A full death recap with four graphs**: cash, fans, heat and paradox over your life, in a share image.
+18. CHIRP brags too early → **Chirp milestones that land**: four tiers of fame posts, written by four types of fans (stan, hater, journalist, bot).
+19. The same market twice on the BOARD → **Every board unique, plus four "featured" bets a day** shared by every player.
+20. Prices print twice → **One clean price, with a colour and an arrow** showing whether it's cheap, normal, pricey or a rip-off for you right now.
+21. Typos → **A copy pass, plus four newspapers**, each with its own voice, reporting what you did.
+22. The bottle sprite covers RESET → **The bottle becomes a moveable companion** you can park in four corners, and it comments on what you do.
+23. Tutorial lines clipped → **Tap to expand any line, and a log that keeps the last four lines on screen.**
+24. Desktop key hint overlaps the buttons → **A key-hint bar that fades in when you stop moving for four seconds.**
+25. EMPIRE breaks the war grid → **EMPIRE gets its own room** in the White House, with four map views: money, army, loyalty, radiation.
+26. The presidency bar is cut off → **A presidency HUD with four live dials**: approval, war, scandal, term clock.
+27. The font file is missing → **Ship the font, and four title screen looks** you unlock by playing.
+28. Heat goes past 100 → **Turn overflow into a feature.** Past 100, heat becomes "MOST WANTED", with four levels, special forces and a bounty that other players' rivals can claim.
+29. Buttons wrap with a gun out → **A radial weapon wheel with four slots**, opened by holding the weapon button.
+30. The wheel opens on the wrong person → **Tap to cycle through everyone within reach**, with up to four portraits shown.
+31. The statue page has test buttons → **Finish it as a boss fight** with four phases, or fold it into the main game.
+32. The lock game has no tell → **Four lock types** (pin, dial, keypad, safe), each with clear sound and shake tells, and a skill that grows with use.
+33. A déjà vu line on the first crisis → **Make it intentional.** On your first life it's a teaser; on every life after it, GUT tells you exactly which of four outcomes happened last time.
