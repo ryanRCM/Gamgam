@@ -8,6 +8,11 @@ Loaded into every session. Keep it short: every line here costs tokens on every 
 - `docs/INVESTOR-PLAYTEST.md` — the backlog (bugs, each with its 4x feature). `docs/LOOP-LOG.md` — one line per run.
 - Improving the game = the `hindsight-loop` skill. Follow it.
 
+## Status (locked 14 Nov 2026)
+- Hindsight Terminal **v23 is locked**: the machine is the game (see `docs/MACHINE-ESSAY.md`, `docs/DESIGN-ESSAY.md`). Live as artifact version 42.
+- Checks: `node terminal/check.mjs` (31), `node tools/syntax.cjs`, `node tools/smoke-run.cjs 1 200 phone`, `node tools/smoke-street.cjs 1 0 laptop`.
+- Next projects: Lightfoot (private repo, never here), then Ryan's 10-20 year plan.
+
 ## Token-lean rules (locked)
 - Never Read `terminal/index.html` whole; lines run to 1.6M chars. Find code with
   `node -e` + `indexOf` and print ~1 KB around the hit. `grep -o` breaks on multi-line template strings.

@@ -3396,11 +3396,18 @@ function pWH(){const w=whState(),r=whRoom(),h=whHot(),hv=v=>typeof v==='function
   <div class="row" style="grid-template-columns:repeat(5,1fr);gap:4px">${WHROOMS.map((q,i)=>`<button type="button" class="tab ${q===r?'on':''}" style="font-size:6px;padding:6px 0" data-a="whgo" data-v="${i}">${['HOME','CABINET','OVAL','PRESS','MAP ROOM'][i]}</button>`).join('')}</div>
   <button type="button" class="pri big" data-a="whact" ${h?'':'disabled'}>${h?hv(h.n):'WALK SOMEWHERE'}<small>${h?hv(h.d):'tap the picture, or a room above'}</small></button>
   <div class="note" style="color:var(--dim);font-size:18px">${w.staff.map(s=>`${ROLES[s.role].replace('THE ','')} ${s.sk}${s.loy<30?' <span class="r">!</span>':''}`).join(' · ')}</div>`}
-{const pw0=pWar;pWar=function(){return S.war.view==='map'?pw0()+'<button type="button" data-a="whback">BACK TO THE SITUATION ROOM</button>':pWH()};
+function pWH23(){const w=whState(),hv=v=>typeof v==='function'?v():v,pips='●'.repeat(Math.max(0,w.orders))+'○'.repeat(Math.max(0,3-w.orders));
+  return `<div class="who2">THE OVAL OFFICE · REMOTE · ${S.world.year} · YEAR ${w.years%4+1} OF TERM ${w.terms}</div>
+  <div class="note">You never go to Washington. The office comes to the machine: every room is a camera, every order is a button.</div>
+  <div class="read"><span class="${w.cq.length?'ro':'hi'}">ON THE DESK ${w.cq.length}</span><span>ORDERS ${pips}</span><span class="vi">PARADOX ${Math.round(S.paradox||0)}%</span></div>
+  ${WHHOT.map((h,i)=>`<button type="button" class="${i===2&&w.cq.length?'pri ':''}card" data-a="wh23" data-v="${i}">${['THE RESIDENCE','THE CABINET ROOM','THE OVAL OFFICE','THE BRIEFING ROOM','THE SITUATION ROOM'][h.r]||''} · ${hv(h.n)}<small>${hv(h.d)}</small></button>`).join('')}
+  <div class="note" style="color:var(--dim);font-size:18px">${w.staff.map(s=>`${ROLES[s.role].replace('THE ','')} ${s.sk}${s.loy<30?' <span class="r">!</span>':''}`).join(' · ')}</div>`}
+{const pw0=pWar;pWar=function(){return S.war.view==='map'?pw0()+'<button type="button" data-a="whback">BACK TO THE SITUATION ROOM</button>':pWH23()};
  $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled||!S.war||S.phase!=='war')return;const a=b.dataset.a,w=S.war;
    if(a==='whgo'){const r=WHROOMS[+b.dataset.v],hs=WHHOT.find(h=>WHROOMS[h.r]===r);w.tx=r.x+(hs?hs.x:r.w/2);w.auto=-1;sfx('tick')}
    else if(a==='whact'){const h=whHot();if(h){sfx('ok');h.act();if(S.phase==='war'&&!S.dlg){save();render()}}}
-   else if(a==='whback'){w.view=null;render()}});
+   else if(a==='whback'){w.view=null;render()}
+   else if(a==='wh23'){const h=WHHOT[+b.dataset.v];if(h){sfx('ok');h.act();if(S.phase==='war'&&!S.dlg){save();render()}}}});
  scr.addEventListener('pointerdown',e=>{if(!whOn()||S.dlg)return;e.stopImmediatePropagation();e.preventDefault();audioStart();const r=scr.getBoundingClientRect(),w=S.war;w.tx=clamp(WHT+(e.clientX-r.left)/r.width*320,14,WH_W-14);const hi=WHHOT.findIndex(h=>Math.abs(WHROOMS[h.r].x+h.x-w.tx)<16);w.auto=hi;if(hi>=0)w.tx=WHROOMS[WHHOT[hi].r].x+WHHOT[hi].x},true)}
 let WHL=0,WHN=null;
 function drawWH(now){const w=whState(),dt=Math.min(.1,(now-(WHL||now))/1000);WHL=now;
@@ -6788,6 +6795,7 @@ setInterval(()=>{try{if(!S||!S.ch||S.phase!=='trade')return;if(S.heat>=70&&!S.hw
    hands outside: hire, send, wait for the report, hope they come back loyal), BUILDING (the flats you let: tenants, dossiers,
    the ministry's daily directive, report or protect, and someone is watching you too), and THIS ROOM. */
 const ROOM23=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ {const d5=draw;draw=function(now){d5(now);try{if(S&&S.phase==='war'&&S.war&&S.war.view!=='map'&&!(typeof wmode==='function'&&wmode())){g.fillStyle='rgba(0,0,0,.6)';g.fillRect(4,4,118,11);g.fillStyle='#ef5d75';g.fillRect(8,7,5,5);g.fillStyle='#fff';g.font='8px monospace';g.fillText('LIVE · WHITE HOUSE CAM '+(1+Math.floor(now/6000)%5),16,12)}}catch(_){}}}
  const ROOMS={house:['THE HOUSE IN THE FIELD','A crate, a car battery, the dog asleep on your foot. Full access. No protection.'],
   cell:['A CELL · PRECINCT 9','The machine is taped under the bunk. Ninety seconds of screen before the guard comes past. Bribe him for more, or serve your time.'],
   cabin:['A CABIN, NO ADDRESS','A kitchen table, a slow satellite link, pines. No KLIK: a stream would give you away. Heat cools twice as fast.'],
@@ -6836,6 +6844,7 @@ const DESK23=(()=>{const P=a=>a[Math.floor(R()*a.length)],nm=()=>P(FIRST)+' '+P(
  function feeds(){const w=S.world||{},x=(S.emp&&S.emp.w22)||{},sh=(w.legend||[])[0],ppl=(w.people||[]).slice(0,8);
    setTimeout(()=>{const box=document.getElementById('feeds23');if(box)try{CAMS22.mount(box)}catch(_){}},0);
    return `<div class="app lab"><div class="sec">FEEDS · LIVE FROM EVERYWHERE YOU ARE NOT</div><div id="feeds23"></div>
+    ${(()=>{const A=S.ag23,now=Date.now();if(!A||!A.list.length)return '';const out=A.list.filter(a=>a.busy>now&&!a.gone);const SEE=['on a bus, hood up','outside a house with the lights off','in a lift with someone important','on a bench, pretending to read','at a bar, buying the wrong person a drink','walking very fast'];return `<div class="sec" style="margin-top:6px">YOUR PEOPLE OUT THERE</div>`+(out.length?out.map(a=>`<div class="read"><span>● ${a.n} · ${a.role}</span><span>${SEE[(a.id+Math.floor(now/8000))%SEE.length]}</span></div>`).join(''):'<div class="note">Nobody out on a job. Everyone is back, or gone.</div>')+A.log.slice(0,2).map(l=>`<div class="note">${l}</div>`).join('')})()}
     <div class="sec" style="margin-top:6px">THE STREET OUTSIDE</div>${ppl.map(p=>`<div class="read"><span>${p.n}${p.alive?'':' †'}</span><span>${p.alive?(p.occ||p.job||'walking'):'remembered'}</span></div>`).join('')||'<div class="note">Nobody out there yet.</div>'}
     <div class="sec" style="margin-top:6px">THE TV IN THE CORNER</div><div class="note">${sh?`${sh.net} is showing <b>${sh.t}</b>. ${sh.actor}.`:'Snooker. Then the news. Then snooker.'}</div>
     ${(x.news||[]).slice(0,3).map(n=>`<div class="note" style="color:${n.col||'inherit'}">${n.y} · ${n.t}</div>`).join('')}</div>`}
