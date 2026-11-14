@@ -1,0 +1,26 @@
+{
+  "id": "independent_theatre",
+  "name": "The Afterlight Theatre",
+  "fictional": true,
+  "purchase_price": 3000,
+  "starting_demo_cash": 5000,
+  "ticket_price": 15,
+  "capacity": 80,
+  "rehearsal_gain": 20,
+  "performance_cost": 100,
+  "states": [
+    "for_sale",
+    "owned",
+    "rehearsing",
+    "ready",
+    "performing",
+    "curtain_call"
+  ],
+  "actions": [
+    "buy",
+    "rehearse",
+    "perform"
+  ],
+  "real_rada_purchase": false,
+  "economy": "fictional prototype balancing values, not real venue prices"
+}

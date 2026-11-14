@@ -1,0 +1,23 @@
+{
+  "frame_width": 32,
+  "frame_height": 48,
+  "frame_count": 4,
+  "frame_durations_ms": [
+    450,
+    900,
+    600,
+    450
+  ],
+  "loop": false,
+  "events": [
+    {
+      "frame": 1,
+      "event": "line_delivery"
+    },
+    {
+      "frame": 2,
+      "event": "applause"
+    }
+  ],
+  "status": "generated_key_pose_sequence"
+}

@@ -1,0 +1,49 @@
+{
+  "wealthThresholds": [
+    100000,
+    500000,
+    1000000
+  ],
+  "arena": [
+    24,
+    616
+  ],
+  "groundY": 184,
+  "player": {
+    "maxHP": 100,
+    "maxStamina": 100,
+    "speed": 110,
+    "damage": 14,
+    "range": 68,
+    "attackDuration": 0.48,
+    "attackContact": 0.18,
+    "attackCost": 12,
+    "dodgeCost": 25,
+    "dodgeDuration": 0.32,
+    "dodgeSpeed": 245
+  },
+  "boss": {
+    "maxHP": 168,
+    "speed": 27,
+    "phaseTwoAt": 0.5,
+    "slam": {
+      "windup": 0.9,
+      "active": 0.12,
+      "recovery": 0.95,
+      "reach": 80,
+      "damage": 22
+    },
+    "sweep": {
+      "windup": 1.15,
+      "active": 0.16,
+      "recovery": 1.1,
+      "reach": 118,
+      "damage": 16
+    }
+  },
+  "ending": {
+    "id": "hollow_truth_unofficial_capitalism",
+    "title": "The Hollow Truth",
+    "subtitle": "Unofficial Capitalism Ending"
+  }
+}
