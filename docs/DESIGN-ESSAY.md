@@ -48,12 +48,12 @@ KLIK chat is a grammar rather than a list: openers × context-chosen cores (each
 
 ## 6. Four people, four games
 
-All four characters are open from the first life, each with a different silhouette and colour, a different opening line, and different reactions from the street.
+All four characters are open from the first life. The pick screen shows each as a painted portrait with a full backstory and a description of how they look; bodies are saved for the street. Each has a different silhouette and colour, a different opening line, and different reactions from the street.
 
-- **Dax, the Narcissist.** A film star. THE SET: auditions decided by CHARM (wired helps, drunk does not), roles with procedural titles and directors, premieres with review scores. A great one gets a TV show made about it.
-- **Ilse, the Paranoid.** Heat builds slower and aides never leak. The world reads her as someone being watched, because she is.
-- **Tomo, the Insomniac.** A fighter and a footballer. THE ARENA: three-round cage fights against named opponents with styles you have to read (strike beats grapplers, grapple beats strikers, guard beats wrestlers), football matches with three moments, a belt at five wins, a club that signs you. Performance drugs make you stronger and get tested.
-- **Boba, the Gambler.** A yogi of the absurd: calm when he loses, kind when he wins, buying the dip with his eyes closed. Chat calls him the zen gambler.
+- **Dax Moreau, THE ACTOR.** Famous at nine for a cereal advert and at twenty-two for a war film everyone quotes; at thirty he punched a director on a red carpet and the work stopped. A narcissist at heart: white suit, gold quiff, shades indoors. THE SET: auditions decided by CHARM (wired helps, drunk does not), roles with procedural titles and directors, premieres with review scores. A great one gets a TV show made about it.
+- **Ilse Varga, THE PARANOID.** She wrote surveillance software for a government she won't name, watched it turned on people she loved, and deleted herself. Heat builds slower and aides never leak. The world reads her as someone being watched, because she is.
+- **Tomo Achebe, THE FIGHTER.** Raised above a boxing gym, cut from a football academy at seventeen, nine and nothing in the cage until a test he swears he never failed. Hasn't slept a full night since. His fists do nearly double. THE ARENA: three-round cage fights against named opponents with styles you have to read (strike beats grapplers, grapple beats strikers, guard beats wrestlers), football matches with three moments, a belt at five wins, a club that signs you. Performance drugs make you stronger and get tested.
+- **Boba Glober, THE GAMBLER.** Won forty grand on a horse called Hindsight at nineteen and has chased the feeling ever since. A yogi of the absurd: calm when he loses, kind when he wins, buying the dip with his eyes closed. Chat calls him the zen gambler.
 
 ## 7. Substances: specific, and each with a voice
 
@@ -67,6 +67,8 @@ Every substance changes the rules, and talks while it does, like EVERCLEAR the b
 ## 8. The world, procedural so it replays forever
 
 EMPIRE's MAP draws the world tile by tile: what you own (gold), war (red), ruin (brown), radiation (green, permanent), your posters. Tap a country to visit, buy, invade, put up propaganda, or nuke it, if you hold a nuclear state or the presidency. A nuke plays out over minutes: ash, closed borders, a market crash, refugees, a number-one song that never mentions you, a memorial you may not attend. A nuclear rival may answer. The radiation is written into the world, so every later life inherits it.
+
+The title menu has WORLD CAMS: live, animated feeds of city centres drawn from your world as it is, with thinner crowds after wars, green empty squares after bombs, your posters where you rule, statues of the people you used to be, and captions from the latest news. They change from life to life.
 
 MEDIA lists the TV shows made about you: genre, network, title, the actor who plays you, a review and a rating, each with its own painted pixel poster. It also carries the state broadcasts from countries you own, the headlines, and reruns of shows about who you used to be. Everything is generated from what you did, so two runs never read the same.
 
