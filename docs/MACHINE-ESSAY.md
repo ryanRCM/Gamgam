@@ -33,6 +33,19 @@ The machine boots into a cracked, flickering desktop. Everything is a window:
 
 The room is the only physical space, and it reacts. The window shows the world getting worse or better. The dog sleeps or paces. Post piles up, and some of it ticks. The TV in the corner runs the shows made about you. Knocks at the door are events: police, a fan, a process server, an assassin, your old self. The substances still live in the cupboard, and salvia still opens a whole other game. Your body is the meter you can't trade away: hunger, sleep, health, age, paranoia.
 
+## 4b. One chair, many rooms
+
+The constant is **you, sat down, at the machine.** Where the desk is changes everything around it. Your life decides where you end up sitting, and each place reskins the room, changes the rules, and changes what reaches the screen:
+
+- **The house in the field.** The start: a crate, a car battery, the dog. Full access, no protection.
+- **A prison cell.** Arrested? You still have the machine, smuggled in and taped under the bunk. One hour of screen time a day, guards walking past, a cellmate who wants in. Bribe the guard for longer sessions. The feeds can show your own trial.
+- **A cabin in the woods.** Hiding, or HUNTED. A slow satellite connection, no KLIK (it would give away where you are), very good for watching other people.
+- **A bunker.** After the bombs. The feeds are mostly green. The phone rings less. The machine is the last bright thing on Earth.
+- **The Oval Office.** President, but still sat at the same gutted laptop on a much better desk. The cabinet is on the other screens. The leaks are worse.
+- **A hospital bed, a yacht, a tower penthouse, a lock-up under the arches, an orbital station, a ship between planets.** Each is a desk with its own view, its own interruptions and its own limits.
+
+Moving between them is the story: you don't walk there, you are taken, you flee, or you buy your way in, and the next scene opens with you sitting down again. The room is the level, and the interface is the game.
+
 ## 5. Agents instead of legs
 
 You don't punch anyone in v23. You **order** it, or pay for it, or prevent it. Each agent is a procedural person with loyalty, competence, a temper and a life of their own. Send the fixer to buy a judge and you get a report back: maybe the judge, maybe a photo of your fixer in handcuffs, maybe a fixer who has started working for someone else. The consequences system writes their stories, and the credits remember them. Strategy shifts from aim to judgement: who you trust, how much you tell them, what you can see on the feeds to check their work.
@@ -48,6 +61,7 @@ Everything from v22 stays: real money and inflation, the currency vacuum, conseq
 ## 8. What changes, concretely
 
 - The title opens on the room and the boot screen, not the bridge.
+- The desk travels: house, prison cell, cabin, bunker, Oval Office and beyond (section 4b). Each place is a reskin with its own rules, and you always arrive sitting down.
 - The street, the house walk and the field are removed as places you control. Their systems keep running as simulation, and their stories reach you through feeds, calls, posts and agents.
 - New windows: FEEDS, PHONE, AGENTS, OVAL (remote).
 - Existing panels (desk, KLIK, EMPIRE, MEDIA, THE NET, the machine) become windows on one desktop that you can tile on a laptop or swipe between on a phone.
