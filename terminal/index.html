@@ -5289,6 +5289,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
 #panel.t21>button:hover,#panel.t21>button:active{border-left-color:#c85a5a!important;color:#fff!important}
 body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{display:none!important}
 #panel .emp21b{grid-column:1/-1;width:100%;white-space:normal}
+html:not(.pc) .pckeys{display:none}
 #panel.t21 .more21{display:none}#panel.t21.open .more21{display:block}
 #panel.t21 .vtag{font:11px monospace;color:#5d5866;padding:6px 12px}`;document.head.appendChild(st);
  const MORE=['dev','voice','xboss','xgames'];
@@ -6438,7 +6439,50 @@ DLG._jwin=()=>JOB22.result(true);DLG._jlose=()=>JOB22.result(false);
 $('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="job"]');if(!b||b.disabled)return;const v=b.dataset.v;audioStart();
   if(v==='fight')return JOB22.fight();const t=v==='aud'?JOB22.role():v==='prem'?JOB22.prem():v==='match'?JOB22.match():'';if(t)say(t,'gold');save();render()});
 
-window.HS={get VH(){return H},KC,R22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+/* ===== v22 · THE ECONOMY IS THE GAME =====
+   NEWS: every few seconds a headline lands on one asset and moves its future (from where you stand in time).
+         What you memorised can drift. Read the news, then decide whether the future you saw still holds.
+   MANIPULATE: PUMP (hype it), RUMOUR (a fake scandal), SPOOF (fake orders move the price you trade at now),
+         GLITCH (the machine leans on the chart: big, visible, dangerous). Each raises SEC suspicion.
+   SEC at 100: an investigation. Pay, lie, or run.
+   KEYS at the desk: ←/→ move in time · J jump · B buy all · V buy half · S sell · H short · C cover · Q/E asset
+         P pump · U rumour · O spoof · G glitch. */
+const ECO22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const UP=['{s} beats every forecast. Analysts apologise on air.','{s} signs a government contract nobody can explain.','A celebrity is photographed using {s}. It sells out in an hour.','{s} announces a buyback. The chairman is seen smiling, which is new.','Leaked memo: {s} has "something huge". Nobody knows what.','{s} survives a recall that should have killed it.'],
+  DN=['{s} CEO arrested at an airport with three passports.','{s} recalls everything it made this year.','A short-seller publishes 90 pages on {s}. Page 41 is a photo.','{s} misses earnings by a number that has its own Wikipedia page.','Regulators raid {s}. They bring boxes. They need more boxes.','{s} factory fire. The smoke spells something rude.'];
+ const E=()=>{S.eco=S.eco||{sec:0,nT:6,log:[],pumps:0,glitch:0};return S.eco};
+ function shock(a,f,from,len,decay){for(let j=0;j<len&&from+j<N;j++){const d=Math.pow(decay,j);S.mk[a][from+j]*=1+(f-1)*d;S.warp[a][from+j]+=Math.abs(Math.log(f))*d*.6}}
+ function news(){if(!S.mk||!S.ch)return;const a=Math.floor(R()*ASSETS.length),up=R()<.5,m=.06+R()*(.25+ (ASSETS[a].amp||.3)*.3),f=up?1+m:1/(1+m),sym=ASSETS[a].sym,t=P(up?UP:DN).replace('{s}',sym);
+   shock(a,f,Math.min(N-1,(S.t||0)+1),14,.88);const e=E();e.log.unshift({t,up,sym,q:qlab(S.t||0)});if(e.log.length>12)e.log.length=12;
+   try{say(`<b style="color:${up?'#3ddc84':'#ef5d75'}">${up?'▲':'▼'} ${sym} ${Math.round(m*100)}%</b> ${t}`,up?'cyan':'rose')}catch(_){}
+   try{const w=S.emp&&S.emp.w22;if(w){w.news.unshift({t:`${qlab(S.t||0)} · ${t}`,y:(S.world&&S.world.year)||2026,col:up?'#3ddc84':'#ef5d75'});if(w.news.length>40)w.news.length=40}}catch(_){}
+   try{if(R()<.3)post(up?'pump':'dump',{a:sym,q:qlab(S.t||0)})}catch(_){}}
+ setInterval(()=>{try{if(!S||S.phase!=='trade'||S.dlg||!S.ch)return;const e=E();e.nT-=1;if(e.nT<=0){e.nT=7+Math.floor(R()*8);news();if(S.loc==='desk')render()}if(e.sec>0)e.sec=Math.max(0,e.sec-.15)}catch(_){}},1000);
+ function sec(n){const e=E();e.sec=Math.min(100,e.sec+n*(mod().heat||1));if(e.sec>=100&&!S.dlg){e.sec=60;openD('sec22')}}
+ const cost=()=>Math.max(500,S.cash*.05);
+ function pump(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,fam=Math.log10(10+(S.fame||0)),f=1+.08*fam*(1+R()*.5);shock(a,f,Math.min(N-1,S.t+1),8,.8);E().pumps++;sec(14);heatAdd(6);try{hype(25,'PUMP');post('pump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}say(`You flood CHIRP about ${ASSETS[a].sym}. ${fmt(c)} on bots and a man in a suit. The next few quarters lift ${Math.round((f-1)*100)}%.`,'gold');done()}
+ function rumour(){const c=cost();if(S.cash<c)return;S.cash-=c;const a=S.asset,f=1/(1+.09*Math.log10(10+(S.fame||0))*(1+R()*.5));shock(a,f,Math.min(N-1,S.t+1),8,.8);sec(18);heatAdd(8);try{post('dump',{a:ASSETS[a].sym,q:qlab(S.t)})}catch(_){}say(`A rumour about ${ASSETS[a].sym}'s chairman and a goat. False. Effective. The next few quarters sag ${Math.round((1-f)*100)}%.`,'rose');done()}
+ function spoof(){if(S.flux<20)return say('Not enough flux to spoof. Spoofing is just a jump you never take.','rose');S.flux-=20;const a=S.asset,up=R()<.5?1:-1,f=1+up*(.1+R()*.15);S.mk[a][S.t]*=f;S.warp[a][S.t]+=.6;sec(10);say(`Ghost orders flicker on ${ASSETS[a].sym}. The price you can trade at right now is ${up>0?'up':'down'} ${Math.round(Math.abs(f-1)*100)}%. It will snap back.`,'violet');done()}
+ function glitch(){const a=S.asset,e=E();e.glitch++;const f=R()<.6?1.4+R()*1.6:1/(1.4+R());shock(a,f,S.t,6,.7);for(let j=0;j<N;j++)S.warp[a][j]+=.4*R();try{scarAdd(2);pdx&&awake()&&pdx(6)}catch(_){}sec(26);flash('jump');sfx('jump');
+   say(f>1?`The chart tears. ${ASSETS[a].sym} jumps ${Math.round((f-1)*100)}% through a hole in the timeline. Somewhere a trader faints.`:`The chart tears the wrong way. ${ASSETS[a].sym} falls ${Math.round((1-1/f)*100)}% into a hole you made.`,'violet');
+   if(e.glitch%4===0){shock(Math.floor(R()*ASSETS.length),.6,Math.min(N-1,S.t+1),10,.9);say('Too many tears. The market corrects itself somewhere else, violently.','rose')}done()}
+ function done(){try{save();render()}catch(_){}}
+ function panel(){const e=E(),c=cost(),s=Math.round(e.sec);return `<div class="app mkt" style="margin-top:6px"><div class="sec">MANIPULATE · SEC SUSPICION <span style="color:${s>70?'#ef5d75':s>40?'#f2c14e':'#3ddc84'}">${s}%</span></div>
+  <div class="row r4"><button type="button" class="tk" data-a="eco" data-v="pump" ${S.cash<c?'disabled':''}>PUMP<small>${fmt(c)} · P</small></button><button type="button" class="tk" data-a="eco" data-v="rumour" ${S.cash<c?'disabled':''}>RUMOUR<small>${fmt(c)} · U</small></button><button type="button" class="tk" data-a="eco" data-v="spoof" ${S.flux<20?'disabled':''}>SPOOF<small>20 flux · O</small></button><button type="button" class="tk" data-a="eco" data-v="glitch">GLITCH<small>scars · G</small></button></div>
+  ${e.log.slice(0,3).map(n=>`<div class="note" style="color:${n.up?'#8fd8ae':'#f0a0ae'}">${n.q} · ${n.t}</div>`).join('')}
+  <div class="note pckeys" style="font-size:15px">KEYS ←/→ time · J jump · B buy all · V half · S sell · H short · C cover · Q/E asset · P U O G tricks</div></div>`}
+ return {panel,pump,rumour,spoof,glitch,news,shock}})();
+{const pm0=pMarket;pMarket=function(){return pm0()+ECO22.panel()}}
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="eco"]');if(!b||b.disabled)return;audioStart();ECO22[b.dataset.v]()});
+DLG.sec22=()=>({who:'SEC · ENFORCEMENT DIVISION',text:`Two people in grey suits and one in a worse one. "We have been watching ${ASSETS[S.asset].sym}. We have been watching you."`,th:[['LOGIC',3,'They have the chat logs. They do not have the machine.'],['GUT',4,'The one in the worse suit wants to be bribed.']],
+ opts:[{t:'Settle. Pay the fine.',cost:()=>Math.round(S.cash*.25),ok:()=>{S.eco.sec=0;return 'A quarter of everything, no admission of wrongdoing, and a press release with your name spelled wrong.'}},
+  {t:'"It was an intern."',check:['CHARM',9],ok:()=>{S.eco.sec=20;return 'They want it to be an intern. It is an intern. The intern is very surprised.'},fail:()=>{S.cash*=.5;S.eco.sec=50;return 'There is no intern. Half your money is frozen while they find one.'}},
+  {t:'Slide an envelope to the worse suit.',cost:()=>Math.round(S.cash*.1),check:['NERVE',8],ok:()=>{S.eco.sec=0;heatAdd(10);return 'The worse suit loses a folder. You lose an envelope.'},fail:()=>{die('prison');return ''}}]});
+addEventListener('keydown',ev=>{if(!(S&&S.phase==='trade'&&S.loc==='desk'&&!S.dlg&&!S.cus&&S.tab==='mkt'))return;if(ev.target&&/INPUT|TEXTAREA/.test(ev.target.tagName))return;if(ev.ctrlKey||ev.metaKey||ev.altKey)return;const c=ev.code,go=f=>{ev.preventDefault();f()};
+ if(c==='ArrowLeft')go(()=>setCur(S.cur-1));else if(c==='ArrowRight')go(()=>setCur(S.cur+1));else if(c==='KeyJ')go(()=>doJump());else if(c==='KeyB')go(()=>doBuy(1));else if(c==='KeyV')go(()=>doBuy(.5));else if(c==='KeyS')go(()=>doSell());else if(c==='KeyH')go(()=>doShort());else if(c==='KeyC')go(()=>doCover());
+ else if(c==='KeyQ'||c==='KeyE')go(()=>{S.asset=(S.asset+(c==='KeyE'?1:ASSETS.length-1))%ASSETS.length;render()});else if(c==='KeyP')go(ECO22.pump);else if(c==='KeyU')go(ECO22.rumour);else if(c==='KeyO')go(ECO22.spoof);else if(c==='KeyG')go(ECO22.glitch)});
+
+window.HS={get VH(){return H},KC,R22,ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
