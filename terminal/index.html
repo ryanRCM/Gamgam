@@ -438,7 +438,7 @@ const goal=()=>1e9*Math.pow(4,S.gen-1),fgoal=()=>1e6*(1+.5*(S.gen-1));
 const regen=()=>sv('coil')*(S.scrap?1.5:1)/(mod().flux||1)/(S.fxs.wired>0?1.5:1);
 const qlab=i=>'Q'+(i%4+1)+' '+(S.world.year-14+Math.floor(i/4));
 const jcost=()=>Math.round(15+70*Math.abs(S.cur-S.t)/(N-1));
-const canJump=()=>S.cur!==S.t&&S.cur>=N-1-sv('tether');
+const canJump=()=>!(S.world&&S.world.broken)&&S.cur!==S.t&&S.cur>=N-1-sv('tether');
 const forceP=()=>Math.max(0,Math.ceil((jcost()-S.flux)/4));
 const memCap=()=>sv('memory')+(S.flags.key?1:0)+(S.flags.seen?1:0)+(S.flags.balloon||0);
 const owner=()=>{const r=S.world.rulers.filter(x=>x.years>0);return S.gen===1||!r.length?'CASSIUS VANE':'THE '+r[r.length-1].name.split(' ')[1].toUpperCase()+' ESTATE'};
@@ -460,7 +460,7 @@ function genMarket(seed){const r=rng(seed),v=x=>Array.isArray(x)?x[0]+r()*(x[1]-
     ev.push({id:id++,q,k:T.k,title:T.t[j],out:T.o[j],odds:Math.round(T.odds[0]+r()*(T.odds[1]-T.odds[0])),used:0,stake:0,done:false})}
   crash.forEach(c=>ev.push({id:id++,q:c,k:'crash',title:'Market panic',out:'everything falls for two quarters',odds:9,used:0,stake:0,done:false}));
   ev.sort((a,b)=>a.q-b.q);return {mk,ev}}
-function beginLife(chId){const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
+function beginLife(chId){try{ERA22.apply()}catch(_){}const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
   const sk={tether:0,coil:0,cloak:0,memory:0,pool:0};let scrap=false;
   if(prev){if(w.machine==='hidden')for(const k in sk)sk[k]=Math.floor((prev[k]||0)/2);
     else if(w.machine==='public')for(const k in sk)sk[k]=Math.min(1,SK[k].cost.length);else scrap=true}
@@ -1339,7 +1339,7 @@ function resolve(){S.ev.forEach(e=>{if(!e.used||e.done||e.q>S.t)return;e.done=tr
     say(`${e.title}: ${e.out}. Your bet pays ${fmt(win)}.`,'gold');post('bet',{o:e.odds})}
   else{const f=fameAdd(600*Math.exp(.11*e.q)*e.odds/4);heatAdd(5);say(`${e.title}: ${e.out}. Your video called it. +${fnum(f)} fans.`,'cyan');post('vid',{e:e.title})}})}
 function track(){if(S.cash>S.peak)S.peak=S.cash;wealth();if(S.towerQ==null&&S.cash>=1e6){S.towerQ=S.t;say('A tower with your name on it now stands in the city. It always has.','gold');post('tower')}}
-function doJump(){if(!canJump())return;const fp=forceP();if(fp){S.flux=0;if(awake()){pdx(fp);say(`Not enough flux. You forced it. Paradox +${fp}.`,'violet')}else{heatAdd(fp);say(`Not enough flux. You forced it and browned out half the county. Heat +${fp}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
+function doJump(){if(!canJump())return;const fp=forceP();try{MACH22.use(fp>0)}catch(_){}if(fp){S.flux=0;if(awake()){pdx(fp);say(`Not enough flux. You forced it. Paradox +${fp}.`,'violet')}else{heatAdd(fp);say(`Not enough flux. You forced it and browned out half the county. Heat +${fp}.`,'rose')}}else S.flux-=jcost();const d=S.cur;
   if(d!==N-1&&S.vis[d]){if(awake()){const rv=mod().revisit||20;pdx(rv);say(`You have been to ${qlab(d)} before. You nearly saw yourself. Paradox +${rv}.`,'violet')}else if(!S.flags.rv){S.flags.rv=1;say(`You have been to ${qlab(d)} before. Harmless, for now. Once the timeline is damaged, this is how you meet yourself.`,'violet')}}
   if(d!==N-1)S.vis[d]=1;
   const lost=S.mem.filter(id=>{const e=S.ev.find(x=>x.id===id);return e.done||e.used});S.mem=S.mem.filter(id=>!lost.includes(id));
@@ -1478,7 +1478,7 @@ function afterlife(keep){const Wd=S.world,cause=S.dead.cause,sur=S.name.split(' 
     for(let i=0;i<4&&live.length>5;i++){const k=live.splice(Math.floor(R()*live.length),1)[0];reg(k).rad=2;reg(k).owner=null;reg(k).army=0}}
   if(IDS.some(k=>reg(k).rad))Wd.scar=1;
   const left=mine();if(left.length){Wd.blocs.push({name:sur+' Dynasty',color:BLOC_COL[Wd.blocs.length%BLOC_COL.length]});left.forEach(k=>reg(k).owner=Wd.blocs.length-1)}
-  Wd.year+=15+Math.floor(R()*10);
+  Wd.year+=ERA22.gap(Wd);
   /* the soul comes back, and the world gets worse for it */
   const st0=STAGES[stageI()][1];Wd.chaos=Math.min(100,(Wd.chaos||0)+4+S.gen*1.2+(['shot','blown','nuke','uprising','assassin','casino'].includes(cause)?3:0));
   if(Wd.people&&Wd.homes&&Wd.homes.civ&&Wd.homes.civ.length){const nb=Math.max(0,Math.round(5-Wd.chaos/18));for(let i=0;i<nb;i++){const h=pick(Wd.homes.civ);Wd.people.push({id:Wd.pid=(Wd.pid||200)+1,n:pick(FIRST)+' '+pick(LASTN),job:'civ',key:'',hx:h[0],hy:h[1],seed:Math.floor(R()*1e9),alive:1,yr:Wd.year})}
@@ -5730,7 +5730,7 @@ body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-ite
 
 /* ================= v22 · SECOND PLAYTEST ================= */
 /* title menu: NEW LIFE, SAVES, ROADMAP. everything else lives in More */
-{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{document.body.classList.toggle('dev',!!DEV);document.body.classList.toggle('pick22',S.phase==='pick'&&!S.cus);document.querySelectorAll('.pf22').forEach(c=>{const x=CHARS[+c.dataset.i],g2=c.getContext('2d');g2.fillStyle=PAPER;g2.fillRect(0,0,32,32);try{faceF(g2,lookOf(x.look),16,16.5,1.72,0,false)}catch(_){}});const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
+{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{document.body.classList.toggle('dev',!!DEV);document.body.classList.toggle('pick22',S.phase==='pick'&&!S.cus);try{const pl=ERA22.planet();scr.style.filter=pl.hue?`hue-rotate(${pl.hue}deg) saturate(${pl.sat})`:''}catch(_){}document.querySelectorAll('.pf22').forEach(c=>{const x=CHARS[+c.dataset.i],g2=c.getContext('2d');g2.fillStyle=PAPER;g2.fillRect(0,0,32,32);try{faceF(g2,lookOf(x.look),16,16.5,1.72,0,false)}catch(_){}});const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
 /* the roadmap: a picture you can read in five seconds, and the systems behind the game */
 {const SYS=[['Reaction engine','Every action becomes posts, quote-posts, videos and memes from 13 kinds of people with faces',70],['Takedown stage','Menu-picked kills play as staged close-ups with voices',65],['Procedural bodies','One pixel body for everyone: walk, fight, fall, smoke, drink, injure',60],['Living street','Witnesses with memory, needs, routines, police calls',55],['Markets and shorts','Price paths, depth, shorts that age into legends',60],['RAKE and bookies','Mines to the last tile, banks you can break, lawsuits, snipers',50],['Presidency','White House rooms, crises, terms, re-election',70],['State visits','Parody capitals, leaders as boss fights, deals that change the country',45],['Wars and ruins','Wars you can visit before, during and after; damage that stays',40],['Propaganda','Your face on every wall once you are rich enough, slogans from what you did',35],['Body and needs','Injuries, bleeding, treatment, hunger, sleep, drink, drugs',55],['Streaming','KLIK: webcam at home, camera outside, a chat that reacts',50],['8-head sprite bible','Every character rebuilt on realistic 8-head pixel proportions',10],['Procedural cities','Streets, rooms and countries generated from a few rules',30],['Procedural dialogue','Tens of thousands of lines from small grammars, never the same twice',40]];
  const css=document.createElement('style');css.textContent=`.rm22 h4{font:700 11px HSPixel,monospace;letter-spacing:.22em;color:#8a8494;margin:16px 0 8px}.rm22 .tl{position:relative;padding-left:18px;border-left:2px solid #2a2630}
@@ -6177,7 +6177,7 @@ function pDead(){const d=S.dead,c=CAUSE[d.cause],rs=S.world.rulers.slice(-4).rev
   <div class="list">${d.years?`<div>Ruled <b>${d.years}</b> years · peak <b>${d.peak}</b>/14 lands · died holding <b>${d.held}</b></div>`:'<div>Never reached the chair. Peak fortune <b>'+fmt(S.peak)+'</b>.</div>'}
   <div>The world: <span class="vi">${stage()} · chaos ${Math.round(chaos())}%</span> · <span class="ro">${(S.world.dead||[]).length} dead, for good</span>${S.wdeath?' · killed by '+S.wdeath.by:''}</div>
   ${rs.map(r=>`<div><b>${r.name}</b> · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}</div>`).join('')}${S.world.seeded?`<div><span class="hi">The seed ships ${S.world.seeded.by} paid for are still flying.</span></div>`:''}</div>
-  <button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
+  ${ERA22.canLeave()?`<button type="button" class="big" data-a="emig" style="border-color:var(--violet);color:var(--violet)">LEAVE ${ERA22.planet().name.toUpperCase()}<small>a new planet, a new sky, the same game. ${(S.world.chaos||0)>=60?'this one will not survive you':''}</small></button>`:''}<button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
   ${S.flags.ngp&&S.war&&S.war.united?'<button type="button" class="pri big" data-a="meet">SOMEONE IS WAITING<small>he has been in every window</small></button>':''}
   ${S.war&&S.war.united?'<button type="button" class="big" data-a="ngp">NEW GAME PLUS<small>same soul, same skills, every memory. The world is not how you left it.</small></button>':''}`}
 function render(){if(S&&S.loc!=='world')S.wmenu=false;hud();const p=$('panel'),ph=S.phase;
@@ -6188,6 +6188,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
   if(a==='road'||a==='roadback'){road=a==='road';render()}
   else if(a==='saves'||a==='sback'){savesOpen=a==='saves';render()}
   else if(a==='sexp')exportSave();
+  else if(a==='emig'){ERA22.emigrate();save();render()}
   else if(a==='sload'){try{const L=JSON.parse(localStorage.getItem('hindsight-slots')||'[]'),x=L[+v];if(x){localStorage.setItem('hindsight-v2',x.s);WR=null;load();savesOpen=false;say('The machine hands you back a version of yourself.','gold');render()}}catch(e){say('That copy is damaged.','rose')}}
   else if(a==='simp'){const t=$('sbox');importSave(t?t.value:'')}
   else if(a==='wact')worldAct();
@@ -6269,7 +6270,7 @@ $('panel').addEventListener('change',e=>{const f=e.target.id==='upf'&&e.target.f
   rd.onload=()=>{const im=new Image();im.onload=()=>{try{S.photo=autoCrop(im);setFace(S.photo);S.draft.look.photo=true;say('Face found and cropped. It is on your shoulders now.','gold')}catch(err){say('Could not read that photo. Try another.','rose')}render()};im.onerror=()=>say('Could not read that photo. Try another.','rose');im.src=rd.result};rd.readAsDataURL(f)});
 let armed=0;
 $('reset').addEventListener('click',()=>{const b=$('reset');
-  if(Date.now()<armed){try{localStorage.removeItem('hindsight-v2')}catch(e){}logs=[];$('lines').innerHTML='';S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed);b.textContent='RESET';armed=0;render()}
+  if(Date.now()<armed){try{localStorage.removeItem('hindsight-v2');localStorage.removeItem('hindsight-slots')}catch(e){}logs=[];$('lines').innerHTML='';S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed);b.textContent='RESET';armed=0;render()}
   else{armed=Date.now()+3000;b.textContent='SURE?';setTimeout(()=>{if(Date.now()>=armed)b.textContent='RESET'},3100)}});
 let armU=0;
 $('unm').addEventListener('click',()=>{const b=$('unm');if(Date.now()<armU){armU=0;b.textContent='UNMAKE';unmake()}
@@ -6333,9 +6334,9 @@ function loopB(now){const dt=Math.min(.1,(now-last)/1000);last=now;
   if(now-lastSave>5000&&S.phase!=='title'){lastSave=now;save()}
 }
 function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hindsight-v2'))}catch(e){s=null}}
-  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){if(S.el){S.el.live=true;S.el.riv=Math.max(0,(S.el.riv||0)-20);S.recount=1}else S.phase='trade'}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);if(S.name)say(`Welcome back, ${S.name}.`,'gold');if(S.recount){S.recount=0;say('THE RECOUNT. The machine remembers the count differently. Your rival loses ground.','gold')}return true}
+  if(s&&s.v===2&&s.world){S=s;if(S.phase==='election'){if(S.el){S.el.live=true;S.el.riv=Math.max(0,(S.el.riv||0)-20);S.recount=1}else S.phase='trade'}if(S.phase==='cosmos')S.phase='dead';if(S.ch&&!CHM[S.ch]){S=null;return false}if(S.ch&&!S.fxs)Object.assign(S,{fxs:{drunk:0,high:0,wired:0,hang:0,hits:0},loc:'desk',px:60,tx:60,stash:0,mailT:0,petT:0,abT:0,allin:false,dark:0,spot:false,cus:false});if(S.ch&&S.scar==null){S.scar=0;S.ms=S.ms||{};S.traits=S.traits||[];S.proj=S.proj||0;if(S.paradox>0)S.flags.pdx=1}if(S.ch&&!S.warp)S.warp=ASSETS.map(()=>Array(N).fill(0));if(S.ch&&!S.rake)S.rake={sus:0,banned:false,accts:0,b:null,round:0,won:0,seen:{},partner:false,salt:1};WR=null;S.dlg=null;S.wmenu=false;S.world.chaos=S.world.chaos||0;S.world.dead=S.world.dead||[];if(S.loc==='world'&&!S.inv)S.loc='out';genCity(S.world.cseed);if(S.loc==='world')buildWR();setFace(S.photo);try{ERA22.apply()}catch(_){}if(S.name)say(`Welcome back, ${S.name}.`,'gold');if(S.recount){S.recount=0;say('THE RECOUNT. The machine remembers the count differently. Your rival loses ground.','gold')}return true}
   return false}
-function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
+function start(data){try{setTimeout(()=>ERA22.apply(),0)}catch(_){}if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
 $('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
 setInterval(()=>{try{if(S&&S.phase==='war'&&!S.dlg&&R()<.5)say('<b class="hd">THE PRESS</b> '+CH22.press(),'cyan')}catch(_){}},45000);
@@ -6477,7 +6478,7 @@ const ECO22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
   ${e.log.slice(0,3).map(n=>`<div class="note" style="color:${n.up?'#8fd8ae':'#f0a0ae'}">${n.q} · ${n.t}</div>`).join('')}
   <div class="note pckeys" style="font-size:15px">KEYS ←/→ time · J jump · B buy all · V half · S sell · H short · C cover · Q/E asset · P U O G tricks</div></div>`}
  return {panel,pump,rumour,spoof,glitch,news,shock}})();
-{const pm0=pMarket;pMarket=function(){return pm0()+ECO22.panel()}}
+{const pm0=pMarket;pMarket=function(){return pm0()+ECO22.panel()+MACH22.panel()}}
 $('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="eco"]');if(!b||b.disabled)return;audioStart();ECO22[b.dataset.v]()});
 DLG.sec22=()=>({who:'SEC · ENFORCEMENT DIVISION',text:`Two people in grey suits and one in a worse one. "We have been watching ${ASSETS[S.asset].sym}. We have been watching you."`,th:[['LOGIC',3,'They have the chat logs. They do not have the machine.'],['GUT',4,'The one in the worse suit wants to be bribed.']],
  opts:[{t:'Settle. Pay the fine.',cost:()=>Math.round(S.cash*.25),ok:()=>{S.eco.sec=0;return 'A quarter of everything, no admission of wrongdoing, and a press release with your name spelled wrong.'}},
@@ -6487,7 +6488,86 @@ addEventListener('keydown',ev=>{if(!(S&&S.phase==='trade'&&S.loc==='desk'&&!S.dl
  if(c==='ArrowLeft')go(()=>setCur(S.cur-1));else if(c==='ArrowRight')go(()=>setCur(S.cur+1));else if(c==='KeyJ')go(()=>doJump());else if(c==='KeyB')go(()=>doBuy(1));else if(c==='KeyV')go(()=>doBuy(.5));else if(c==='KeyS')go(()=>doSell());else if(c==='KeyH')go(()=>doShort());else if(c==='KeyC')go(()=>doCover());
  else if(c==='KeyQ'||c==='KeyE')go(()=>{S.asset=(S.asset+(c==='KeyE'?1:ASSETS.length-1))%ASSETS.length;render()});else if(c==='KeyP')go(ECO22.pump);else if(c==='KeyU')go(ECO22.rumour);else if(c==='KeyO')go(ECO22.spoof);else if(c==='KeyG')go(ECO22.glitch)});
 
-window.HS={get VH(){return H},KC,R22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+/* ===== v22 · ERAS AND PLANETS =====
+   Each life lands further in the future: decades at first, then centuries. By life fifteen it is the year 3000.
+   The era renames the markets and colours the propaganda. Once ships exist (the ORBITAL era, or seed ships you paid for)
+   the death screen offers a way off the planet: a procedural new world (name, sky, colours) with the same systems,
+   your legend, your TV reruns and your dynasty's name. Leave a planet at high chaos and it breaks apart behind you. */
+const ERA22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const ERAS=[[2080,'THE NOW',null],[2200,'ORBITAL',[['HELIO','Solar farms in orbit. Sunlight sold by the kilowatt.'],['ORBT','Real estate where the air is extra.'],['FUSE','Fusion that works on Tuesdays.'],['KODA','Still dying. Still huge. Still here.']]],
+  [2500,'SOLAR',[['BELT','Asteroid metal. Prices fall from the sky.'],['RING','Habitats spun up around Saturn.'],['ICEX','Water from comets. Thirsty planets pay.'],['MARS','A whole planet, listed.']]],
+  [2900,'INTERSTELLAR',[['WARP','Engines that fold the map.'],['SEED','Colonies sold before they land.'],['MIND','Uploaded people. Dividends in memories.'],['VOID','Shorting the dark between stars.']]],
+  [1e9,'DEEP TIME',[['STAR','Whole suns, fractional ownership.'],['ECHO','The old Earth, as a theme park.'],['GODS','The companies that built the gods.'],['NULL','Nothing, priced perfectly.']]]];
+ const ORIG=ASSETS.map(a=>[a.sym,a.note]);
+ const era=y=>ERAS.find(e=>(y||2026)<e[0])||ERAS[ERAS.length-1];
+ const SY=['ka','ve','lo','ri','tan','os','mir','zu','el','dra','nyx','sol','qua','ren','tho','vy'];
+ const pname=()=>{let n='';for(let i=0;i<2+Math.floor(R()*2);i++)n+=P(SY);return n[0].toUpperCase()+n.slice(1)+(R()<.3?' '+P(['Prime','II','IV','Major','Minor']):'')};
+ function apply(){try{const y=S&&S.world&&S.world.year,e=era(y);ASSETS.forEach((a,i)=>{const r=e[2]?e[2][i]:ORIG[i];a.sym=r[0];a.note=r[1]})}catch(_){}}
+ function gap(w){const lives=(w.rulers||[]).length;return Math.round((15+R()*10)*Math.pow(1.45,Math.max(0,lives-2)))}
+ const planet=()=>(S.world&&S.world.planet)||{name:'Earth',hue:0,sat:1};
+ const canLeave=()=>{const e=era(S.world&&S.world.year);return e[1]!=='THE NOW'||!!(S.world&&S.world.seeded)};
+ function emigrate(){const old=S.world,op=planet(),boom=(old.chaos||0)>=60,np={name:pname(),hue:Math.floor(30+R()*300),sat:+(0.7+R()*.9).toFixed(2),n:((op.n||0)+1)};
+   const w=newWorld();w.year=old.year+1;w.planet=np;w.legend=old.legend||[];w.rulers=old.rulers||[];w.blocs=old.blocs||[];w.cseed=Math.floor(R()*1e9);w.left=(old.left||[]).concat([{name:op.name,yr:old.year,boom}]);
+   S.world=w;try{genCity(w.cseed)}catch(_){}apply();
+   const t=boom?`${op.name} breaks apart behind the ship. You watch it from a porthole the size of a coin. ${np.name} is ahead: new sky, new air, the same you.`:`You leave ${op.name} to whoever is left. ${np.name} rises in the window: a new sky, the same game.`;
+   say(t,'gold');try{const e=S.emp&&S.emp.w22;if(e)e.news.unshift({t,y:w.year,col:'#a57be0'})}catch(_){}return t}
+ function hud(){const p=planet(),e=era(S.world&&S.world.year);return `${p.name.toUpperCase()} · ${e[1]}`}
+ return {apply,gap,emigrate,canLeave,planet,era,hud}})();
+
+/* ===== v22 · THE MACHINE, AND THE END =====
+   The machine is a gutted aluminium laptop with a dead fruit on the lid, sealed to the table with epoxy and four
+   steel bolts, wired to a car battery, a jam-jar cloud chamber and an oscilloscope that only shows the future.
+   Every jump wears it (S.world.wear, kept across lives). At 100 it dies. It can be patched three times, each patch
+   worse than the last. When it dies for good, THE LAST JUMP plays the ending and the credits: your own run,
+   every name you lived as, how they died, the shows, the bombs, the planets. Then a clean world. */
+const MACH22=(()=>{const W=()=>{const w=S.world;w.wear=w.wear||0;w.fix=w.fix||0;return w};
+ const STEP=[[25,'The trackpad clicks on its own now. The cloud chamber shows tracks going backwards.'],[50,'The screen has a crack shaped like a river. The epoxy around the bolts is smoking.'],[75,'The fan spins with no blades. The battery terminals have grown frost in a warm room.'],[90,'The oscilloscope shows a flat line, then your heartbeat, then someone else\'s.']];
+ function use(forced){const w=W();if(w.broken)return;const before=w.wear;w.wear=Math.min(100,w.wear+(0.5+w.fix*.35)*(forced?2.5:1));
+   STEP.forEach(s=>{if(before<s[0]&&w.wear>=s[0])say(`<b class="hd">THE MACHINE</b> ${s[1]}`,'violet')});
+   if(w.wear>=100){w.broken=1;flash('jump');sfx('bad');say('<b class="hd">THE MACHINE</b> A pop, a smell like a struck match, and the screen goes the grey of an old tooth. It is dead. It is still bolted to the table.','rose');try{R22.note('broke',{x:'the machine'})}catch(_){}}}
+ function fix(){const w=W();if(w.fix>=3||!w.broken&&w.wear<60)return;const c=Math.max(1e5,S.cash*.3);if(S.cash<c)return;S.cash-=c;w.fix++;w.broken=0;w.wear=55+w.fix*12;try{if(awake())pdx(10)}catch(_){}
+   say(['You solder it back together with a borrowed iron and a prayer. It boots. It hums a note it never used to.','A second repair. Parts from a dead phone, a hearing aid and a toy. It works, angrily.','The last repair anyone could do. Half the machine is tape now. It will not survive another death.'][w.fix-1],'gold');save();render()}
+ function panel(){const w=W(),c=Math.max(1e5,S.cash*.3),col=w.broken?'#ef5d75':w.wear>75?'#f2c14e':'#8fd8ae';
+   return `<div class="app lab" style="margin-top:6px"><div class="sec">THE MACHINE · <span style="color:${col}">${w.broken?'DEAD':Math.round(100-w.wear)+'% LEFT'}</span> · repaired ${w.fix}/3</div><div class="note">A gutted aluminium laptop, sealed to the table with epoxy and four bolts. Car battery. Jam-jar cloud chamber. An oscilloscope that only shows tomorrow.</div>
+   ${(w.broken||w.wear>=60)&&w.fix<3?`<button type="button" class="card" data-a="mach" data-v="fix" ${S.cash<c?'disabled':''}>REPAIR IT · ${fmt(c)}<small>${['solder and a prayer','parts from a dead phone','the last repair anyone could do'][w.fix]}</small></button>`:''}
+   ${w.broken&&w.fix>=3?`<button type="button" class="pri big" data-a="mach" data-v="end">THE LAST JUMP<small>it will not come back from this. neither will you.</small></button>`:''}</div>`}
+ return {use,fix,panel,W}})();
+const CRED22=(()=>{function record(){const w=S.world||{},r=w.rulers||[],L=w.legend||[],e=S.emp&&S.emp.w22,left=w.left||[];
+   return {lives:r.length+(S.ch&&S.phase!=='dead'?1:0),names:r.map(x=>x.name).concat(S.name&&S.phase!=='dead'?[S.name]:[]),deaths:r.map(x=>x.cause),shows:L.map(s=>s.t),rad:e?Object.keys(e.rad).length:0,dead:(w.dead||[]).length,left:left.map(p=>p.name+(p.boom?' (destroyed)':'')),year:w.year||2026,planet:(w.planet&&w.planet.name)||'Earth'}}
+ function text(){const r=record();return `HINDSIGHT TERMINAL\nThe record of one machine, ${r.lives} lives, ${r.year-2026} years.\n\nSTARRING\n${r.names.join('\n')||'Nobody, briefly'}\n\nHOW THEY WENT\n${r.deaths.join('\n')||'Still going'}\n\nAS SEEN ON TV\n${r.shows.slice(0,12).join('\n')||'Nothing worth filming'}\n\nPLANETS LEFT BEHIND\n${r.left.join('\n')||'None. Earth kept you.'}\n\nCOUNTRIES THAT GLOW\n${r.rad}\n\nPEOPLE WHO STAYED DEAD\n${r.dead}\n\nLAST SEEN\n${r.planet}, ${r.year}`}
+ function roll(){const t=text(),ov=document.createElement('div');ov.id='cred22';
+   ov.style.cssText='position:fixed;inset:0;z-index:95;background:#000;color:#e6e1d4;overflow:hidden;font:15px/1.6 monospace;text-align:center';
+   if(!document.getElementById('cred22s')){const s=document.createElement('style');s.id='cred22s';s.textContent='@keyframes cred22{from{transform:translateY(100vh)}to{transform:translateY(-100%)}}#cred22 .roll{animation:cred22 48s linear forwards;white-space:pre-wrap;padding:0 16px}#cred22 .roll b{color:#f2c14e;letter-spacing:.2em}#cred22 .end{position:absolute;left:0;right:0;bottom:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}';document.head.appendChild(s)}
+   ov.innerHTML=`<div class="roll">${t.split('\n').map(l=>/^[A-Z ]+$/.test(l)&&l.length>3?`<b>${l}</b>`:l.replace(/[<>&]/g,'')).join('\n')}\n\n\n<b>CREATED BY</b>\nRyan\n\n<b>WITH</b>\nFable and Opus\n\n<b>EVERY COPY OF THIS GAME ENDS DIFFERENTLY</b>\nThis one was yours.\n\n\n</div><div class="end"><button type="button" data-c="copy">COPY YOUR RECORD</button><button type="button" data-c="again" class="pri">A NEW MACHINE</button></div>`;
+   document.body.appendChild(ov);
+   ov.addEventListener('click',ev=>{const b=ev.target.closest('[data-c]');if(!b)return;if(b.dataset.c==='copy'){try{navigator.clipboard.writeText(t)}catch(_){}b.textContent='COPIED'}else{try{localStorage.removeItem('hindsight-v2');localStorage.removeItem('hindsight-slots')}catch(_){}ov.remove();S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed);try{ERA22.apply()}catch(_){}render()}})}
+ function lastJump(){flash('jump');sfx('jump');S.world.ended=1;try{const w=S.world;w.rulers.push({name:S.name,years:0,cause:'THE LAST JUMP',peak:0})}catch(_){}save();setTimeout(roll,600)}
+ return {roll,lastJump,text,record}})();
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="mach"]');if(!b||b.disabled)return;audioStart();if(b.dataset.v==='fix')MACH22.fix();else CRED22.lastJump()});
+
+/* ===== v22 · THE CAMERA =====
+   Streaming outside needs a camera rig (KLIK or the street menu). Live in the street, you hold it: a little camera at
+   your hand with a red light, and a picture-in-picture feed cut live from the street around you, chat scrolling over it. */
+const CAM22=(()=>{const cost=300,has=()=>!!(S.camera||((S.bag||{}).camera>0));
+ function buy(){if(has()||S.cash<cost)return;S.cash-=cost;S.camera=1;S.bag=S.bag||{};S.bag.camera=(S.bag.camera||0)+1;say('A camera rig: a phone on a gimbal, a mic the size of a thumb, a battery pack held on with a hair tie. You can stream outside now.','gold');save();render()}
+ const btn=()=>has()?'':`<button type="button" class="kgo" data-a="cam22" ${S.cash<cost?'disabled':''}>BUY A CAMERA RIG · ${fmt(cost)}<small>you cannot stream outside without one</small></button>`;
+ const cam=document.createElement('div');cam.id='cam22';cam.style.cssText='position:fixed;z-index:3;width:12px;height:9px;background:#14121c;border:1px solid #cfc9bb;display:none;pointer-events:none';cam.innerHTML='<i style="position:absolute;right:1px;top:1px;width:3px;height:3px;background:#ef5d75;border-radius:50%"></i>';document.body.appendChild(cam);
+ const pip=document.createElement('canvas');pip.id='pip22';pip.width=176;pip.height=132;pip.style.cssText='position:fixed;left:10px;bottom:70px;z-index:4;width:176px;height:132px;border:2px solid #53fc18;background:#000;display:none;pointer-events:none;image-rendering:pixelated';document.body.appendChild(pip);
+ const px=pip.getContext('2d');let t=0;
+ function frame(now){requestAnimationFrame(frame);const on=S&&S.live&&S.loc==='world'&&WR&&WR.me&&WV&&!S.dlg&&S.phase==='trade';cam.style.display=on?'block':'none';pip.style.display='none';if(!on)return;
+   const m=WR.me,Z=WV.Z,sx=(m.x-WR.cam.x),sy=(m.y-WR.cam.y);cam.style.left=Math.round((sx+m.dir*7)*Z-6)+'px';cam.style.top=Math.round((sy-19)*Z)+'px';
+   return;const k=SNAP,cw=60,ch=45;try{px.imageSmoothingEnabled=false;px.drawImage(scr,Math.max(0,(sx-cw/2)*k),Math.max(0,(sy-ch+8)*k),cw*k,ch*k,0,0,176,132)}catch(_){}
+   for(let i=0;i<40;i++){px.fillStyle=`rgba(255,255,255,${Math.random()*.08})`;px.fillRect(Math.random()*176|0,Math.random()*132|0,1,1)}
+   px.fillStyle='rgba(0,0,0,.55)';px.fillRect(0,0,176,14);px.fillStyle='#ef5d75';px.fillRect(5,4,6,6);px.fillStyle='#fff';px.font='10px monospace';px.fillText('LIVE · '+fnum(S.viewers||0),15,11);
+   const L=(S.kchat||[]).slice(0,4).reverse();px.font='9px monospace';L.forEach((c,i)=>{const y=132-8-(L.length-1-i)*11,txt=String(c.t).slice(0,34);px.fillStyle='rgba(0,0,0,.5)';px.fillRect(0,y-8,176,11);px.fillStyle=c.c===2?'#f2c14e':c.c===1?'#ef5d75':'#d6ffcc';px.fillText(txt,3,y)})}
+ requestAnimationFrame(frame);
+ return {buy,btn,has}})();
+{const gl0=goLive;goLive=function(on){if(on&&S.loc==='world'&&!CAM22.has()){say('You need a camera to stream outside. KLIK sells a rig.','rose');render();return}return gl0(on)}}
+{const pk0=pKlik;pKlik=function(){return pk0().replace('<div class="row r3">',CAM22.btn()+'<div class="row r3">')}}
+{const pw0=pWorldMenu;pWorldMenu=function(){return CAM22.btn()+pw0()}}
+$('panel').addEventListener('click',ev=>{const b=ev.target.closest('[data-a="cam22"]');if(b&&!b.disabled){audioStart();CAM22.buy()}});
+
+window.HS={get VH(){return H},KC,R22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
