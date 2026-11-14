@@ -84,11 +84,17 @@ That makes each copy a footprint: an honest record of how one person behaved wit
 
 Strategic code is what makes this profound rather than random. The rules are small and legible, so the stories they produce feel earned, and the memory is long, so the stories accumulate meaning. Played seriously, the game becomes a mirror held up for a thousand years, and what it shows is the player.
 
-## 11. Controls that know you
+## 11. Endings, and a guide
+
+There is no single ending. When the machine dies for good, THE LAST JUMP reads your whole record and names what you became (the butcher, the owner, the emperor, the face, the ghost, the saint, the wanderer), how it ended (the last jump, a burning world, exile, a crown, a quiet death, outliving the machine) and the era. That is 210 endings, each with its own name and closing line. The credits show the one you found, then every ending found on this device across all its machines.
+
+EVERCLEAR, the bottle only you can see, is the guide. It reads the live state and points at the next move: repair the machine before it dies, stop pumping when the SEC is at 70, buy a camera before streaming outside, buy a country once you have a billion, leave the planet once ships exist. It is wrong on purpose about once in three, and it always tells you not to do the thing it just told you to do.
+
+## 12. Controls that know you
 
 The game works out what you are playing on (touch, keyboard and mouse, or gamepad) and switches the moment you do. The first time you reach each place (the desk, the house and field, the street, the presidency) on that device, a card shows exactly what works there. Press ? to see it again.
 
-## 12. What v22 still needs
+## 13. What v22 still needs
 
 - A share-a-life code with a postcard image (four save slots shipped in v22).
 - A real-device pass: a mid-range phone, a 7 MB first load on mobile data, and audio.
