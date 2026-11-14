@@ -77,6 +77,11 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   ok(`${t} police stop: Run. actually runs`, rn.goX != null && rn.wanted >= 2, JSON.stringify(rn));
   await p.evaluate(() => { HS.S.dlg = null; HS.S.wanted = 0; HS.render(); });
 
+  // 4x feature 1: the machine remembers four of you. A slot exists after play and SAVES can load it.
+  await p.evaluate(() => { HS.S.dlg = null; HS.S.phase = "trade"; localStorage.removeItem("hindsight-slots"); HS.save(); });
+  const slots = await p.evaluate(() => JSON.parse(localStorage.getItem("hindsight-slots") || "[]").length);
+  ok(`${t} play leaves a save slot`, slots >= 1, "slots " + slots);
+
   // Bug 3: a reload on election night resumes the election (as a recount) instead of eating the fee.
   await p.evaluate(() => { HS.S.phase = "election"; HS.S.el = { you: 40, riv: 60, live: true, spd: 8, base: 3 }; HS.S.dlg = null; localStorage.setItem("hindsight-v2", JSON.stringify(HS.S)); });
   await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000); await act("continue");

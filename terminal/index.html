@@ -473,7 +473,9 @@ function beginLife(chId){const w=S.world,gen=S.gen,prev=S.prevSk,c=CHM[chId];
   if(S.carry){S.st=Object.assign({},S.carry.st);S.sk=Object.assign({},S.carry.sk);S.name=S.carry.name;S.scrap=false;S.flags.ngp=1;S.traits=S.carry.traits||[];S.carry=null}
   S.tm=buildMod(chId,S.traits);
   openD('q0')}
-function save(){if(WR&&WR.me&&S.loc==='world'&&!WR.me.dead)S.wpos={x:WR.me.x,y:WR.me.y};try{localStorage.setItem('hindsight-v2',JSON.stringify(S))}catch(e){}}
+function save(){if(WR&&WR.me&&S.loc==='world'&&!WR.me.dead)S.wpos={x:WR.me.x,y:WR.me.y};try{localStorage.setItem('hindsight-v2',JSON.stringify(S))}catch(e){}slotTick()}
+let slotT=0,slotPh='';function slotTick(force){try{if(!S||!S.ch||S.dlg||!/trade|war|dead/.test(S.phase))return;const now=Date.now();if(!force&&now-slotT<60000&&S.phase===slotPh)return;slotT=now;slotPh=S.phase;
+  const L=JSON.parse(localStorage.getItem('hindsight-slots')||'[]');L.unshift({at:now,n:S.name,ch:S.ch,cash:S.cash,ph:S.phase,yr:(S.world&&S.world.year)||0,g:S.gen,s:JSON.stringify(S)});localStorage.setItem('hindsight-slots',JSON.stringify(L.slice(0,4)))}catch(e){}}
 function say(t,c){logs.push({t,c:c||''});if(logs.length>2)logs.shift();$('lines').innerHTML=logs.map(l=>`<div class="${l.c}">${l.t}</div>`).join('')}
 function flash(kind){if(!still){fx=.35;fxKind=kind}}
 /* PARADOX. Asleep until you have scarred the market SCAR_MAX worth. Then: scars, revisits and forced jumps fill it; standing in the present drains it. */
@@ -2189,7 +2191,8 @@ function exportSave(){save();let s='';try{s=btoa(unescape(encodeURIComponent(loc
   savesBox=s;render()}
 let savesOpen=false,savesBox='';
 function importSave(txt){try{const s=JSON.parse(decodeURIComponent(escape(atob(String(txt).trim()))));if(!(s&&s.v===2&&s.world))throw 0;localStorage.setItem('hindsight-v2',JSON.stringify(s));WR=null;load();savesOpen=false;say('Save imported.','gold');render()}catch(e){say('That is not a Hindsight save.','rose')}}
-function pSaves(){return `<div class="who2">SAVES</div><div class="note" style="color:var(--dim);font-size:19px">Export makes a code you can keep or move to another device. Import loads one, replacing the life on this device.</div>
+function pSaves(){let L=[];try{L=JSON.parse(localStorage.getItem('hindsight-slots')||'[]')}catch(e){}const ago=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':Math.round(m/60)+' h ago'};
+  return `<div class="who2">THE MACHINE REMEMBERS FOUR OF YOU</div>${L.length?L.map((x,i)=>`<button type="button" class="card" data-a="sload" data-v="${i}">${x.n||'SOMEONE'} · ${fmt(x.cash||0)} · ${x.yr}<small>${({trade:'living',war:'in office',dead:'dead'})[x.ph]||x.ph} · life ${x.g||1} · ${ago(x.at)}</small></button>`).join(''):'<div class="note">Nothing yet. Every minute of play leaves a copy here.</div>'}<div class="who2">SAVES</div><div class="note" style="color:var(--dim);font-size:19px">Export makes a code you can keep or move to another device. Import loads one, replacing the life on this device.</div>
   <button type="button" class="pri" data-a="sexp">EXPORT THIS SAVE</button><textarea id="sbox" rows="4" aria-label="Save code" placeholder="paste a save code here">${savesBox}</textarea>
   <button type="button" data-a="simp">IMPORT FROM THE BOX</button><button type="button" data-a="sback">BACK</button>`}
 
@@ -5290,6 +5293,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
 body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{display:none!important}
 #panel .emp21b{grid-column:1/-1;width:100%;white-space:normal}
 html:not(.pc) .pckeys{display:none}
+body.pick22 .crt{display:none}.pk22{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:96px!important;padding:6px 2px!important}.pk22 canvas{width:64px;height:64px;image-rendering:pixelated;border:1px solid #3a3552}
 #panel.t21 .more21{display:none}#panel.t21.open .more21{display:block}
 #panel.t21 .vtag{font:11px monospace;color:#5d5866;padding:6px 12px}`;document.head.appendChild(st);
  const MORE=['dev','voice','xboss','xgames'];
@@ -5726,7 +5730,7 @@ html:not(.pc) .pckeys{display:none}
 
 /* ================= v22 · SECOND PLAYTEST ================= */
 /* title menu: NEW LIFE, SAVES, ROADMAP. everything else lives in More */
-{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{document.body.classList.toggle('dev',!!DEV);const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
+{const KEEP=['new','continue','saves','road'];const r23=render;render=function(){const r=r23.apply(this,arguments);try{document.body.classList.toggle('dev',!!DEV);document.body.classList.toggle('pick22',S.phase==='pick'&&!S.cus);document.querySelectorAll('.pf22').forEach(c=>{const x=CHARS[+c.dataset.i],g2=c.getContext('2d');g2.fillStyle=PAPER;g2.fillRect(0,0,32,32);try{faceF(g2,lookOf(x.look),16,16.5,1.72,0,false)}catch(_){}});const p=$('panel');if(S.phase==='title'&&p.querySelector('[data-a=new],[data-a=continue]')){p.querySelectorAll('button[data-a]').forEach(b=>{if(!KEEP.includes(b.dataset.a))b.classList.add('more21')});const mb=p.querySelector('.mbtn21');if(mb)mb.innerHTML='More…<small>the 100, travel and theatre, the back room, the statue, voice, download</small>'}}catch(_){}return r}}
 /* the roadmap: a picture you can read in five seconds, and the systems behind the game */
 {const SYS=[['Reaction engine','Every action becomes posts, quote-posts, videos and memes from 13 kinds of people with faces',70],['Takedown stage','Menu-picked kills play as staged close-ups with voices',65],['Procedural bodies','One pixel body for everyone: walk, fight, fall, smoke, drink, injure',60],['Living street','Witnesses with memory, needs, routines, police calls',55],['Markets and shorts','Price paths, depth, shorts that age into legends',60],['RAKE and bookies','Mines to the last tile, banks you can break, lawsuits, snipers',50],['Presidency','White House rooms, crises, terms, re-election',70],['State visits','Parody capitals, leaders as boss fights, deals that change the country',45],['Wars and ruins','Wars you can visit before, during and after; damage that stays',40],['Propaganda','Your face on every wall once you are rich enough, slogans from what you did',35],['Body and needs','Injuries, bleeding, treatment, hunger, sleep, drink, drugs',55],['Streaming','KLIK: webcam at home, camera outside, a chat that reacts',50],['8-head sprite bible','Every character rebuilt on realistic 8-head pixel proportions',10],['Procedural cities','Streets, rooms and countries generated from a few rules',30],['Procedural dialogue','Tens of thousands of lines from small grammars, never the same twice',40]];
  const css=document.createElement('style');css.textContent=`.rm22 h4{font:700 11px HSPixel,monospace;letter-spacing:.22em;color:#8a8494;margin:16px 0 8px}.rm22 .tl{position:relative;padding-left:18px;border-left:2px solid #2a2630}
@@ -6037,7 +6041,7 @@ const CH22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
  function open(){if(OPEN[S.ch])try{say(OPEN[S.ch],'violet')}catch(_){}}
  return {bits,npc,press,open}})();
 function pPick(){if(S.cus)return pCustom();const c=CHARS[S.pick],a=ABIL[c.id];
-  return `<div class="row r4">${CHARS.map((x,i)=>`<button type="button" class="tab ${i===S.pick?'on':''}" data-a="pick" data-v="${i}">${isUnl(x.id)?x.tag.replace('THE ',''):'LOCKED<small>live '+(UNL.indexOf(x.id)+1)+' lives</small>'}</button>`).join('')}</div>
+  return `<div class="row r4">${CHARS.map((x,i)=>`<button type="button" class="tab pk22 ${i===S.pick?'on':''}" data-a="pick" data-v="${i}"><canvas class="pf22" data-i="${i}" width="32" height="32"></canvas>${x.tag.replace('THE ','')}</button>`).join('')}</div>
   <div class="who2">${c.tag}</div><div class="say">${c.creed}</div>
   <div class="stats">${Object.keys(c.st).map(k=>`<span class="c${k}">${k} ${c.st[k]}</span>`).join('')}</div>
   <div class="list"><div><b>+</b> ${c.perk}</div><div><span class="ro">-</span> ${c.flaw}</div><div><span class="vi">${a.n}</span> ${a.d}</div></div>
@@ -6184,6 +6188,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
   if(a==='road'||a==='roadback'){road=a==='road';render()}
   else if(a==='saves'||a==='sback'){savesOpen=a==='saves';render()}
   else if(a==='sexp')exportSave();
+  else if(a==='sload'){try{const L=JSON.parse(localStorage.getItem('hindsight-slots')||'[]'),x=L[+v];if(x){localStorage.setItem('hindsight-v2',x.s);WR=null;load();savesOpen=false;say('The machine hands you back a version of yourself.','gold');render()}}catch(e){say('That copy is damaged.','rose')}}
   else if(a==='simp'){const t=$('sbox');importSave(t?t.value:'')}
   else if(a==='wact')worldAct();
   else if(a==='wmclose'){S.wmenu=false;render()}
@@ -6482,7 +6487,7 @@ addEventListener('keydown',ev=>{if(!(S&&S.phase==='trade'&&S.loc==='desk'&&!S.dl
  if(c==='ArrowLeft')go(()=>setCur(S.cur-1));else if(c==='ArrowRight')go(()=>setCur(S.cur+1));else if(c==='KeyJ')go(()=>doJump());else if(c==='KeyB')go(()=>doBuy(1));else if(c==='KeyV')go(()=>doBuy(.5));else if(c==='KeyS')go(()=>doSell());else if(c==='KeyH')go(()=>doShort());else if(c==='KeyC')go(()=>doCover());
  else if(c==='KeyQ'||c==='KeyE')go(()=>{S.asset=(S.asset+(c==='KeyE'?1:ASSETS.length-1))%ASSETS.length;render()});else if(c==='KeyP')go(ECO22.pump);else if(c==='KeyU')go(ECO22.rumour);else if(c==='KeyO')go(ECO22.spoof);else if(c==='KeyG')go(ECO22.glitch)});
 
-window.HS={get VH(){return H},KC,R22,ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},KC,R22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
