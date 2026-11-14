@@ -90,6 +90,10 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
     return { moved, alive: S.phase === "trade", armed: S.armed }; });
   ok(`${t} keyboard walks in the house; the deadly pipe asks twice`, kb.moved && kb.alive && kb.armed === "pipe", JSON.stringify(kb));
 
+  // Bug 19: no market twice on one BOARD (40 boards).
+  const dup = await p.evaluate(() => { let bad = 0; for (let i = 1; i <= 40; i++) { HS.S.bx = { seed: i * 7919, slip: {}, peek: {}, open: [], done: [], n: 0 }; const q = HS.btBoard().map(m => m.q); if (q.length !== 8 || new Set(q).size !== 8) bad++ } return bad; });
+  ok(`${t} BOARD never lists a market twice`, dup === 0, dup + " bad boards");
+
   // Bug 4: one more character unlocks per life. Bug 13: GOD and BODY hidden from players.
   const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });
   ok(`${t} a second life unlocks a second character`, lk.filter(Boolean).length === 2, JSON.stringify(lk));

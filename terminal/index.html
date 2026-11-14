@@ -504,7 +504,7 @@ const DEEP={
  CHARM:{n:'THE CHORUS',t:'Under a dim red sun their faces grew huge and their voices grew complicated. They have no word for alone. Each one is adored by all the others, all the time, and has never once wondered why.',sx:1.25,sy:1,L:{skin:'#f2c14e',hair:'#f2a03c',hs:2,coat:'#7a5a1e',pants:'#4a3a14',build:1,acc:''}},
  LOGIC:{n:'THE LEDGER',t:'On an ice moon they stopped moving to save heat. Sixty million of them sit in rows and think. Their only art is forecasting. They are always right, and it has never made one of them happy.',sx:.9,sy:.9,L:{skin:'#58d6c9',hair:'#123a34',hs:3,coat:'#1f6a5c',pants:'#123a34',build:0,acc:'glasses'}},
  GUT:{n:'THE DOWSERS',t:'In an ocean with no surface they lost their eyes and kept the feeling you had under the bridge. They cannot say what a star is. They always know which way is out.',sx:.75,sy:1.4,L:{skin:'#6c8cff',hair:'#1a2140',hs:3,coat:'#3d5a80',pants:'#1a2140',build:0,acc:'shades'}}};
-function heatAdd(x){if(x>0&&S.dark>0)return;if(x>0)x*=sv('cloak')*(mod().heat||1)*S.heatM*(S.deal?S.deal.heat:1)*(S.front?.7:1);S.heat=clamp(S.heat+x,0,S.gov?60:120)}
+function heatAdd(x){if(x>0&&S.dark>0)return;if(x>0)x*=sv('cloak')*(mod().heat||1)*S.heatM*(S.deal?S.deal.heat:1)*(S.front?.7:1);S.heat=clamp(S.heat+x,0,S.gov?60:100)}
 function fameAdd(x){if(S.spot){x*=2;S.spot=false}x*=(mod().fame||1)*S.fameM;S.fame+=x;return x}
 function earn(profit){let cut=0;if(profit>0){if(S.deal)cut+=profit*S.deal.cut;if(S.gov)cut+=profit*.25;if(S.front)cut+=profit*.05;if(pubTax())cut+=profit*.4;S.earned+=profit-cut}return cut}
 
@@ -3195,7 +3195,7 @@ function whRewind(){const w=S.war;if(!w.lastC)return say('Nothing to undo. The m
   S.flags.pdx=1;S.paradox=(S.paradox||0)+14;flash('jump');sfx('jump');say(`Rewound. That decision never happened. Paradox +14 (${Math.round(S.paradox)}%).`,'violet');
   if(S.world.machine==='hidden'&&!mod().noLeak&&R()<.15){S.world.machine='public';appr(-20);w.tension+=12;clampWar();say('LEAK. An aide watched you do it. The world knows about the machine.','rose')}
   if(S.paradox>=100)return die('paradox');save();render()}
-DLG.crisis=i=>{const c=CRISES[i],cs=staffOf(0),tx=typeof c.x==='function'?c.x():c.x;return {who:'ON THE DESK · '+c.t,look:cs.look,text:tx,th:[['LOGIC',3,'Every one of these can be undone at the machine, once, at a price.'],['GUT',4,'You have a feeling you have sat through this before.']],
+DLG.crisis=i=>{const c=CRISES[i],cs=staffOf(0),tx=typeof c.x==='function'?c.x():c.x;return {who:'ON THE DESK · '+c.t,look:cs.look,text:tx,th:[['LOGIC',3,'Every one of these can be undone at the machine, once, at a price.'],['GUT',4,'Leave this one on the desk and it comes back worse.']],
   opts:c.o.map(o=>{const done=fn=>()=>{whSnap();const w=S.war;w.cq=w.cq.filter(q=>q!==i);const r=fn();w.done=(w.done||0)+1;return r};return o[1]?{t:o[0],check:o[1],ok:done(o[2]),fail:done(o[3])}:{t:o[0],ok:done(o[2])}})}};
 DLG.press=()=>{const w=S.war,ps=staffOf(1),q=w.approval<40?'"Your numbers are the worst on record. Why should anyone believe a word of this?"':w.tension>60?'"Are we going to war?"':w.unrest>50?'"There are fires in three cities. What do you say to the people in them?"':(S.paradox||0)>30?'"People say Tuesday happened twice. Do you have a comment?"':'"How do you always know?"',dc=9+(w.pressH?2:0)-(ps.sk>=7?1:0);
   const fin=fn=>()=>{whSnap();w.pressed=true;return fn()};
@@ -3698,13 +3698,13 @@ const BT={teams:['Harrow Ironsides','Port Vey Gulls','Calder Saints','Ashdown Ro
  other:[['The mayor resigns before Friday',.08],['It snows on the cup final',.05],['Krane Chips closes above yesterday',.52],['The bridge stays shut another week',.6],['A streamer is arrested live on air',.04],['The governor says "unprecedented" in the speech',.71],['RAKE main event ends in round one',.17],['The comet is visible tonight',.3],['A referee is punched',.03],['The lottery rolls over again',.66],['Someone streaks the derby',.11],['The rate is cut',.24]]};
 function btState(){if(!S.bx||!S.bx.seed)S.bx={seed:Math.floor(R()*1e9)+1,slip:{},peek:{},open:[],done:[],n:0};return S.bx}
 function btBoard(){const B=btState(),r=rng(B.seed),pk=a=>a[Math.floor(r()*a.length)],M=[];
-  for(let i=0;i<8;i++){const k=r();let q,p;
+  for(let i=0,tr=0;M.length<8&&tr<80;tr++){i=M.length;const k=r();let q,p;
     if(k<.34){const a=pk(BT.teams);let b=pk(BT.teams);while(b===a)b=pk(BT.teams);p=.12+r()*.7;q=r()<.3?`${a} beat ${b} by 3 or more`:`${a} beat ${b}`;if(q.includes('3 or more'))p*=.3}
     else if(k<.5){const a=pk(BT.fighters);let b=pk(BT.fighters);while(b===a)b=pk(BT.fighters);p=.1+r()*.5;q=r()<.4?`${a} knocks out ${b} in round one`:`${a} beats ${b}`;if(q.includes('round one'))p*=.25}
     else if(k<.66){p=.02+r()*.16;q=`${pk(BT.horses)} wins the 3.40`}
     else if(k<.76){p=.008+r()*.02;q=`${pk(BT.teams)} win the league from the bottom half`}
     else{const o=pk(BT.other);q=o[0];p=clamp(o[1]*(.7+r()*.6),.01,.95)}
-    p=clamp(p,.008,.96);const yes=clamp(Math.round((p+(r()-.5)*.04)*100),1,99);M.push({i,q,yes,win:rng((B.seed*31+i*977)>>>0)()<p})}
+    p=clamp(p,.008,.96);if(M.some(x=>x.q===q))continue;const yes=clamp(Math.round((p+(r()-.5)*.04)*100),1,99);M.push({i,q,yes,win:rng((B.seed*31+i*977)>>>0)()<p})}
   return M}
 const btX=(m,s)=>.97*100/(s==='Y'?m.yes:100-m.yes);
 function btMult(){const B=btState(),M=btBoard();let x=1,n=0;M.forEach(m=>{const s=B.slip[m.i];if(s){x*=btX(m,s);n++}});return [x,n]}
@@ -4054,7 +4054,7 @@ button,.card,.sheet,.chirp,.chirp button,.btm,.bts,.say,.post>i,#tcTop button,#h
 #tcTop button{border:2px solid #cfc9bb;background:#0b0a09;box-shadow:2px 2px 0 #000;letter-spacing:.08em}
 body.wm.dlg #panel{border-radius:0!important;border-top:4px double var(--gold)!important;box-shadow:0 -6px 0 rgba(0,0,0,.6)}
 .say{border-left:3px solid #3a3552;padding-left:8px}
-#pal{position:fixed;right:8px;bottom:60px;z-index:6;display:none;align-items:flex-end;gap:6px;pointer-events:none;max-width:78vw}
+#pal{position:fixed;right:8px;bottom:112px;z-index:6;display:none;align-items:flex-end;gap:6px;pointer-events:none;max-width:78vw}
 #pal canvas{width:44px;height:88px;pointer-events:auto;cursor:pointer;animation:palb 2.4s steps(4) infinite;filter:drop-shadow(3px 3px 0 #000)}
 #pal .pbx{pointer-events:auto;background:#f1ecdc;color:#14110e;border:2px solid #14110e;box-shadow:3px 3px 0 #000;padding:7px 9px;font:400 13px/1.3 'Special Elite',ui-monospace,Menlo,'Courier New',monospace;margin-bottom:26px;position:relative;display:none}
 #pal .pbx b{display:block;font-size:9px;letter-spacing:.16em;color:#8a2c2c;font-weight:400;margin-bottom:2px}
@@ -5134,7 +5134,7 @@ body.wm #lines div:nth-child(n+3){display:none}`;document.head.appendChild(st)}
    /* the same people come back later */
    if(w>=2)setTimeout(()=>{try{const p=persona();add(p,fill(pk(['called it. {n} was always going to do this','still thinking about what {n} did','update: {n} has not apologised','day '+(2+Math.floor(rnd()*30))+' of thinking about {n}']),v),k,w*.7);try{render()}catch(_){}}catch(_){}},20000+rnd()*40000)}catch(e){}};
  /* every post the game already makes now starts a reaction */
- {const p0=post;post=function(k,v){const r=p0.apply(this,arguments);try{const map={win:'win',short:'short',rake:'rake',kill:'kill',heat:'heat',flex:'flex',deny:'deny',vid:'vid',give:'give',war:'war',rich:'rich',dead:'dead',bet:'win',build:'rich',tower:'rich',nuke:'war',hunt:'wanted'};if(map[k])HSREACT(map[k],v)}catch(_){}return r}}
+ {const p0=post;post=function(k,v){const r=p0.apply(this,arguments);try{const map={win:'win',short:'short',rake:'rake',kill:'kill',heat:'heat',flex:'flex',deny:'deny',vid:'vid',give:'give',war:'war',rich:'rich',dead:'dead',bet:'win',nuke:'war',hunt:'wanted'};if(map[k])HSREACT(map[k],v)}catch(_){}return r}}
  /* things that happen without a post: money milestones, wanted, presidency */
  setInterval(()=>{try{if(!S||S.phase==='title'||!S.ch)return;const ms=[1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12];S.rx=S.rx||{};ms.forEach(m=>{if(S.cash>=m&&!S.rx['c'+m]){S.rx['c'+m]=1;HSREACT(m>=1e9?'rich':'win',{m:fmt(m)})}});
   if((S.wanted||0)>=3&&!S.rx.w3){S.rx.w3=1;HSREACT('wanted')}if((S.wanted||0)<1)S.rx.w3=0;
@@ -5556,7 +5556,7 @@ try{const d0=DLG.door;DLG.door=()=>{const n=d0();n.opts=[{t:'Knock, like a perso
  html.pc #panel button{cursor:pointer}html.pc #panel button:hover:not(:disabled){filter:brightness(1.25)}
  html.pc #panel .say{font-size:19px}html.pc #panel button.card[data-a=dopt]{font-size:17px}
  html.pc .kh{display:inline-block;font:11px monospace;color:#6d6777;border:1px solid #3a3542;padding:0 4px;margin-left:6px;border-radius:3px}
- html.pc #pchelp{position:fixed;right:14px;bottom:10px;z-index:30;font:11px monospace;color:#5d5866;pointer-events:none}`;document.head.appendChild(st);
+ html.pc #pchelp{position:fixed;right:14px;top:8px;z-index:30;font:11px monospace;color:#5d5866;pointer-events:none}`;document.head.appendChild(st);
  const apply=()=>{document.documentElement.classList.toggle('pc',DESK());try{window.dispatchEvent(new Event('resize-pc'))}catch(_){}};apply();addEventListener('resize',apply);
  const help=document.createElement('div');help.id='pchelp';help.textContent='1-9 choose · ENTER continue · ESC close · A/D or ←/→ walk · SHIFT slow motion · E use · TAB desk tabs';document.body.appendChild(help);
  setInterval(()=>{help.style.display=document.documentElement.classList.contains('pc')&&!document.body.classList.contains('wm')?'':'none'},1000);
@@ -6097,7 +6097,7 @@ function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hin
   return false}
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
-window.HS={get VH(){return H},GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+window.HS={get VH(){return H},btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});
