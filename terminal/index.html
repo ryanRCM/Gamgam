@@ -227,13 +227,13 @@ const P={void:'#0c0a14',gold:'#f2c14e',cyan:'#58d6c9',rose:'#ef5d75',violet:'#a5
 const CHARS=[
  {id:'narc',name:'Dax Moreau',tag:'THE NARCISSIST',creed:'The world is a mirror, and it is finally looking back.',
   st:{NERVE:3,CHARM:5,LOGIC:1,GUT:3},perk:'Videos pull double the fans.',flaw:'Every loss is a wound. Approval drops hit 50% harder.',
-  look:{skin:'#f1c9a5',hair:'#d9a441',hs:2,coat:'#b0303a',pants:'#1c1420',build:2,acc:'shades'},mod:{fame:2,loss:1.5},remake:{name:'Dorian Vale',line:'The best surgeon alive. He comes out better looking and insists that was always the point.',look:{skin:'#f1c9a5',hair:'#14101c',hs:2,coat:'#ece5cc',pants:'#ece5cc',build:2,acc:'tie'}}},
+  look:{skin:'#f1c9a5',hair:'#f2c14e',hs:2,coat:'#ece5cc',pants:'#ece5cc',shoes:'#f2c14e',build:2,ht:2,top:'suit',acc:'shades'},mod:{fame:2,loss:1.5},remake:{name:'Dorian Vale',line:'The best surgeon alive. He comes out better looking and insists that was always the point.',look:{skin:'#f1c9a5',hair:'#14101c',hs:2,coat:'#ece5cc',pants:'#ece5cc',build:2,acc:'tie'}}},
  {id:'para',name:'Ilse Varga',tag:'THE PARANOID',creed:'They are watching. You are simply the only one who noticed.',
   st:{NERVE:3,CHARM:1,LOGIC:3,GUT:5},perk:'Covers her tracks. Heat builds 40% slower and aides never leak.',flaw:'Trusts no one. Every foreign leader starts out disliking you.',
-  look:{skin:'#c68655',hair:'#14101c',hs:1,coat:'#2f3a2f',pants:'#1a1a1a',build:0,acc:'hood'},mod:{heat:.6,noLeak:true,rel:-20},remake:{name:'Ana Morales',line:'New face, new fingerprints, new teeth. She burns the clinic records herself, then the clinic.',look:{skin:'#c68655',hair:'#d9a441',hs:4,coat:'#3d5a80',pants:'#1a1a1a',build:0,acc:'glasses'}}},
+  look:{skin:'#c68655',hair:'#14101c',hs:3,coat:'#3f5a2f',pants:'#2f3a2f',shoes:'#14121c',build:0,ht:1,top:'jacket',acc:'cap'},mod:{heat:.6,noLeak:true,rel:-20},remake:{name:'Ana Morales',line:'New face, new fingerprints, new teeth. She burns the clinic records herself, then the clinic.',look:{skin:'#c68655',hair:'#d9a441',hs:4,coat:'#3d5a80',pants:'#1a1a1a',build:0,acc:'glasses'}}},
  {id:'insom',name:'Tomo Achebe',tag:'THE INSOMNIAC',creed:'Sleep is where ambition goes to die. Four years awake and counting.',
   st:{NERVE:2,CHARM:3,LOGIC:5,GUT:2},perk:'Never sleeps. Flux recharges 50% faster.',flaw:'Burning out. Old age comes for you ten years early.',
-  look:{skin:'#6e4127',hair:'#14101c',hs:0,coat:'#5b3f6e',pants:'#2a2433',build:0,acc:'phones'},mod:{flux:1.5,old:50},remake:{name:'Temi Achebe',line:'The surgeon asks what he wants to look like. He gives the answer he has been awake avoiding for four years. Temi wakes after eleven days and, for the first time in her life, sleeps. Nobody is looking for her.',look:{skin:'#6e4127',hair:'#14101c',hs:1,coat:'#a57be0',pants:'#2a2433',build:0,acc:''}}},
+  look:{skin:'#6e4127',hair:'#14101c',hs:6,coat:'#a57be0',pants:'#2a2433',shoes:'#58d6c9',build:0,ht:2,top:'tee',acc:'phones'},mod:{flux:1.5,old:50},remake:{name:'Temi Achebe',line:'The surgeon asks what he wants to look like. He gives the answer he has been awake avoiding for four years. Temi wakes after eleven days and, for the first time in her life, sleeps. Nobody is looking for her.',look:{skin:'#6e4127',hair:'#14101c',hs:1,coat:'#a57be0',pants:'#2a2433',build:0,acc:''}}},
  {id:'gamb',name:'Boba Glober',tag:'THE GAMBLER',creed:'Every room is a table and the stream never ends. Absurdism, hood down, one left in the pack.',
   st:{NERVE:5,CHARM:3,LOGIC:1,GUT:4},perk:'Bookies love the action. Bets pay 50% more.',flaw:"Can't resist one more look. Revisiting a moment costs 30 paradox, not 20.",
   look:{skin:'#d9a988',hair:'#14101c',hs:3,coat:'#23232b',pants:'#3a3a42',shoes:'#ece5cc',build:0,top:'hoodie',hood:false,beard:1,eye:'#2a2433',acc:'cig'},mod:{odds:1.5,revisit:30},remake:{name:'Solana Ferreira',line:'Sol cuts the deck to choose the new face, and rigs the cut. First time he has ever cheated to get the thing he actually wanted. Solana walks out. The house never sees her coming.',look:{skin:'#9a5f3a',hair:'#4a2a17',hs:1,coat:'#b0303a',pants:'#2b1d14',build:0,acc:'cig'}}},
@@ -2230,7 +2230,7 @@ const KC=(()=>{const P=a=>a[Math.floor(R()*a.length)],ch=p=>R()<p;
  const cash=()=>fmt(S.cash||0),where=()=>{try{return S.phase==='war'?P(['the oval office','the white house','the situation room','the residence']):S.loc==='world'?(typeof zoneName==='function'&&WR?zoneName().toLowerCase():'the street'):S.loc==='desk'?'the terminal':'the house'}catch(_){return 'somewhere'}};
  const W22=()=>(window.HSW22&&S.emp&&S.emp.w22)||null;
  const CORE={
-  any:[()=>`${SN()} is ${P(ADJ)}`,()=>`who let ${SN()} have a time machine`,()=>`this is the most ${P(ADJ)} stream on klik`,()=>`${P(['day','hour','minute'])} ${Math.floor(2+R()*900)} of asking ${SN()} to ${P(['touch grass','drink water','explain the coin','say hi to my nan','do the voice','go back to the bridge'])}`,
+  any:[()=>{try{const b=CH22.bits();return b.length?`${P(['that','the','bro the','i need that','who approved the'])} ${P(b)} ${P(['is a choice','goes hard','is criminal','is so 2019','is iconic','is giving villain','should be illegal'])}`:'fit check'}catch(_){return 'fit check'}},()=>{try{const b=CH22.bits();return `${P(['rate the','chat what is the','ok but the','10/10 for the','0/10 for the'])} ${P(b)||'fit'}`}catch(_){return 'fit?'}},()=>`${SN()} is ${P(ADJ)}`,()=>`who let ${SN()} have a time machine`,()=>`this is the most ${P(ADJ)} stream on klik`,()=>`${P(['day','hour','minute'])} ${Math.floor(2+R()*900)} of asking ${SN()} to ${P(['touch grass','drink water','explain the coin','say hi to my nan','do the voice','go back to the bridge'])}`,
    ()=>`${P(['streamer','ceo','president','landlord','prophet','menace'])} ${SN()} ${P(['strikes again','is cooking','has lost it','is him','is not him','is so back','is so over'])}`,()=>`imagine ${P(['owning','being','trusting','dating','voting for'])} ${SN()}`,
    ()=>`can we get ${Math.floor(2+R()*98)} ${P(['W','L','o7','F','🗿'])}s in chat`,()=>`${P(['my','the'])} ${P(['dog','landlord','therapist','teacher','priest','barber'])} ${P(['watches','hates','sent me','warned me about'])} this stream`,()=>`${P(['predict','bet','guess'])}: ${SN()} ${P(['dies','goes to prison','buys the moon','gets cancelled','becomes god'])} by ${P(['tuesday','the weekend','2030','the end of stream'])}`],
   rich:[()=>`bro has ${cash()} and still ${P(['wears that hoodie','lives under a bridge spiritually','asks chat for advice','cant afford taste'])}`,()=>`${cash()} ${P(['and not one cent to me','and i cant pay rent','and he tips like a ghost','is crazy'])}`,()=>`${SN()} ${P(['buy','give','send'])} me ${P(['a car','a house','one coin','a country','50 quid'])} ${P(['please','im begging','for content','you wont'])}`],
@@ -3588,7 +3588,7 @@ Q100.push(['S','Does the presidency run out of things to do?',`An in-tray that c
    m.todo = what you are on your way to do · m.seq = moves queued to play out · m.killT = someone you are in the middle of ending. */
 const SIMA=[
  {k:'talk',n:'TALK',d:'sit them down, ask things',do:e=>openD('npc',e.p.id)},
- {k:'chat',n:'CHAT',d:'a quick word',do:e=>{const p=e.p;npcInit(p);p.met=(p.met||0)+1;p.rep=(p.rep||0)+.3;S.chatN=(S.chatN||0)+1;const t=tgen(pick(TG[p.trait]||TG.gen));bub(e,tgen(pick(TG.bub)),2.6);say(`<b class="hd">${p.n}</b> ${t}`)}},
+ {k:'chat',n:'CHAT',d:'a quick word',do:e=>{const p=e.p;npcInit(p);p.met=(p.met||0)+1;p.rep=(p.rep||0)+.3;S.chatN=(S.chatN||0)+1;let t=tgen(pick(TG[p.trait]||TG.gen));try{if(R()<.45){const q=CH22.npc(p);if(q)t=q}}catch(_){}bub(e,tgen(pick(TG.bub)),2.6);say(`<b class="hd">${p.n}</b> ${t}`)}},
  {k:'give',n:()=>'GIVE '+fmt(Math.max(20,Math.round(S.cash*.01))),d:'they will remember',ok:()=>S.cash>=20,do:e=>{const p=e.p,a=Math.max(20,Math.round(S.cash*.01));if(S.cash<a)return;S.cash-=a;p.cash=(p.cash||0)+a;p.rep=(p.rep||0)+1;p.met=(p.met||0)+1;fameAdd(Math.max(5,Math.sqrt(a)));bub(e,pick(['FOR ME?','GOD BLESS','WHAT IS THE CATCH','THANK YOU','I WILL NOT FORGET']),2.4);sfx('ok')}},
  {k:'punch',n:'PUNCH',d:'once',do:e=>{WR.me.seq=[[0,'p']]}},
  {k:'beat',n:'BEAT DOWN',d:'three and a kick',do:e=>{WR.me.seq=[[0,'p'],[.3,'p'],[.6,'p'],[1.05,'k']]}},
@@ -5955,13 +5955,31 @@ function pTitle(){let has=false;try{const s=JSON.parse(localStorage.getItem('hin
   <button type="button" data-a="dev">DOWNLOAD THE WHOLE GAME<small>one file. everything in it. runs anywhere</small></button>`}
 function pRoad(){return `<div class="who2">ROADMAP · TARGETS, NOT PROMISES</div>`+ROADMAP.map(r=>`<div class="ev"><div><b class="${r[0]==='SHIPPED'?'g':r[0]==='PORT'?'vi':r[0]==='NEXT'?'au':''}">${r[2]}</b> <i class="hi">${r[1]}</i><br>${r[3]}</div><button type="button" disabled>${r[0]}</button></div>`).join('')+`<button type="button" class="pri" data-a="roadback">BACK</button>`}
 const UNL=['gamb','narc','para','insom'];function unlN(){let n=S&&S.gen||1;try{n=Math.max(n,+localStorage.getItem('hindsight-unlock')||1);localStorage.setItem('hindsight-unlock',String(n))}catch(e){}return Math.min(4,n)}
-const isUnl=id=>UNL.indexOf(id)<unlN();
+const isUnl=()=>true;
+
+const CH22=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const COL={'#ece5cc':'white','#f2c14e':'gold','#b0303a':'red','#3f5a2f':'army green','#2f3a2f':'green','#a57be0':'purple','#23232b':'black','#101018':'black','#4a5568':'grey','#5b3f6e':'plum','#7a5a1e':'brown','#d8d2c2':'cream','#3d5a80':'blue','#14101c':'black','#d9a441':'blond','#c9c9d1':'silver','#58d6c9':'teal','#ef5d75':'pink','#8a4b20':'auburn','#4a2a17':'brown','#2b1d14':'dark brown','#23232b':'black','#3a3a42':'charcoal','#1c1420':'black','#2a2433':'dark'};
+ const cn=h=>COL[h]||'loud';
+ const L=()=>S.look||{};
+ function bits(){const l=L(),o=[],v=(k,x)=>(CUSV[k]&&CUSV[k][x])||'';
+   if(l.top)o.push(cn(l.coat)+' '+(v('top',l.top)||l.top));if(l.hs!=null)o.push((l.hs===3?'shaved head':cn(l.hair)+' '+(v('hs',l.hs)||'hair')));if(l.beard)o.push(v('beard',l.beard));if(l.acc)o.push(l.acc==='cig'?'cigarette':l.acc==='phones'?'headphones':l.acc);
+   if(l.build===2)o.push('size');if(l.build===0)o.push('thin frame');if(l.ht===2)o.push('height');if(l.ht===0)o.push('short legs');if(l.shoes==='#ece5cc')o.push('white trainers');return o.filter(Boolean)}
+ const PER={narc:['They are already looking at you before you speak. You like that.','"Are you someone? You look like someone."','A girl asks for a selfie. You say yes before she finishes.','"Is that a real suit or a costume?" It is both.'],
+  para:['They glance at the cap and then at your hands.','"You alright, mate? You keep checking the door."','A man with a dog crosses the road when he sees you. Good. Or bad.','"Nobody is following you." That is exactly what they would say.'],
+  insom:['"Have you slept?" No.','They notice the headphones are not plugged into anything.','A shopkeeper offers you a coffee for free. Your eyes did that.','"You look like you have seen tomorrow." You have.'],
+  gamb:['They clock the hoodie and the cigarette and decide you owe someone money.','"Fancy a bet?" They are joking. You are not.','A man flips a coin as you pass. You call it before it lands.','"You look lucky." Nobody has said that in years.']};
+ const TPL=[b=>`"Nice ${b}."`,b=>`"Where did you get that ${b}?"`,b=>`Someone stares at your ${b} a beat too long.`,b=>`"The ${b}? Bold."`,b=>`A kid points at your ${b} and laughs. The mum does not stop them.`,b=>`"I would kill for that ${b}." They mean it a little.`,b=>`"You cannot wear that ${b} in here." They let you anyway.`,b=>`Two people whisper about the ${b}. One of them is impressed.`];
+ function npc(p){const b=bits();if(R()<.5&&PER[S.ch])return P(PER[S.ch]);return b.length?P(TPL)(P(b)):''}
+ function press(){const b=bits(),c=CHM[S.ch]||{};return P([`A reporter asks about the ${P(b)||'look'}. "Is that presidential?"`,`The papers call you "${(c.tag||'THE STRANGER').replace('THE ','the ').toLowerCase()} in the ${P(b)||'suit'}".`,`A cartoonist draws you as nothing but the ${P(b)||'hair'}. It sells.`,`Polls say voters trust the ${P(b)||'face'} more than the policies.`])}
+ const OPEN={narc:'Three cameras, a ring light, and nobody watching yet. Yet.',para:'Every window on the street is a lens. You count them on the way past.',insom:'Day four awake. The streetlights have started to hum in a key.',gamb:'One cigarette left and a coin you do not trust. The bridge is warm tonight.'};
+ function open(){if(OPEN[S.ch])try{say(OPEN[S.ch],'violet')}catch(_){}}
+ return {bits,npc,press,open}})();
 function pPick(){if(S.cus)return pCustom();const c=CHARS[S.pick],a=ABIL[c.id];
   return `<div class="row r4">${CHARS.map((x,i)=>`<button type="button" class="tab ${i===S.pick?'on':''}" data-a="pick" data-v="${i}">${isUnl(x.id)?x.tag.replace('THE ',''):'LOCKED<small>live '+(UNL.indexOf(x.id)+1)+' lives</small>'}</button>`).join('')}</div>
   <div class="who2">${c.tag}</div><div class="say">${c.creed}</div>
   <div class="stats">${Object.keys(c.st).map(k=>`<span class="c${k}">${k} ${c.st[k]}</span>`).join('')}</div>
   <div class="list"><div><b>+</b> ${c.perk}</div><div><span class="ro">-</span> ${c.flaw}</div><div><span class="vi">${a.n}</span> ${a.d}</div></div>
-  <button type="button" class="pri big" data-a="be">NEXT · MAKE THEM YOURS</button>`}
+  <button type="button" class="pri big" data-a="be">BE ${c.name.split(' ')[0].toUpperCase()}<small>${c.perk}</small></button>`}
 function pCustom(){const L=S.draft.look,life=S.phase==='trade',T=S.draft.traits||[],left=ptsLeft(T),tabs=[['face','FACE'],['body','BODY'],['extra','EXTRA']].concat(life?[]:[['traits','TRAITS '+left]]);
   let tab=S.cusTab||'face';if((life&&tab==='traits')||(tab!=='traits'&&!CUSG[tab]))tab=S.cusTab='face';
   const head=`<div class="who2">${life?'THE MIRROR':'WHO ARE YOU'}</div><div class="row r4" style="grid-template-columns:repeat(${tabs.length},1fr)">${tabs.map(t=>`<button type="button" class="tab ${tab===t[0]?'on':''}" data-a="ctab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>`;
@@ -6092,7 +6110,7 @@ function pDead(){const d=S.dead,c=CAUSE[d.cause],rs=S.world.rulers.slice(-4).rev
   <div class="list">${d.years?`<div>Ruled <b>${d.years}</b> years · peak <b>${d.peak}</b>/14 lands · died holding <b>${d.held}</b></div>`:'<div>Never reached the chair. Peak fortune <b>'+fmt(S.peak)+'</b>.</div>'}
   <div>The world: <span class="vi">${stage()} · chaos ${Math.round(chaos())}%</span> · <span class="ro">${(S.world.dead||[]).length} dead, for good</span>${S.wdeath?' · killed by '+S.wdeath.by:''}</div>
   ${rs.map(r=>`<div><b>${r.name}</b> · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}</div>`).join('')}${S.world.seeded?`<div><span class="hi">The seed ships ${S.world.seeded.by} paid for are still flying.</span></div>`:''}</div>
-  ${(()=>{const n=unlN(),nx=n<4?CHM[UNL[n]]:null;return nx?`<div class="say" style="color:var(--gold)">UNLOCKED NEXT LIFE: ${nx.tag}. ${nx.perk}</div>`:''})()}<button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
+  <button type="button" class="pri big" data-a="reborn">BE BORN AGAIN<small>a new life in the world you left behind</small></button>
   ${S.flags.ngp&&S.war&&S.war.united?'<button type="button" class="pri big" data-a="meet">SOMEONE IS WAITING<small>he has been in every window</small></button>':''}
   ${S.war&&S.war.united?'<button type="button" class="big" data-a="ngp">NEW GAME PLUS<small>same soul, same skills, every memory. The world is not how you left it.</small></button>':''}`}
 function render(){if(S&&S.loc!=='world')S.wmenu=false;hud();const p=$('panel'),ph=S.phase;
@@ -6127,7 +6145,7 @@ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(
   else if(a==='new'){setFace(null);logs=[];$('lines').innerHTML='';S={v:2,gen:1,world:newWorld(),phase:'pick',pick:3,prevSk:null};genCity(S.world.cseed);save();render()}
   else if(a==='continue'){load();render()}
   else if(a==='pick'){if(!isUnl(CHARS[+v].id)){say(`Locked. ${CHARS[+v].tag} unlocks after life ${UNL.indexOf(CHARS[+v].id)}.`,'rose');return}S.pick=+v;sfx('tick');render()}
-  else if(a==='be'){const c=CHARS[S.pick];S.draft={look:lookOf(c.look),name:S.gen===1?c.name:pick(FIRST)+' '+pick(LASTN),traits:[]};S.cus=true;S.cusTab='face';sfx('tick');render()}
+  else if(a==='be'){const c=CHARS[S.pick];S.draft={look:lookOf(c.look),name:S.gen===1?c.name:pick(FIRST)+' '+pick(LASTN),traits:[]};S.cus=false;sfx('ok');beginLife(c.id);try{CH22.open()}catch(_){}}
   else if(a==='ctab'){S.cusTab=v;sfx('tick');render()}
   else if(a==='trait'){const T=S.draft.traits=S.draft.traits||[],i=T.indexOf(v);if(i>=0)T.splice(i,1);else T.push(v);sfx(i>=0?'tick':'ok');render()}
   else if(a==='shtab'){S.shTab=v;sfx('tick');render()}
@@ -6252,7 +6270,8 @@ function load(data){let s=data;if(!s){try{s=JSON.parse(localStorage.getItem('hin
 function start(data){if(!(data&&data.S&&load(data.S))){S={v:2,gen:1,world:newWorld(),phase:'title'};genCity(S.world.cseed)}
   sndLabel();render();requestAnimationFrame(loop)}
 $('lines').addEventListener('click',e=>{const d=e.target.closest('#lines div');if(d)d.classList.toggle('x')});
-window.HS={get VH(){return H},KC,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
+setInterval(()=>{try{if(S&&S.phase==='war'&&!S.dlg&&R()<.5)say('<b class="hd">THE PRESS</b> '+CH22.press(),'cyan')}catch(_){}},45000);
+window.HS={get VH(){return H},KC,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
 if(hot&&hot.ready)hot.ready(start);else start(hot&&hot.data||{});

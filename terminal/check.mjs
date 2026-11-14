@@ -94,9 +94,9 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   const dup = await p.evaluate(() => { let bad = 0; for (let i = 1; i <= 40; i++) { HS.S.bx = { seed: i * 7919, slip: {}, peek: {}, open: [], done: [], n: 0 }; const q = HS.btBoard().map(m => m.q); if (q.length !== 8 || new Set(q).size !== 8) bad++ } return bad; });
   ok(`${t} BOARD never lists a market twice`, dup === 0, dup + " bad boards");
 
-  // Bug 4: one more character unlocks per life. Bug 13: GOD and BODY hidden from players.
+  // Bug 4 (now v22): all four characters are open from the first life. Bug 13: GOD and BODY hidden from players.
   const lk = await p.evaluate(() => { localStorage.setItem("hindsight-unlock", "2"); HS.S.phase = "pick"; HS.S.pick = 3; HS.S.cus = false; HS.render(); return [...document.querySelectorAll('[data-a="pick"]')].map(b => b.textContent.startsWith("LOCKED")); });
-  ok(`${t} a second life unlocks a second character`, lk.filter(Boolean).length === 2, JSON.stringify(lk));
+  ok(`${t} all four characters are playable`, lk.filter(Boolean).length === 0, JSON.stringify(lk));
   const dev = await p.evaluate(() => ["bGod", "bBody"].map(id => { const b = document.getElementById(id); return !b || getComputedStyle(b).display === "none"; }));
   ok(`${t} GOD and BODY are hidden from players`, dev.every(Boolean), JSON.stringify(dev));
   await ctx.close();
