@@ -205,3 +205,21 @@ The playtest was stopped before these were covered. Nothing above should be take
 - **Other characters:** the three locked ones and their abilities cannot be reached in this build.
 - **Platform:** sound and music, voice lines, gamepad, landscape phone, real phone performance and load time, photo upload for the face, the 100 questions page, DOWNLOAD THE WHOLE GAME, RESET.
 - **Desktop:** only the title, builder, intro, desk layout, the house and field keys, the jester's first line and a short walk in the field were covered. Mouse aiming, hover and the wheel with a mouse were not.
+
+## Opus continues: the blockers, checked in the code
+
+Fable played; Opus read the code behind the two blockers. Both are real, and each one is a single-line fix. Line numbers refer to `index.html` in the upload, which is byte-for-byte the live artifact (13 Nov 2026).
+
+**Blocker 1, CONTINUE dies after a reload mid-conversation: confirmed.**
+- Cause: `load()` (line 6088) brings back the saved state as it was, and that includes an open conversation in `S.dlg`. It then sets `WR=null` and rebuilds only the city, not the street. The first frame redraws the open conversation, `DLG.wtaxi` (line 1967) reads `WR.me`, and `WR` is null, so it throws every frame.
+- Fix (S): in `load()`, next to `WR=null`, add `S.dlg=null;`. Better still, the autosave should skip saving `S.dlg` at all. Keep a second "last good save" slot that is written only when no conversation is open, and have CONTINUE fall back to it if loading throws.
+
+**Blocker 2, SAVES and ROADMAP have no buttons: confirmed.**
+- Cause: the title skin (line 5511) adds the class `more21` to every button on a title-phase screen unless its action is in `KEEP=['new','continue','saves','road']`. `#panel.t21 .more21{display:none}` (line 5173) then hides it. The SAVES screen also runs in the title phase, so its own buttons `sexp`, `simp` and `sback` get hidden. So does `roadback` on ROADMAP.
+- Fix (S): add them to the list: `KEEP=['new','continue','saves','road','sexp','simp','sback','roadback']`. Better still, only apply the `more21` fold to the main title menu, so no sub-screen loses its buttons again.
+
+**What to do next, in order**
+1. Ship the two fixes above as one small version. Test it by reloading while a taxi conversation is open, then by pressing EXPORT, IMPORT and BACK on SAVES.
+2. Then items 3 to 5 of the Locked List (guns, punches, police): they're the first things anyone clips.
+3. Then the cold open (the guided first trade inside 40 seconds), the highest-ranked item outside "Fix first".
+4. Run a second playtest on the "Not reached yet" list above, starting with markets in depth and dying in the street. It should only start once 1 and 2 are live, so it isn't fighting broken saves.
