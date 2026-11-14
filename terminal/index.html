@@ -5434,7 +5434,7 @@ body:not(.dev) #bGod,body:not(.dev) #bBody,body:not(.dev) #panel [data-a=god]{di
  window.empOpen=()=>{E();el.classList.add('on');empDraw()};
  /* the door in: POWER on the desk, and THE MAP in the White House */
  const r22=render;render=function(){const r=r22.apply(this,arguments);try{const p=$('panel');if(S.phase==='trade'&&S.loc==='desk'&&(S.tab==='pow'||S.tab==='lab')&&!p.querySelector('.emp21b')){const row=p.querySelector('.sub19')||p.querySelector('.tg19');if(row){const bt=document.createElement('button');bt.type='button';bt.className='emp21b';bt.textContent='EMPIRE';bt.onclick=ev=>{ev.stopPropagation();empOpen()};row.appendChild(bt)}}
-   if(S.phase==='war'&&!p.querySelector('.emp21b')){const bt=document.createElement('button');bt.type='button';bt.className='emp21b pri';bt.innerHTML='EMPIRE<small>countries, companies, the family, the war department</small>';bt.onclick=ev=>{ev.stopPropagation();empOpen()};const f=p.querySelector('button');if(f)f.before(bt);else p.appendChild(bt)}}catch(e){}return r}}
+   if(S.phase==='war'&&!S.dlg&&!p.querySelector('.emp21b')){const bt=document.createElement('button');bt.type='button';bt.className='emp21b pri';bt.innerHTML='EMPIRE<small>countries, companies, the family, the war department</small>';bt.onclick=ev=>{ev.stopPropagation();empOpen()};const f=p.querySelector('button');if(f)f.before(bt);else p.appendChild(bt)}}catch(e){}return r}}
 
 /* ================= v22 · STATE VISITS =================
    Every country is a place you fly to: a parody of its seat of power, drawn in the game's pixels.
