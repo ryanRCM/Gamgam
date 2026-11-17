@@ -7088,6 +7088,26 @@ const FAM24=(()=>{
  {const r0=render;render=function(){const r=r0.apply(this,arguments);try{document.querySelectorAll('#panel canvas[data-f24]').forEach(c=>{const x=rows[+c.dataset.f24],g2=c.getContext('2d');g2.fillStyle=PAPER;g2.fillRect(0,0,32,32);
    if(x&&x.look){try{faceF(g2,x.look,16,16.5,1.72,0,(x.age||0)>58)}catch(_){}}else{g2.fillStyle='#8d86a3';g2.font='20px monospace';g2.fillText('?',10,23)}})}catch(_){}return r}}
  return {}})();
+/* RW24 : REWIND AS A SHOW. Rewinding a lost RAKE board throws a VHS "60 SECONDS AGO" stamp over the screen and
+   makes the security bar twitch. Cashing out a rewound board builds a REWIND STREAK: each level pays +10% more
+   (to +50%) and makes security 5 points more nervous. NEW BOARD after a bust ends the streak. */
+const RW24=(()=>{
+ {const st=document.createElement('style');st.textContent=`#rw24{position:fixed;z-index:44;display:none;pointer-events:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;overflow:hidden;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 2px,transparent 2px 5px),rgba(10,8,20,.55);font-family:var(--disp);color:#fff;text-shadow:3px 0 #ef5d75,-3px 0 #58d6c9;animation:vhs24 .12s steps(2) infinite}
+  #rw24 b{font-size:clamp(14px,4.4vw,26px);font-weight:400;letter-spacing:.06em}#rw24 i{font-style:normal;font-family:var(--read);font-size:clamp(15px,4.4vw,20px);color:#f2c14e;text-shadow:none;text-align:center;padding:0 12px}#rw24 b{text-align:center;padding:0 8px}#rw24 u{position:absolute;left:0;right:0;height:14px;background:rgba(255,255,255,.18);text-decoration:none;animation:roll24 .7s linear infinite}
+  #rw24 s{position:absolute;top:10px;left:12px;text-decoration:none;font-size:10px;color:#ef5d75;text-shadow:none}
+  @keyframes vhs24{0%{transform:translateX(0)}50%{transform:translateX(-3px) skewX(-2deg)}}@keyframes roll24{from{top:110%}to{top:-10%}}
+  .tw24{animation:tw24 .14s steps(2) 8}@keyframes tw24{0%{transform:translateX(0)}50%{transform:translateX(6px)}}
+  .rs24{color:#f2c14e;font-family:var(--disp);font-size:9px}`;document.head.appendChild(st)}
+ const el=document.createElement('div');el.id='rw24';el.innerHTML='<u></u><s>● PLAY ◀◀</s><b>◀◀ 60 SECONDS AGO</b><i></i>';document.body.appendChild(el);let hideT=0;
+ function show(n){const c=document.querySelector('.crt'),r=c&&c.getBoundingClientRect();if(!r||r.width<10)return;Object.assign(el.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',display:'flex'});
+  el.querySelector('i').textContent=n?`REWIND STREAK ×${n} ON THE LINE`:'same table · same board · you saw where they are';clearTimeout(hideT);hideT=setTimeout(()=>{el.style.display='none'},still?700:1700)}
+ {const r0=rrew;rrew=function(){const k=S.rake,can=k.b&&!k.b.live&&k.b.bust>=0&&S.flux>=25;const r=r0.apply(this,arguments);if(can){k.rw24=1;show(k.streak24||0);setTimeout(()=>{const m=document.getElementById('ms');if(m){m.classList.remove('tw24');void m.offsetWidth;m.classList.add('tw24')}},30)}return r}}
+ {const c0=rcash;rcash=function(){const k=S.rake,b=k.b,m=b&&b.picks&&b.picks.length?rmult(b.picks.length):0,was=k.rw24&&b&&b.known;const r=c0.apply(this,arguments);
+   if(b&&k.b!==b&&was){k.rw24=0;k.streak24=(k.streak24||0)+1;const n=k.streak24;if(n>=2){const x=b.bet*m*.1*Math.min(5,n-1);S.cash+=x;k.sus=Math.min(100,k.sus+5*n);say(`<b class="hd">REWIND STREAK ×${n}</b> The house pays ${fmt(x)} extra and cannot work out why. Security leans closer.`,'gold')}else say(`<b class="hd">REWIND STREAK ×1</b> Beat the board you already lost. Do it again.`,'gold');try{save();render()}catch(_){}}return r}}
+ {const n0=rnew;rnew=function(){const k=S.rake,lost=k.b&&!k.b.live&&k.b.bust>=0;const r=n0.apply(this,arguments);if(lost&&k.streak24){say(`Streak over at ×${k.streak24}. You let a board go.`,'rose');k.streak24=0;k.rw24=0;try{save();render()}catch(_){}}return r}}
+ {const p0=pRake;pRake=function(){const h=p0.apply(this,arguments),n=S.rake.streak24||0;return n?h.replace('<div class="m">',`<div class="rs24">REWIND STREAK ×${n}${n>=2?' · rewound boards pay +'+Math.min(50,10*(n-1))+'%':' · beat another rewound board'}</div><div class="m">`):h}}
+ return {show}})();
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));

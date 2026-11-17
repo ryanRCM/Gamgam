@@ -85,6 +85,19 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000);
   const fam = await p.evaluate(() => { const f = document.querySelector("#panel .fam24"); if (!f) return null; const r = f.getBoundingClientRect(); return { n: f.querySelectorAll(".f24").length, faces: f.querySelectorAll("canvas").length, h: r.height, txt: f.innerText.slice(0, 200) }; });
   ok(`${t} title shows the family tree with faces`, fam && fam.n >= 2 && fam.faces >= 2 && fam.h > 0 && /Mara Reyes/.test(fam.txt) && /ASSASSINATED/.test(fam.txt), JSON.stringify(fam));
+  // v24 · REWIND AS A SHOW: rewinding a lost RAKE board stamps "60 SECONDS AGO" on screen, and beating the
+  // rewound board builds a streak that shows in the RAKE header.
+  await p.evaluate(() => { localStorage.removeItem("hindsight-v2"); }); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(900);
+  for (const a of ["new", "be"]) await act(a);
+  await p.evaluate(async () => { for (let i = 0; i < 30 && HS.S.phase === "intro"; i++) { const x = document.querySelector('#panel [data-a="dcont"]') || document.querySelector('#panel [data-a="dopt"]'); x && x.click(); await new Promise(r => setTimeout(r, 60)); } });
+  const rw = await p.evaluate(async () => { const S = HS.S, w = ms => new Promise(r => setTimeout(r, ms)), c = (a, v) => { const b = [...document.querySelectorAll(`#panel [data-a="${a}"]`)].find(b => v == null || b.dataset.v == v); if (b && !b.disabled) { b.click(); return true; } return false; };
+    S.dlg = null; S.cash = 1e5; S.flux = 100; S.tab = "rake"; S.rake.banned = false; S.rake.b = null; S.rake.sus = 0; HS.render(); await w(50);
+    for (let tries = 0; tries < 6 && !(S.rake.b && S.rake.b.bust >= 0); tries++) { S.rake.b = null; S.rake.round++; HS.render(); c("rbet", ".1"); for (let i = 0; i < 25 && S.rake.b && S.rake.b.live; i++) c("rpick", String(i)); }
+    if (!(S.rake.b && S.rake.b.bust >= 0)) return { err: "never busted" };
+    c("rrew"); await w(150); const o = document.getElementById("rw24"), stamp = !!o && getComputedStyle(o).display !== "none" && /60 SECONDS AGO/.test(o.innerText);
+    c("rbet", ".1"); const safe = [...document.querySelectorAll('#panel [data-a="rpick"]')].find(b => !b.disabled && !/✕/.test(b.innerText)); safe && safe.click(); await w(50); c("rcash"); await w(80);
+    return { stamp, streak: S.rake.streak24, head: (document.querySelector("#panel .rs24") || {}).innerText || "" }; });
+  ok(`${t} RAKE rewind stamps the screen and builds a streak`, rw.stamp && rw.streak === 1 && /STREAK/.test(rw.head), JSON.stringify(rw));
   await ctx.close();
 }
 await browser.close(); srv.close();
