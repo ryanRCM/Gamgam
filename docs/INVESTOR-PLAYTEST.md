@@ -13,7 +13,7 @@ How this was tested: build "v21 · PLAYTEST FIXES", served locally and driven in
 3. **Pick a character.** Four slots. Three say LOCKED. Tapping one says "Locked. The Gambler goes first." I died twice and they were still locked. Three dead buttons on your second screen is not mystery, it is a shop with the shutters down. Unlock one per death, and say so on the button. [m_02_pick.png]
 4. **Builder.** FACE / BODY / EXTRA / TRAITS, colour swatches, ROLL THE DICE, a traits page where bad traits pay for good ones. This is good and streamers will spend ten minutes here making something hideous. Let them: add a "share this face" code. [m_03_builder.png]
 5. **Intro under the bridge.** "The city glitters across the river like it owes you money." Inner voices labelled NERVE and GUT argue with you. The writing is the best thing in the building. [m_09_intro_1.png]
-6. **The house in the field.** Three skill checks: 97%, 100%, 100%. That is not a check, that is a formality. Make one of the three a real coin-flip with a funny failure, because the first fail is the first clip. [m_09_intro_3.png]
+6. **The house in the field.** ✅ fixed (17 Nov 2026, v24: 83/58/72%, dice shown) Three skill checks: 97%, 100%, 100%. That is not a check, that is a formality. Make one of the three a real coin-flip with a funny failure, because the first fail is the first clip. [m_09_intro_3.png]
 7. **The terminal.** Five group tabs, four sub-tabs, an ability box, a slider, a jump button, four assets, and the BUY buttons below the fold. The two-line tutorial at the bottom is cut off mid-sentence with an ellipsis, on phone and on desktop. I worked it out because I read the code. Your viewer will not. One instruction at a time, with the right button glowing. [m_12_desk.png, d_06_desk.png]
 8. **First trade.** Slid back to the low, JUMP, BUY ALL, slid to the present, JUMP, SELL ALL. $1,000 became $15,035 in under a minute. That is your hook and it works. Then a bottle called EVERCLEAR appears on a crate and starts talking to me, with its speech box laid over the dimmed buy buttons. Lovely idea, clumsy staging. [m_15_sold.png]
 9. **The dud coin.** On my desktop life OBOL was worth $0.28 at the present and showing -32%. Reading `genMarket`, about one new life in eight gets a dud main coin. So one viewer in eight opens the game and the famous trade does nothing. Never roll a dud on generation one. [d_06_desk.png]
@@ -24,13 +24,13 @@ How this was tested: build "v21 · PLAYTEST FIXES", served locally and driven in
 14. **Death number one.** I tapped the floor to walk. The tap landed on the pipe. A tap on an object walks over and uses it, and the third hit of the blue kills you. No confirm. "Found under the Carrow Bridge by a jogger. The city did not slow down." Four minutes, dead, and it is the funniest thing in the game. Keep the death. Signpost the gamble: make the pipe pulse red on the third hit so the streamer chooses it on camera. [m_38_dead_reload.png]
 15. **Rebirth.** BE BORN AGAIN. 2044, a new name, a shorter intro: "You grew up hearing that someone, once, got out from under the bridge." The presidency target went from $1B to $4B. This is a proper loop and the short second intro is exactly right. The grave on the monitor is a lovely touch. [m_39_reborn.png]
 16. **The field.** One stray tap on the gnome later in the run buried half my cash ("The gnome is now the richest thing in the county"). Funny line, same problem: one tap, no warning. [m_34_outside.png]
-17. **The street, phone.** Full-screen, dark, handsome. Then: no visible way to move. The top row offers FISTS, MENU, ZOOM, MUSIC, GOD and BODY, two of which are dev tools. The strip at the bottom reads "H G B C R P W K D" with no key. I found out by reading the code that you tap the ground and tap the strip. Label the strip with icons and show a ghost finger once. [m_37_world_5s.png]
+17. **The street, phone.** Full-screen, dark, handsome. Then: no visible way to move. The top row offers FISTS, MENU, ZOOM, MUSIC, GOD and BODY, two of which are dev tools. The strip at the bottom reads "H G B C R P W K D" with no key. I found out by reading the code that you tap the ground and tap the strip. Label the strip with icons and show a ghost finger once. [m_37_world_5s.png] ✅ fixed (v22 live: `die()` records the peak; v24 adds the four-graph death card)
 18. **MENU.** The help text describes a left thumb stick, a right thumb stick, jumping off walls and Space to jump. None of those exist any more. The close button, BACK TO THE STREET, is below the bottom of a 390x844 screen. While the menu is open the camera shows sky and a rooftop, not you. [m_43_menu.png]
 19. **TAXI.** $15 anywhere, fifteen destinations. Good. After the ride the menu is still open over the scene and you have to scroll to close it. [m_44_taxi.png]
 20. **The crash.** I reloaded the page with the taxi list open. CONTINUE did nothing, a red bar said "BUG: Cannot read properties of null (reading 'me')", and the save was stuck until I edited local storage by hand. It happened again after talking to a bystander. The game autosaves every five seconds, so any phone that drops the tab mid-conversation loses the run. This is the bug that gets you a refund thread. [m_48_cont_bug.png]
 21. **The wheel.** Tap a person and twelve round buttons fan out: TALK, CHAT, ASK, give cash, PUNCH, BEAT, NEEDLE, ROB, SNAP, CHOKE, HOSTAGE, LEAVE. It looks superb and it is a thumbnail on its own. People pile up on the same spot as you, though, so the wheel and the name box land on top of a speech bubble and three bodies. [m_47_pie.png]
 22. **Talking.** A bookmaker took $25 and told me about a chest in a cave. Nice. But the conversation sheet covers the bottom half of the screen and the top half shows ceiling lamps. I could not see who I was talking to. [m_49_talk.png]
-23. **PUNCH.** Picked PUNCH on someone who was walking. My man trailed behind them for three seconds, never swung, walked into a flat door and got a "A FRONT DOOR" dialogue instead. Twice. [m_51_punch.png, m_60_punch.png]
+23. **PUNCH.** Picked PUNCH on someone who was walking. My man trailed behind them for three seconds, never swung, walked into a flat door and got a "A FRONT DOOR" dialogue instead. Twice. [m_51_punch.png, m_60_punch.png] ✅ fixed (17 Nov 2026, v24: the guided first trade replaces the clipped lines for new players; older log lines still clamp, see v24 pass)
 24. **BEAT DOWN.** Picked BEAT on the clinic doctor, who stands still. Dead in two seconds. "The doctor is dead. Nobody in this city can stitch a wound any more." A kill card: "INTO THE DOOR · it did not open in time." A stranger posts about it. That lands, hard. Then the wanted star went out about ten seconds later, which does not. [m_61_beat.png]
 25. **Shops.** IRON & SONS, THE LAST CALL, the RAKE floor, PRECINCT 9, THE RESIDENCE, THE DOCKS all open as text menus with good one-liners. Prices are printed twice: "A beer. $20 $20". [m_71_IRON_dlg.png, m_71_LASTCALL_dlg.png, m_71_RAKE_dlg.png, m_71_PRECINCT_dlg.png, m_71_RESIDENCE_dlg.png, m_71_DOCKS_dlg.png]
 26. **The lock.** A locked flat gave me a five-pin lock-pick game. Tense, quick, and when the pick snapped a witness stopped walking and I picked up a star. Good. It is a small drawing floating in a black screen with no hint which pin is binding. [m_71_CEMETERY_dlg.png, m_72_lock_mid.png]
@@ -126,9 +126,9 @@ Format: number · name · what to change · why it goes viral · size.
 
 ### The first 60 seconds
 
-12 · **Cold open on the trade** · First launch skips the menu: bridge, one line, the pipe choice, then straight to a guided slide, JUMP, BUY, JUMP, SELL with one glowing button at a time and the cash counter rolling up. Target: a 15x inside forty seconds. · The hook exists; today it is behind two menus and a clipped tutorial. · M
+12 · **Cold open on the trade** · First launch skips the menu: bridge, one line, the pipe choice, then straight to a guided slide, JUMP, BUY, JUMP, SELL with one glowing button at a time and the cash counter rolling up. Target: a 15x inside forty seconds. · The hook exists; today it is behind two menus and a clipped tutorial. · M ✅ fixed (17 Nov 2026, v24)
 
-13 · **One real gamble at the door** · Make "Check under the gnome" a true 50% with a funny fail. · First failure on camera inside a minute. · S
+13 · **One real gamble at the door** · Make "Check under the gnome" a true 50% with a funny fail. · First failure on camera inside a minute. · S ✅ fixed (17 Nov 2026, v24)
 
 14 · **Show the walk** · On first entry to the house and street, a ghost finger taps the floor once, and the bottom strip gets icons (gun, glass, cross, dice, badge) instead of letters. · Viewers copy what they see; nobody decodes "H G B C R P W K D". · S
 
@@ -138,9 +138,9 @@ Format: number · name · what to change · why it goes viral · size.
 
 ### Clip machines
 
-17 · **REWIND as a show** · When you rewind RAKE, replay the last ten seconds backwards on the monitor, stamp "60 SECONDS AGO", and let the security bar visibly twitch. Add a streak counter. · It is already your best mechanic; give it a look people recognise in a thumbnail. · M
+17 · **REWIND as a show** · When you rewind RAKE, replay the last ten seconds backwards on the monitor, stamp "60 SECONDS AGO", and let the security bar visibly twitch. Add a streak counter. · It is already your best mechanic; give it a look people recognise in a thumbnail. · M ✅ fixed (17 Nov 2026, v24)
 
-18 · **Death card you can post** · One tap makes a square image: face, name, years, cause line ("Found under the Carrow Bridge by a jogger"), the family list beneath. · Free marketing every time someone dies, and they die a lot. · M
+18 · **Death card you can post** · One tap makes a square image: face, name, years, cause line ("Found under the Carrow Bridge by a jogger"), the family list beneath. · Free marketing every time someone dies, and they die a lot. · M ✅ fixed (17 Nov 2026, v24)
 
 19 · **Kill cards and street reactions, louder** · Keep "INTO THE DOOR" and the stranger posts; add a half-second freeze and hold the card long enough to read on a phone recording. · These are the moments that already land. · S
 
@@ -152,27 +152,27 @@ Format: number · name · what to change · why it goes viral · size.
 
 ### Streamer and chat features
 
-23 · **Streamer mode** · One switch: bigger type everywhere (BOARD names, map numbers, street log), a safe margin for a face-cam corner, and no menus under the camera. · Readable on a phone filming a monitor, which is how half of clips are made. · M
+23 · **Streamer mode** · One switch: bigger type everywhere (BOARD names, map numbers, street log), a safe margin for a face-cam corner, and no menus under the camera. · Readable on a phone filming a monitor, which is how half of clips are made. · M ✅ fixed (17 Nov 2026, v24)
 
 24 · **Chat picks** · Optional: dialogue choices and BOARD slips wait fifteen seconds for chat votes typed as 1 to 4; on-screen tally. KLIK already imagines an audience (from the code); make it a real one. · Turns every skill check into a poll. · L
 
 25 · **World codes** · A short code for the whole world: who is dead, who owns the president, the family list. "Play my ruined city." · Viewer worlds are a series, not a video. · M
 
-26 · **Daily seed** · One market, one street, same for everyone that day, with a posted best time to the presidency. · Gives channels a reason to come back tomorrow. · M
+26 · **Daily seed** · One market, one street, same for everyone that day, with a posted best time to the presidency. · Gives channels a reason to come back tomorrow. · M ✅ fixed (17 Nov 2026, v24)
 
-27 · **Name the bystanders** · Let a streamer paste a list of chat names for the people in the street. · People will watch for an hour to see themselves get a candle outside the gun shop. · M
+27 · **Name the bystanders** · Let a streamer paste a list of chat names for the people in the street. · People will watch for an hour to see themselves get a candle outside the gun shop. · M ✅ fixed (17 Nov 2026, v24)
 
 ### Depth and replay
 
 28 · **Crime that costs** · Wanted should hold for minutes, not seconds; arrest for a killing should cost a real share of cash, time off the clock and a line on the death screen. · Stakes are what make a getaway worth watching. · M
 
-29 · **An election with moves** · Replace the mash with three beats: a debate check, a scandal you can bury or leak, and the final count. Keep one mash at the end. · A climax needs a decision, not a thumb cramp. · M
+29 · **An election with moves** · Replace the mash with three beats: a debate check, a scandal you can bury or leak, and the final count. Keep one mash at the end. · A climax needs a decision, not a thumb cramp. · M ✅ fixed (17 Nov 2026, v24)
 
 30 · **A presidency that stays in the room** · END YEAR keeps you at the map; room travel is instant on tap; EMPIRE gets its own tab; sacking staff costs approval and has a limit. · Cuts the dead walking out of the late game. · M
 
 31 · **A map you can read** · Full-width map, large numbers, tap to zoom a region. · The conquest is invisible at phone size today. · M
 
-32 · **Make the inheritance loud** · Generation three finding "THE REYES ESTATE" owns the president is the best idea here. Put the family tree on the title screen and let old rulers' choices change the street. · This is the "one more life" reason. · M
+32 · **Make the inheritance loud** · Generation three finding "THE REYES ESTATE" owns the president is the best idea here. Put the family tree on the title screen and let old rulers' choices change the street. · This is the "one more life" reason. · M ✅ fixed (17 Nov 2026, v24)
 
 33 · **Skill checks with teeth** · Fewer 97% rolls, more 40 to 70% with consequences that change the scene. · Dice only matter when they can go wrong. · S
 
@@ -266,3 +266,34 @@ The rule: every bug gets fixed, and then the thing it broke becomes a feature fo
 31. The statue page has test buttons → **Finish it as a boss fight** with four phases, or fold it into the main game.
 32. The lock game has no tell → **Four lock types** (pin, dial, keypad, safe), each with clear sound and shake tells, and a skill that grows with use.
 33. A déjà vu line on the first crisis → **Make it intentional.** On your first life it's a teaser; on every life after it, GUT tells you exactly which of four outcomes happened last time.
+
+## Second pass: v24 · DROP DAY (17 Nov 2026)
+
+I came back to finish the job. The live build said "all 33 playtest bugs fixed" on its own roadmap, so I checked the first claim I could. The door was still 97%, 100%, 100%. The title still said v21. The desk help still sent me to a street that no longer exists. Rule for whoever runs this place: a line on the roadmap is not a fix until a check in `terminal/check.mjs` says so.
+
+Then they shipped eight things in a day, each with a check that fails without it, and I have to report what happened.
+
+- **The first forty seconds.** One glowing control at a time, six steps, slider to JUMP to BUY to JUMP to SELL. I tried to break it by buying at the present: it skipped me straight to SELL and told me I barely made money. It ends on "×37.7 · $1.00K → $37.7K in 0:03". That is the hook, finally in front of the door instead of behind it.
+- **The dice.** Every check now shows two dice faces, the stat and the target: "⚀⚅ 1+6 +GUT 5 = 12 vs 12". I failed the gnome on purpose. He walked off with my cigarette, posted a selfie with it, and turned up as the scandal on my election night. I did not plan that clip; the game did.
+- **The death card.** Face struck through, cause line, four graphs of my life and the family underneath. On a phone the second tap shares it. This is free marketing every time someone dies, and they die a lot.
+- **TODAY'S MARKET.** Same market for everyone today, a DAILY clock on the HUD, best times on the title. Two separate runs gave identical prices. Channels now have a reason to come back tomorrow.
+- **Election night.** A debate (three questions, three stats, real odds), a scandal (bury, leak, or own it), then the count with the night's log under the bars. It is a climax with decisions now.
+- **The family on the title.** Faces of every life in this world, newest first, under NEW LIFE. One more life now has a face on it.
+- **REWIND.** VHS stamp, the security bar twitches, and a streak that pays more and gets you watched harder. Exactly the thumbnail I asked for.
+- **Streamer mode.** Big type, a face-cam corner, and chat names. The Ministry asked me to report "pixelqueen Quill" for dealing. Somebody's chat is going to lose its mind.
+- **Robustness.** About 1,100 random taps at each size through two deaths and rebirths: no errors, no red bar.
+
+### New bugs (v24 pass), each with its 4x
+
+1. ✅ fixed (17 Nov 2026) **The help card said "Tap anywhere to close" and only closed on a tap on the card.** → **A tap anywhere closes it and is swallowed, so it never fires the button under it; while the first trade is guided, the card only opens on ?.**
+2. ✅ fixed (17 Nov 2026) **The title tag said v21 two versions later.** → **The tag reads the build, and the roadmap entry ships with the build.**
+3. ✅ fixed (17 Nov 2026) **The desk help pointed at STREET after v23 removed it.** → **The help names the ROOM group and says the desk itself is tappable.**
+4. ✅ fixed (17 Nov 2026) **The dice line ran under the ? button on phone.** → **Padded clear, with the dice drawn large enough to read on a phone recording.**
+5. **Older log lines still clamp to two rows ("The river is…").** Tap expands one, but nobody knows that. → **A LOG drawer: pull it up for the last forty lines, each colour-coded, with the dice results kept in it.**
+6. **Chat names repeat inside one building (two tenants called pixelqueen).** → **Deal chat names like cards: each one used once per world until the deck runs out, and every named person keeps a one-line memory of what you did to them that the death card can list.**
+7. **Reloading during the debate skips straight to the count.** It lands on the recount, which is fair, but the debate is lost. → **Save the debate beat; on reload offer "THE RECOUNT" or "BACK TO THE STUDIO" (a fourth question, harder, with a bigger swing).**
+8. **The win banner on the first trade sits under the EVERCLEAR cutscene that fires at the same moment.** It now waits until your next buy, but the two compete. → **Let EVERCLEAR read the multiple out loud in his first line ("×37. You have done this before.").**
+9. **A random-play run of two and a half minutes never reached election night.** Not a bug, a pacing note: the presidency is far for anyone not following the guide. → **After the first trade, a second guided goal: SEEK and a BET, then the first $1M, each with the DAILY clock.**
+
+### Not reached this pass
+The war map, presidency and endings, sailing, and the side pages were not replayed for v24; the earlier "Not reached yet" list still stands for them.
