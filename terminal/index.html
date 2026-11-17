@@ -6977,6 +6977,44 @@ const GNOME24=(()=>{const L=['THE GNOME bought OBOL at the low. Nobody knows how
    {t:'Kick him into the hedge.',check:['NERVE',ST('NERVE')+7],ok:()=>{const w=Math.round(5000*INF22.cpi());S.cash+=w;S.flags.gnome24=-1;return `He lands in the hedge and his wallet lands at your feet. ${fmt(w)}. He will not be back. Probably.`},fail:()=>{S.st.NERVE=Math.max(0,S.st.NERVE-1);return 'He was ready. He has been ready since 1971. You limp to the desk. NERVE -1.'}}]});
  setInterval(()=>{try{const f=S&&S.flags;if(!f||!(f.gnome24>0)||S.phase!=='trade'||S.dlg)return;if(R()<.4){if(f.gnome24<=L.length){say('<b class="hd">GNOME</b> '+L[f.gnome24-1],'gold');f.gnome24++}else if(!f.gnomeMet24){f.gnomeMet24=1;openD('gnome24')}}}catch(_){}},20000);
  return {L}})();
+/* CARD24 : the death card. One tap on the death screen makes a 1080 square to post: face, name, cause line,
+   four graphs of the life (cash, fans, heat, paradox) and the family list. LIFE24 samples the graphs every 5 s. */
+const CARD24=(()=>{let last=null,url=null;
+ setInterval(()=>{try{if(!S||!S.ch||!/trade|war|election/.test(S.phase))return;const h=S.hist24=S.hist24||[];h.push([S.cash||0,S.fame||0,S.heat||0,S.paradox||0]);if(h.length>240){for(let i=1;i<h.length;i++)h.splice(i,1)}}catch(_){}},5000);
+ {const b0=beginLife;beginLife=function(){const r=b0.apply(this,arguments);S.hist24=[[S.cash||0,0,S.heat||0,0]];return r}}
+ const F=(px,f)=>`${px}px ${f==='d'?"'Press Start 2P',monospace":f==='s'?"'Special Elite',Georgia,serif":"'VT323',monospace"}`;
+ function wrap(c,t,x,y,w,lh,max){const ws=String(t).split(' ');let line='',n=0;for(const q of ws){const tt=line?line+' '+q:q;if(c.measureText(tt).width>w&&line){c.fillText(line,x,y);y+=lh;line=q;if(++n>=max-1){line=ws.slice(ws.indexOf(q)).join(' ');break}}else line=tt}if(line){while(c.measureText(line).width>w&&line.length>3)line=line.slice(0,-2);c.fillText(line,x,y)}return y+lh}
+ function spark(c,x,y,w,h,vals,col,lab,fmtv,log){c.strokeStyle='#352e4c';c.lineWidth=2;c.strokeRect(x,y,w,h);c.fillStyle='#8d86a3';c.font=F(18,'d');c.fillText(lab,x,y-14);
+  if(vals.length<2)vals=[vals[0]||0,vals[0]||0];const tr=v=>log?Math.log10(1+Math.max(0,v)):v,tv=vals.map(tr),mx=Math.max(...tv,log?1:100),mn=log?Math.min(...tv):0;
+  c.beginPath();tv.forEach((v,i)=>{const px=x+8+(w-16)*i/(tv.length-1),py=y+h-8-(h-16)*(v-mn)/Math.max(1e-9,mx-mn);i?c.lineTo(px,py):c.moveTo(px,py)});c.strokeStyle=col;c.lineWidth=5;c.lineJoin='round';c.stroke();
+  c.fillStyle=col;c.font=F(30,'r');const t=fmtv(Math.max(...vals));c.fillText('peak '+t,x+w-c.measureText('peak '+t).width-10,y+h+30)}
+ function make(){const d=S.dead,cz=CAUSE[d.cause]||['GONE',''],W=1080,cv=document.createElement('canvas');cv.width=W;cv.height=W;const c=cv.getContext('2d');
+  c.fillStyle='#0c0a14';c.fillRect(0,0,W,W);for(let y=0;y<W;y+=6){c.fillStyle='rgba(255,255,255,.018)';c.fillRect(0,y,W,2)}
+  c.strokeStyle='#f2c14e';c.lineWidth=8;c.strokeRect(24,24,W-48,W-48);c.strokeStyle='#352e4c';c.lineWidth=2;c.strokeRect(40,40,W-80,W-80);
+  c.fillStyle='#f2c14e';c.font=F(26,'d');c.fillText('HINDSIGHT TERMINAL',72,104);c.fillStyle='#8d86a3';c.font=F(30,'r');const yr=(S.world&&S.world.year)||'';const tg=`GENERATION ${S.gen} · ${yr}`;c.fillText(tg,W-72-c.measureText(tg).width,100);
+  const fc=document.createElement('canvas');fc.width=32;fc.height=32;const fx=fc.getContext('2d');fx.fillStyle=PAPER;fx.fillRect(0,0,32,32);try{faceF(fx,LOOK(),16,16.5,1.72,0,S.age>58)}catch(_){}
+  c.imageSmoothingEnabled=false;c.fillStyle='#f3efe3';c.fillRect(72,140,256,256);c.drawImage(fc,72,140,256,256);c.strokeStyle='#ece5cc';c.lineWidth=6;c.strokeRect(72,140,256,256);
+  c.strokeStyle='#ef5d75';c.lineWidth=10;c.beginPath();c.moveTo(60,410);c.lineTo(340,128);c.stroke();
+  c.fillStyle='#ece5cc';c.font=F(40,'d');let nm=S.name.toUpperCase();while(c.measureText(nm).width>660&&nm.length>4)nm=nm.slice(0,-1);c.fillText(nm,368,200);
+  c.fillStyle='#8d86a3';c.font=F(34,'r');c.fillText(`${(CHM[S.ch]||{}).tag||''} · died at ${S.age}`,368,250);
+  c.fillStyle='#ef5d75';c.font=F(34,'d');c.fillText(cz[0],368,322);c.fillStyle='#ece5cc';c.font=F(36,'s');wrap(c,cz[1],368,376,640,44,3);
+  const H=(S.hist24&&S.hist24.length?S.hist24:[[S.cash,S.fame,S.heat,S.paradox]]).concat([[S.peak||S.cash].concat((S.hist24&&S.hist24.length?S.hist24[S.hist24.length-1]:[0,S.fame||0,S.heat||0,S.paradox||0]).slice(1))]);
+  const col=i=>H.map(r=>r[i]),gw=440,gh=120;
+  spark(c,72,530,gw,gh,col(0),'#3ddc84','CASH',fmt,true);spark(c,W-72-gw,530,gw,gh,col(1),'#58d6c9','FANS',v=>fnum(v),true);
+  spark(c,72,730,gw,gh,col(2),'#ef5d75','HEAT',v=>Math.round(v)+'',false);spark(c,W-72-gw,730,gw,gh,col(3),'#a57be0','PARADOX',v=>Math.round(v)+'%',false);
+  c.fillStyle='#f2c14e';c.font=F(18,'d');c.fillText('THE FAMILY',72,924);c.font=F(30,'r');const rs=((S.world&&S.world.rulers)||[]).slice(-3).reverse();
+  rs.forEach((r,i)=>{c.fillStyle=i?'#8d86a3':'#ece5cc';let t=`${r.name} · ${r.years?r.years+' yrs in power':'never ruled'} · ${r.cause}`;while(c.measureText(t).width>W-150&&t.length>4)t=t.slice(0,-2);c.fillText(t,72,960+i*28)});
+  c.fillStyle='#5d5866';c.font=F(26,'r');const dd=((S.world&&S.world.dead)||[]).length,ft=`the dead stay dead · ${dd} name${dd===1?'':'s'} in the chronicle`;c.fillText(ft,W-72-c.measureText(ft).width,1040);
+  return cv}
+ function cardFor(){if(last!==S.dead||!url){last=S.dead;url=make().toDataURL('image/png')}return url}
+ function save(){const u=cardFor(),fn='hindsight-'+S.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.png';
+  try{if(navigator.canShare){fetch(u).then(r=>r.blob()).then(b=>{const f=new File([b],fn,{type:'image/png'});if(navigator.canShare({files:[f]}))return navigator.share({files:[f],title:S.name}).catch(()=>{});dl(u,fn)}).catch(()=>dl(u,fn));return}}catch(_){}dl(u,fn)}
+ function dl(u,fn){try{const a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove()}catch(_){}}
+ let shown=null;
+ {const pd=pDead;pDead=function(){const h=pd.apply(this,arguments),cz=CAUSE[S.dead.cause]||['',''];const pv=shown===S.dead&&url?`<img class="card24" src="${url}" alt="Death card: ${S.name}, ${cz[0]}. ${cz[1]}" style="width:100%;max-width:420px;align-self:center;image-rendering:auto;border:2px solid var(--edge)">`:'';
+   return h.replace('<div class="quote">',`${pv}<button type="button" class="big" data-a="card24" style="border-color:var(--gold);color:var(--gold)">${pv?'SAVE THE DEATH CARD':'MAKE THE DEATH CARD'}<small>${pv?'a square image to post. the family list goes with it':'face, cause, four graphs of your life, the family'}</small></button><div class="quote">`)}}
+ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a="card24"]');if(!b||!S.dead)return;audioStart();if(shown===S.dead&&url)save();else{shown=S.dead;cardFor();try{sfx('ok')}catch(_){}render()}});
+ return {make,cardFor}})();
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));

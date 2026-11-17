@@ -62,6 +62,11 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   await p.evaluate(() => { window.__rnd = 0; const b = [...document.querySelectorAll('#panel [data-a="dopt"]')].find(b => /gnome/.test(b.innerText)); b && b.click(); window.__rnd = null; }); await p.waitForTimeout(300);
   const dice = await p.evaluate(() => { const d = document.querySelector("#panel .dice24"); return d ? d.innerText : ""; });
   ok(`${t} a failed check shows its dice`, /FAILURE/.test(await p.evaluate(() => document.getElementById("panel").innerText)) && /2/.test(dice), "dice: " + dice);
+  // v24 · DEATH CARD: dying gives you a square image to post, with the face, cause line and the family list.
+  await p.evaluate(() => { for (let i = 0; i < 20 && HS.S.dlg; i++) { const x = document.querySelector('#panel [data-a="dcont"]') || document.querySelector('#panel [data-a="dopt"]'); x && x.click(); } });
+  await p.evaluate(() => HS.die("pipe")); await p.waitForTimeout(500);
+  const card = await p.evaluate(async () => { const b = document.querySelector('#panel [data-a="card24"]'); if (!b) return { err: "no card button" }; b.click(); await new Promise(r => setTimeout(r, 400)); const im = document.querySelector("#panel img.card24"); if (!im) return { err: "no preview" }; await im.decode().catch(() => {}); return { w: im.naturalWidth, h: im.naturalHeight, alt: im.alt }; });
+  ok(`${t} death screen makes a 1080px death card with the cause`, card.w === 1080 && card.h === 1080 && /BLUE/.test(card.alt || ""), JSON.stringify(card));
   await ctx.close();
 }
 await browser.close(); srv.close();
