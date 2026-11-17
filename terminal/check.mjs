@@ -25,6 +25,7 @@ const ok = (n, c, extra = "") => { console.log((c ? "✅ " : "❌ ") + n + (c ||
 const browser = await chromium.launch();
 for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouch: true }, { n: "laptop", width: 1280, height: 800 }]) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: !!vp.isMobile, hasTouch: !!vp.hasTouch });
+  await ctx.addInitScript(() => { const o = Math.random; Math.random = () => (window.__rnd != null ? window.__rnd : o()); });
   const p = await ctx.newPage(); const errs = [];
   p.on("pageerror", e => errs.push(e.message));
   await p.goto(url, { waitUntil: "load" }); await p.waitForTimeout(1500);
@@ -47,6 +48,20 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   errs.length = 0; await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1200);
   await act("continue"); await p.waitForTimeout(1200);
   ok(`${t} CONTINUE works after saving mid-conversation in the street`, errs.length === 0 && await p.evaluate(() => HS.S.dlg == null), errs[0] || "conversation kept open after load");
+  // v24 · DROP DAY: the title says what build this is, the desk help does not send you to a street that is gone,
+  // and the door is a real gamble whose dice you can see.
+  await p.evaluate(() => localStorage.removeItem("hindsight-v2")); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000);
+  const vtag = await p.evaluate(() => (document.querySelector("#panel .vtag") || {}).textContent || "");
+  ok(`${t} title shows the current build (v24)`, /v24/.test(vtag), "tag: " + vtag);
+  const helpStreet = await p.evaluate(() => /STREET takes you outside/.test(document.documentElement.innerHTML));
+  ok(`${t} desk help no longer points at the removed street`, !helpStreet);
+  for (const a of ["new", "be"]) await act(a);
+  const door = await p.evaluate(async () => { for (let i = 0; i < 30; i++) { const o = [...document.querySelectorAll('#panel [data-a="dopt"]')]; if (o.some(b => /gnome/.test(b.innerText))) return o.map(b => b.innerText); const x = document.querySelector('#panel [data-a="dcont"]') || o[0]; if (!x) return null; x.click(); await new Promise(r => setTimeout(r, 120)); } return null; });
+  const pcts = (door || []).map(s => +((s.match(/(\d+)%/) || [])[1])).filter(n => !isNaN(n));
+  ok(`${t} the door is a real gamble (no option over 90%, one between 35% and 65%)`, pcts.length === 3 && pcts.every(n => n <= 90) && pcts.some(n => n >= 35 && n <= 65), JSON.stringify(door));
+  await p.evaluate(() => { window.__rnd = 0; const b = [...document.querySelectorAll('#panel [data-a="dopt"]')].find(b => /gnome/.test(b.innerText)); b && b.click(); window.__rnd = null; }); await p.waitForTimeout(300);
+  const dice = await p.evaluate(() => { const d = document.querySelector("#panel .dice24"); return d ? d.innerText : ""; });
+  ok(`${t} a failed check shows its dice`, /FAILURE/.test(await p.evaluate(() => document.getElementById("panel").innerText)) && /2/.test(dice), "dice: " + dice);
   await ctx.close();
 }
 await browser.close(); srv.close();

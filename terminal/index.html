@@ -1147,7 +1147,7 @@ function draw(now){BOF=still?0:Math.floor(now/105);const n=S.dlg?node():null,sc=
 /* ================= DIALOGUE ================= */
 const PCT=[100,100,100,97,92,83,72,58,42,28,17,8,3];
 const pct=(st,dc)=>{const need=dc-ST(st);return need<=2?100:need>12?0:PCT[need]};
-const roll=(st,dc)=>1+Math.floor(R()*6)+1+Math.floor(R()*6)+ST(st)>=dc;
+let LASTROLL=null;const roll=(st,dc)=>{const a=1+Math.floor(R()*6),b=1+Math.floor(R()*6),s=ST(st);LASTROLL=[a,b,st,s,dc];return a+b+s>=dc};
 function node(){return DLG[S.dlg.id](S.dlg.ctx)}
 function openD(id,ctx){sceneT=performance.now();S.dlg={id,ctx:ctx==null?null:ctx,res:null};sfx('tick');render()}
 function choose(i){const n=node(),o=n.opts[i];if(!o)return;const cost=o.cost?Math.round(o.cost()*INF22.cpi()):0;if(cost>S.cash)return;
@@ -1156,7 +1156,7 @@ function choose(i){const n=node(),o=n.opts[i];if(!o)return;const cost=o.cost?Mat
   sfx(o.check?(ok?'ok':'bad'):'tick');
   if(!S.dlg)return;                       /* the option ended the life or changed phase itself */
   if(!r)return dnext(next);
-  S.dlg.res={t:r,ok,checked:!!o.check,next};save();render()}
+  S.dlg.res={t:r,ok,checked:!!o.check,next,dice:o.check?LASTROLL:null};save();render()}
 function dnext(next){const ctx=S.dlg?S.dlg.ctx:null;if(next&&next[0]==='_'){DLG[next]();return}if(next){openD(next,ctx);return}S.dlg=null;
   if(S.phase==='intro'){S.phase='trade';say('Slide to a low inside the lit zone. JUMP. BUY. Slide to a high. JUMP. SELL. Or SHORT a high and cover at a low.','cyan');say('SEEK: memorise what already happened, jump back before it, then BET on it or post a VIDEO.','cyan')}
   if(S.phase==='trade')triggers();
@@ -5372,7 +5372,7 @@ body.pick22 .crt{position:relative}#pbig22{position:absolute;inset:0;width:100%;
  const MORE=['dev','voice','xboss','xgames'];
  const r21=render;render=function(){const r=r21.apply(this,arguments);try{const p=$('panel');const menu21=S.phase==='title'&&!!p.querySelector('[data-a=new],[data-a=continue]');p.classList.toggle('t21',menu21);if(menu21&&!p.querySelector('.mbtn21')){
    p.querySelectorAll('button').forEach(b=>{if(MORE.includes(b.dataset.a))b.classList.add('more21')});
-   const v=p.querySelector('[data-a=devtap]');if(v){v.className='vtag';v.textContent='v21 · PLAYTEST FIXES'}
+   const v=p.querySelector('[data-a=devtap]');if(v){v.className='vtag';v.textContent='v24 · DROP DAY'}
    const m=document.createElement('button');m.type='button';m.className='mbtn21';m.innerHTML='More…<small>the back room, the statue, voice, download</small>';m.onclick=ev=>{ev.stopPropagation();p.classList.toggle('open');m.style.display='none'};
    const vt=p.querySelector('.vtag');if(vt)p.insertBefore(m,vt);else p.appendChild(m)}}catch(e){try{HSBUG(e)}catch(_){}}return r}}
 /* mgClose-ups, Undertale-basic: white lines on black, one clear thing to do, nothing pasted in at the edges */
@@ -5858,9 +5858,9 @@ window.HSEMP=window.HSEMP||{C,E};window.HSINC=()=>{const e=E();let c=0,o=0,r=0;C
    <h4>SHIPPED</h4><div class="tl">${grp('SHIPPED').slice(0,12).map(it).join('')}</div><h4>LATER</h4><div class="tl">${ROADMAP.filter(r=>r[0]!=='SHIPPED'&&r[0]!=='NEXT').map(it).join('')}</div></div><button type="button" class="pri" data-a="roadback">BACK</button>`};
  try{ROADMAP.unshift(['NEXT','THIS WEEK','v23 · THE MONEY','More stocks, new ones every day, penny stocks that can go to the moon or to zero. RAKE gets more tables. Football and UFC betting with real visuals, parlays, and bookies with a limited bank you can break or buy. A desktop that looks like a broken Windows-Mac with 22 TB of RAM.'],['NEXT','THIS WEEK','v23 · THE BIBLE','Every character rebuilt on 8-head pixel proportions with separate limbs.'])}catch(_){}}
 /* the door: every way in costs something and asks something of you */
-try{const d0=DLG.door;DLG.door=()=>{const n=d0();n.opts=[{t:'Knock, like a person.',check:['CHARM',6],ok:()=>{S.rel.vane+=10;return 'Nobody answers, but the door swings in like it was waiting. A camera above the frame likes your manners.'},fail:()=>{S.heat=(S.heat||0)+8;return 'You knock too hard and too long. Inside, something writes your face down. Heat +8.'},next:'desk'},
-  {t:'Check under the gnome.',check:['GUT',7],ok:()=>{S.flags.key=1;return 'A key, and a note in fountain pen: REMEMBER MORE THAN YOU THINK YOU NEED. +1 memory slot.'},fail:()=>{S.st.NERVE=Math.max(0,S.st.NERVE-1);return 'Just a gnome. It bites, somehow. NERVE -1.'},next:'desk'},
-  {t:'Break the window.',check:['NERVE',6],ok:()=>{S.cash+=1500;S.heat+=20;S.rel.vane-=10;return 'Silverware, a watch, a painting of a man who looks like money. +$1,500. An alarm starts counting.'},fail:()=>{S.whp=Math.max(40,(S.whp||100)-25);S.heat+=10;return 'The glass wins. Your hand is open to the bone. You go in bleeding.'},next:'desk'}];return n}}catch(_){}
+try{const d0=DLG.door;DLG.door=()=>{const n=d0();n.opts=[{t:'Knock, like a person.',check:['CHARM',ST('CHARM')+5],ok:()=>{S.rel.vane+=10;return 'Nobody answers, but the door swings in like it was waiting. A camera above the frame likes your manners.'},fail:()=>{S.heat=(S.heat||0)+8;return 'You knock too hard and too long. Inside, something writes your face down. Heat +8.'},next:'desk'},
+  {t:'Check under the gnome.',check:['GUT',ST('GUT')+7],ok:()=>{S.flags.key=1;return 'A key, and a note in fountain pen: REMEMBER MORE THAN YOU THINK YOU NEED. +1 memory slot.'},fail:()=>{S.st.NERVE=Math.max(0,S.st.NERVE-1);S.flags.gnome24=1;return 'You lift the gnome. It is not a gnome. It is a very small, very old man in a red hat who has been waiting since 1971 for someone to do exactly that. He bites your thumb, takes your last cigarette and walks off towards the city, smoking it. NERVE -1. The gnome is loose.'},next:'desk'},
+  {t:'Break the window.',check:['NERVE',ST('NERVE')+6],ok:()=>{S.cash+=1500;S.heat+=20;S.rel.vane-=10;return 'Silverware, a watch, a painting of a man who looks like money. +$1,500. An alarm starts counting.'},fail:()=>{S.whp=Math.max(40,(S.whp||100)-25);S.heat+=10;return 'The glass wins. Your hand is open to the bone. You go in bleeding.'},next:'desk'}];return n}}catch(_){}
 /* the field: feet on the ground */
 {const hz=drawHouse;drawHouse=function(now,L,walk){if(!L)return hz(now,L,walk);g.save();g.translate(0,0);const r=hz(now,L,walk);g.restore();return r}}
 /* the puppy sleeps in her bed, on the floor by the desk */
@@ -6183,7 +6183,7 @@ function pWalk(){const h=nearHot(),f=fxNames();
   <div class="read"><span>STATS</span><span>${['NERVE','CHARM','LOGIC','GUT'].map(k=>`<span class="c${k}">${k[0]}${ST(k)}</span>`).join(' ')}</span></div>
   ${S.stash>0?`<div class="read"><span>BURIED</span><span class="au">${fmt(S.stash)}</span></div>`:''}`}
 function pDlg(){const n=node(),d=S.dlg;let h=n.who?`<div class="who2">${n.who}</div>`:'';
-  if(d.res)return h+`<div class="say">${d.res.checked?`<span class="${d.res.ok?'okc':'badc'}">[${d.res.ok?'SUCCESS':'FAILURE'}]</span> `:''}${d.res.t}</div><button type="button" class="pri" data-a="dcont">CONTINUE</button>`;
+  if(d.res)return h+(d.res.dice?(()=>{const q=d.res.dice,F='⚀⚁⚂⚃⚄⚅';return `<div class="dice24 ${d.res.ok?'okc':'badc'}"><b>${F[q[0]-1]}${F[q[1]-1]}</b><span>${q[0]}+${q[1]} +${q[2]} ${q[3]} = ${q[0]+q[1]+q[3]} vs ${q[4]}</span></div>`})():'')+`<div class="say">${d.res.checked?`<span class="${d.res.ok?'okc':'badc'}">[${d.res.ok?'SUCCESS':'FAILURE'}]</span> `:''}${d.res.t}</div><button type="button" class="pri" data-a="dcont">CONTINUE</button>`;
   if(n.who&&n.scene!=='desk'&&d.rx22!==d.id+(n.who||'')){d.rx22=d.id+(n.who||'');d.rxl=R22.line()||((R()<.5)?(()=>{try{return CH22.npc({})}catch(_){return ''}})():'')}
   h+=(n.who&&d.rxl?`<div class="th" style="border-left-color:var(--gold)"><b style="color:var(--gold)">NOW</b> ${d.rxl}</div>`:'')+`<div class="say">${n.text}</div>`;
   (n.th||[]).forEach(t=>{if(ST(t[0])>=t[1])h+=`<div class="th"><b class="c${t[0]}">${t[0]}</b> ${t[2]}</div>`});
@@ -6743,7 +6743,7 @@ const CTRL22=(()=>{let dev=matchMedia('(pointer:coarse)').matches?'touch':'keys'
  addEventListener('keydown',e=>{if(dev!=='keys'&&!/^(Shift|Control|Alt|Meta)$/.test(e.key)){dev='keys';maybe(true)}},true);
  addEventListener('touchstart',()=>{if(dev!=='touch'){dev='touch';maybe(true)}},{capture:true,passive:true});
  addEventListener('gamepadconnected',()=>{dev='pad';maybe(true)});
- const CARDS={desk:{touch:['Drag the slider to move through time.','JUMP goes there. BUY and SELL trade at that moment.','MONEY, SOCIAL, POWER, YOU: the groups. STREET takes you outside.','PUMP, RUMOUR, SPOOF, GLITCH bend the market. Watch the SEC meter.'],
+ const CARDS={desk:{touch:['Drag the slider to move through time.','JUMP goes there. BUY and SELL trade at that moment.','MONEY, SOCIAL, POWER, YOU, ROOM: the groups. Everything on the desk can be tapped.','PUMP, RUMOUR, SPOOF, GLITCH bend the market. Watch the SEC meter.'],
    keys:['←/→ move through time · J jump','B buy all · V half · S sell · H short · C cover · Q/E switch asset','P pump · U rumour · O spoof · G glitch','TAB next desk tab · 1-9 pick an option · ENTER continue · ESC back'],pad:['D-pad: move through time · A: jump','X: buy · B: sell · LB/RB: switch asset','START: menu']},
   walk:{touch:['Tap the floor to walk there.','Tap a thing to walk over and use it.','Dangerous things ask twice.'],keys:['A/D or ←/→ walk · E use','Dangerous things ask twice: press E again.','ESC back'],pad:['Left stick walk · A use']},
   world:{touch:['Tap the ground to walk. Tap the strip at the bottom to travel.','Tap a person for the wheel: talk, give, punch, more. Tap again to cycle a crowd.','MENU: taxi, KLIK, weapons, the dead.'],keys:['A/D or ←/→ walk · E act · F hit or shoot','SHIFT slow motion · Q switch weapon · X spin · C kick · R reload','Click a person for the wheel · ESC menu'],pad:['Left stick walk · A act · X hit or shoot','RB slow motion · Y wheel · START menu']},
@@ -6965,6 +6965,18 @@ const HOT23=(()=>{const SP=[['window',25,0,172,56,'THE WINDOW · FEEDS',()=>{S.t
    if(!S.flags.hot23){S.flags.hot23=1;say('Everything on the desk does something. Tap the window, the phone, the dog, the mug.','cyan')}}
  return {paint}})();
 {const d4=draw;draw=function(now){d4(now);try{HOT23.paint(now)}catch(_){}}}
+/* ===== v24 · DROP DAY =====
+   Each block below is one update from the drop-day list. Every one is guarded by a check in terminal/check.mjs.
+   DICE24  : every skill check shows the two dice it rolled, the stat and the number it needed.
+   GNOME24 : fail the gnome at the door and he walks to the city with your cigarette. He turns up in the log, then at the door. */
+{const st=document.createElement('style');st.textContent=`.dice24{display:flex;align-items:center;gap:10px;font-size:18px;line-height:1.1}.dice24 b{font-size:38px;font-weight:400;line-height:1;letter-spacing:4px}.dice24 span{color:var(--dim);padding-right:30px}`;document.head.appendChild(st)}
+const GNOME24=(()=>{const L=['THE GNOME bought OBOL at the low. Nobody knows how he knew.','THE GNOME was seen at the RAKE tables. Security let him play. He is very small.','THE GNOME posted a selfie with your cigarette. 40K likes.','THE GNOME opened a bank account. It is in your name.','THE GNOME shorted the market an hour before you did. He is laughing about it.','THE GNOME is asking about you at the bridge.'];
+ DLG.gnome24=()=>({who:'THE GNOME · AT THE DOOR',text:'He is back, in a tiny camel coat, smoking what is very clearly your cigarette, which has somehow not got any shorter. "Thirty years under a gnome," he says. "You have no idea what I know."',th:[['GUT',3,'He knows the market. He has been listening to the house for thirty years.'],['NERVE',4,'He is the size of a boot.']],
+  opts:[{t:'Ask for the cigarette back.',check:['CHARM',ST('CHARM')+6],ok:()=>{S.flags.key=1;return 'He hands it over, still lit, and a brass key with it. "You were always going to need this." +1 memory slot.'},fail:()=>{heatAdd(5);return 'He blows smoke in your face and writes your name in a very small notebook. Heat +5.'}},
+   {t:'Ask what he knows.',cost:()=>500,ok:()=>{let lo=0;const a=S.mk[0];for(let i=Math.max(0,N-1-sv('tether'));i<N;i++)if(a[i]<a[lo]||lo<N-1-sv('tether'))lo=i;S.cur=lo;return `He taps the screen with one finger. "${qlab(lo)}. Cheapest it gets, as far back as you can reach." The cursor is already there.`}},
+   {t:'Kick him into the hedge.',check:['NERVE',ST('NERVE')+7],ok:()=>{const w=Math.round(5000*INF22.cpi());S.cash+=w;S.flags.gnome24=-1;return `He lands in the hedge and his wallet lands at your feet. ${fmt(w)}. He will not be back. Probably.`},fail:()=>{S.st.NERVE=Math.max(0,S.st.NERVE-1);return 'He was ready. He has been ready since 1971. You limp to the desk. NERVE -1.'}}]});
+ setInterval(()=>{try{const f=S&&S.flags;if(!f||!(f.gnome24>0)||S.phase!=='trade'||S.dlg)return;if(R()<.4){if(f.gnome24<=L.length){say('<b class="hd">GNOME</b> '+L[f.gnome24-1],'gold');f.gnome24++}else if(!f.gnomeMet24){f.gnomeMet24=1;openD('gnome24')}}}catch(_){}},20000);
+ return {L}})();
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
