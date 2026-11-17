@@ -52,7 +52,7 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   // and the door is a real gamble whose dice you can see.
   await p.evaluate(() => localStorage.removeItem("hindsight-v2")); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000);
   const vtag = await p.evaluate(() => (document.querySelector("#panel .vtag") || {}).textContent || "");
-  ok(`${t} title shows the current build (v24)`, /v24/.test(vtag), "tag: " + vtag);
+  ok(`${t} title shows the current build (v24+)`, /v2[4-9]/.test(vtag), "tag: " + vtag);
   const helpStreet = await p.evaluate(() => /STREET takes you outside/.test(document.documentElement.innerHTML));
   ok(`${t} desk help no longer points at the removed street`, !helpStreet);
   for (const a of ["new", "be"]) await act(a);
@@ -130,6 +130,27 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   await p.mouse.click(8, 790); await p.waitForTimeout(150);
   const hc1 = await p.evaluate(() => { const c = document.getElementById("ctrl22"); return !!c && c.style.display === "block"; });
   ok(`${t} the help card closes on a tap anywhere`, hc0 && !hc1, JSON.stringify({ shown: hc0, stillShown: hc1 }));
+  // v25 · KLIK: going live puts a chat overlay on screen; a ballsy bet floods it, opens a prediction, and the
+  // character talks to chat in their own voice (spoken through speechSynthesis); chat dares pay off and make clips.
+  await p.evaluate(() => { localStorage.clear(); }); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(900);
+  await act("new"); await act("be");
+  const kl = await p.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)), q = s => document.querySelector(s);
+    for (let i = 0; i < 30 && HS.S.phase === "intro"; i++) { const x = q('#panel [data-a="dcont"]') || q('#panel [data-a="dopt"]'); x && x.click(); await w(60); }
+    const said = []; try { Object.defineProperty(window, "speechSynthesis", { configurable: true, value: { speak: u => said.push({ t: u.text, p: u.pitch, r: u.rate }), cancel() {}, getVoices: () => [], pending: false, speaking: false } }); } catch (e) {}
+    if (!window.HS24 || !HS24.klik) return { err: "no KLIK24" };
+    const S = HS.S; S.flags.g24 = { c0: 1, t0: 0 }; try { localStorage.setItem("hindsight-guided", "1"); } catch (e) {}
+    S.cash = 2e5; S.fame = 5e4; S.kk = { peak: 0, earned: 0, deals: {}, off: { volt: 1, rake: 1, krane: 1 } }; S.tab = "rake"; S.rake.b = null; S.rake.banned = false; HS.render(); await w(50);
+    const goLive = q('#panel [data-a="live"]'); if (!goLive) return { err: "no GO LIVE on the RAKE tab" }; goLive.click(); await w(1800);
+    const ov = q("#kc24"), vis = !!ov && getComputedStyle(ov).display !== "none", amb = ov ? ov.querySelectorAll(".m24").length : 0;
+    const n0 = HS24.klik().n; q('#panel [data-a="rbet"][data-v="1"]').click(); await w(700);
+    const n1 = HS24.klik().n, pred = !!q("#kc24 .pr24"), me = [...document.querySelectorAll("#kc24 .me24")].map(e => e.innerText);
+    const first = S.name.split(" ")[0].toUpperCase();
+    // a dare: chat dares a max bet; doing it pays and makes a clip
+    S.rake.b = null; S.rake.round++; S.cash = 2e5; HS.render(); HS24.klik().dare("max"); await w(50); const hype0 = S.hype || 0;
+    q('#panel [data-a="rbet"][data-v="1"]').click(); await w(300);
+    return { vis, amb, storm: n1 - n0, pred, me: me.slice(-2), meOk: me.some(t => t.startsWith(first)), said: said.length, dare: HS24.klik().last, hypeUp: (S.hype || 0) > hype0, clips: (S.kk.clips24 || []).length }; });
+  ok(`${t} KLIK: live chat overlay on screen, a max bet floods it, opens a prediction and the character talks to chat`, !kl.err && kl.vis && kl.amb >= 2 && kl.storm >= 6 && kl.pred && kl.meOk && kl.said >= 1, JSON.stringify(kl));
+  ok(`${t} KLIK: a chat dare pays off and becomes a clip`, !kl.err && kl.dare === "done" && kl.hypeUp && kl.clips >= 1, JSON.stringify(kl));
   await ctx.close();
 }
 await browser.close(); srv.close();

@@ -5372,7 +5372,7 @@ body.pick22 .crt{position:relative}#pbig22{position:absolute;inset:0;width:100%;
  const MORE=['dev','voice','xboss','xgames'];
  const r21=render;render=function(){const r=r21.apply(this,arguments);try{const p=$('panel');const menu21=S.phase==='title'&&!!p.querySelector('[data-a=new],[data-a=continue]');p.classList.toggle('t21',menu21);if(menu21&&!p.querySelector('.mbtn21')){
    p.querySelectorAll('button').forEach(b=>{if(MORE.includes(b.dataset.a))b.classList.add('more21')});
-   const v=p.querySelector('[data-a=devtap]');if(v){v.className='vtag';v.textContent='v24 · DROP DAY'}
+   const v=p.querySelector('[data-a=devtap]');if(v){v.className='vtag';v.textContent='v25 · KLIK IS ALIVE'}
    const m=document.createElement('button');m.type='button';m.className='mbtn21';m.innerHTML='More…<small>the back room, the statue, voice, download</small>';m.onclick=ev=>{ev.stopPropagation();p.classList.toggle('open');m.style.display='none'};
    const vt=p.querySelector('.vtag');if(vt)p.insertBefore(m,vt);else p.appendChild(m)}}catch(e){try{HSBUG(e)}catch(_){}}return r}}
 /* mgClose-ups, Undertale-basic: white lines on black, one clear thing to do, nothing pasted in at the edges */
@@ -7181,6 +7181,190 @@ const GUIDE24=(()=>{const K='hindsight-guided';
  $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a="g24low"]');if(!b)return;const a=S.mk[S.asset];let k=lo();for(let i=lo();i<N-1;i++)if(a[i]<a[k])k=i;S.cur=k;try{sfx('tick')}catch(_){}render()});
  return {step}})();
 try{ROADMAP.unshift(['SHIPPED','17 NOV 2026','v24 · DROP DAY','Eight updates in a day. Dice you can see on every check, and a door that can fail (the gnome walks off with your cigarette and comes back). A death card to post: face, cause, four graphs of your life, the family. TODAY\'S MARKET: one seed a day for everyone, with a clock. Election night with a debate and a scandal before the count. The family tree on the title. REWIND as a show, with streaks. Streamer mode, and chat names for the whole city. The first trade, guided one glowing button at a time.'])}catch(_){}
+/* ===== v25 · KLIK IS ALIVE =====
+   KLIK24 : streaming that reacts. While you are live a chat overlay sits on the game screen, on every tab.
+   - Chat storms: bets, gems, busts, rewinds, cash-outs, big sells and deaths each set chat off, and the bigger and
+     ballsier the move (share of your cash, the multiple) the bigger the storm, the tip rain and the viewer spike.
+   - Predictions: a bet of half your cash or more opens a chat prediction; it resolves on the cash-out or the bust.
+   - Dares: every minute or so chat dares you (bet max, four gems, buy all, short). Do it in 30 s for a storm and a
+     clip; ignore it and chat calls you a coward and some of them leave.
+   - Your character talks to chat, unprompted, in their own voice: every event has lines, and between events they
+     read chat and answer people by name. Spoken aloud with speechSynthesis when SOUND is on (toggle in KLIK).
+   - Clips: the biggest moments become clips that keep collecting views, and views turn into fans.
+   HS24.klik() exposes the counters for checks. */
+const KLIK24=(()=>{const P=a=>a[Math.floor(R()*a.length)],esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+ const FN=()=>(S.name||'streamer').split(' ')[0],UP=()=>FN().toUpperCase();
+ /* ---------------- the four voices ---------------- */
+ const VOX={
+  gamb:{p:.95,r:.84,v:['Daniel','Alex','Fred','male','Google UK English Male'],
+   live:['Evening, chat. One cigarette, one coin, no plan. Perfect.','We are live. Nothing matters, so everything is allowed.','Hello chat. Breathe in. Hold it. Now hit follow.'],
+   bigbet:['All of it, chat. Breathe in for four. Out for six. Tile.','Money is just a feeling, and I am feeling brave.','If it goes, it goes. The river does not care and neither do I.','Everything on one board. This is the most relaxed I have ever been.'],
+   smallbet:['Ten percent. I am being responsible. Clip it, it will not happen again.','A little bet. A treat. Like a biscuit.'],
+   gem:['One.','Lovely.','And another, chat. Calm hands.','Mm. Nice.'],
+   gems:['Chat is screaming cash out. Chat has never known peace.','One more. The bomb is a lesson, not a threat.','I can hear you all panicking. It is beautiful.'],
+   bust:['And it is gone. Beautiful. I wish it well.','That money had a good life, chat.','Bust. Breathe. Nothing was ever ours.','Ha. Ha ha. Okay.'],
+   rewind:['What board? I have never seen this board before in my life.','Sixty seconds ago I was a worse man.','Let us try that again, with feeling.'],
+   win:['See? Peace pays.','Small win. Big smile.','Little treat for the soul.'],
+   bigwin:['CHAT. I am completely calm. I am lighting my last cigarette.','Told you. The universe is a joke and I finally got it.','Forty grand on a horse called Hindsight. That was nothing. THIS is something.'],
+   sellwin:['Bought it when nobody wanted it. Like me.','Up only, chat. Spiritually and financially.'],selloss:['Sold low. A lesson. A cheap one, spiritually.','The market and I have agreed to see other people.'],
+   dare:['Chat dares me. Chat does not know I have already lost everything once.','A dare. Of course. What is money for, if not this.'],done:['Done. Your turn, chat. Go touch grass.','Dare complete. I feel nothing. It is wonderful.'],fail:['I declined. Inner peace is also content.','No. Sometimes the bet is not betting.'],
+   idle:['Chat, has anyone here ever actually been at peace? Asking for a gambler.','Somebody tell the mods I love them.','You know what I like about money, chat? It always leaves. Like a cat.','If you are new here: hello, nothing matters, welcome.'],
+   reply:['@{u} you said "{m}". Fair. Wrong, but fair.','@{u} breathe, my friend.','@{u} I read that. I bless it.','@{u} "{m}". Put that on my headstone.'],
+   death:['Chat... clip that.','Well. That is the bet.'],allin:['All in, chat. Double or nothing. Mostly nothing. Let us see.']},
+  narc:{p:.78,r:.92,v:['Daniel','Arthur','Google UK English Male','male'],
+   live:['Lights. Camera. Me. Hello, chat, you lucky things.','You are watching the most important stream in history. Act like it.','Chat. It is me. You may scream.'],
+   bigbet:['Watch my face, chat. This is the shot they will use in the documentary.','Everything on the table. Get my left side, it is the good side.','All in. This is the scene where the hero risks it all. Obviously.'],
+   smallbet:['A small bet. Character work. The audience is not ready for the big one.','Ten percent. A cameo, not a lead role.'],
+   gem:['Of course.','Naturally.','They should give me an award for this.','Effortless.'],
+   gems:['Cash out? Cash OUT? Do you know who I am?','One more. The third act needs a twist.','Chat, the tension. Are you feeling the tension. I am selling the tension.'],
+   bust:['That was a choice. A bold, artistic choice.','Cut. CUT. We are going again.','Do not clip that. Do NOT clip that.','The script said I win. Who wrote this?'],
+   rewind:['Take two. From the top.','The first take was rehearsal, darling.','Reset the set, please. Thank you.'],
+   win:['And THAT is why I am famous.','A modest win. For me.','Mm. Applause is acceptable.'],
+   bigwin:['Standing ovation, chat. I can hear it from here.','They will teach this in drama schools.','Somebody get me a mirror. I need to see what a winner looks like.'],
+   sellwin:['Bought it before it was cool. Like my early work.','The market finally recognised talent.'],selloss:['The market does not understand my vision.','Critics. Everywhere.'],
+   dare:['A dare? From my fans? How could I refuse my public.','Chat wants a show. Chat gets a show.'],done:['Applause. Thank you. Thank you.','Nailed it in one take.'],fail:['I do not do dares. I do art.','My agent says no to that dare.'],
+   idle:['Chat, rate my jawline out of ten. Wrong answers get banned.','Has anyone seen my agent? He owes me a call and a career.','I was in a war film once. Ask me about it. No, do not, I will cry.','Chat, I want you to know: I see every single one of you. Mostly me, though.'],
+   reply:['@{u} that is the nicest thing anyone has said to me today.','@{u} "{m}"? I will have you know I trained for years.','@{u} noted. Banned. Unbanned. I am merciful.','@{u} sign my chest. Metaphorically.'],
+   death:['Remember me... in better lighting.','This is not how the film ends.'],allin:['Double or nothing, chat. A star does not do halves.']},
+  para:{p:1.22,r:1.2,v:['Samantha','Victoria','Karen','Zira','Google UK English Female','female'],
+   live:['We are live. Do not tell anyone where I am. Wait. I just did.','Chat, mods: check every new follower. I mean it.','Hello chat. VPN on. Cap on. Let us go.'],
+   bigbet:['All in. If they are watching, let them watch this.','The house knows my face. Good. Let it remember it.','Everything. Because they will take it anyway.'],
+   smallbet:['Ten percent. Small enough not to be noticed. Probably.','Testing the board. It is testing me back.'],
+   gem:['Clean.','That one was safe. I knew.','Quiet, chat. They can hear you.','Good. Good.'],
+   gems:['Cash out. No. That is what they want me to do.','Every gem is a breadcrumb. One more.','Chat, stop typing CASH OUT. They read chat.'],
+   bust:['Rigged. I told you. I TOLD you.','They moved the bomb. I saw the pixel twitch.','Somebody in chat warned them.','Of course. Of course it was there.'],
+   rewind:['This board never happened. Delete the VOD.','Chat, you did not see that.','Sixty seconds. Nobody checks sixty seconds.'],
+   win:['Out, clean, gone.','Win. Now we change the stream key.','Small win. Do not draw attention.'],
+   bigwin:['Out, clean, gone. Nobody saw. Except all of you.','That is going to get flagged. Worth it.','Chat. Chat. I need everyone to stay calm and also scream.'],
+   sellwin:['Sold before they could front-run me.','In and out before the algorithms woke up.'],selloss:['Front-run. Again. Who is leaking my trades?','Someone knew. Someone always knows.'],
+   dare:['A dare. Fine. But I am using a VPN.','You want proof I am not scared? Watch.'],done:['Done. Now forget my face.','Dare complete. Wipe the logs.'],fail:['No. That dare was a trap.','I know who sent that dare.'],
+   idle:['Chat, the one with the default avatar. Who are you. Who sent you.','Mods, it is getting quiet. Quiet is bad.','If you can see the window behind me, no you cannot.','Chat, quick question: is anyone else hearing a click on the line?'],
+   reply:['@{u} why do you want to know that.','@{u} "{m}". Interesting. Noted. In the file.','@{u} I have screenshotted this.','@{u} nice try.'],
+   death:['I knew it would be today.','Told you they were watching.'],allin:['All in. They expect me to hide. I will not hide.']},
+  insom:{p:.62,r:1.14,v:['Fred','Alex','Daniel','male','Google US English'],
+   live:['Day four awake, chat. We are LIVE. Let us GO.','Gloves on. Stream on. Who is ready.','Chat. I have not slept. I will not sleep. Let us work.'],
+   bigbet:['ALL OF IT. You do not go to the cage with half your heart.','Max bet, chat. Ref, ring the bell.','Everything in. That is a title fight.'],
+   smallbet:['Feeling out the round. Jab. Jab.','Light work first. Warm up.'],
+   gem:['Jab.','Cross.','That is the combo, chat.','Hook.'],
+   gems:['Cash out is for people who sleep.','One more round. ONE MORE.','Chat, I can go twelve rounds. Watch.'],
+   bust:['Knocked down. Not out. Never out.','That one caught me clean. I felt it in my teeth.','Get me up. Cutman. Somebody.','Okay. Okay. Shake it off.'],
+   rewind:['Run it back. Rematch.','I watched the tape. I know his moves now.','Second round. Same opponent. Different man.'],
+   win:['Points win. I will take it.','Clean round.','Easy money. Next.'],
+   bigwin:['AND STILL. Undisputed, chat. UNDISPUTED.','BELL! That is a stoppage!','I do not need sleep. I need THIS.'],
+   sellwin:['Bought the dip like a body shot.','In, out, knockout.'],selloss:['Took a loss on the cards. Judges were paid.','Bad round. Not a bad fight.'],
+   dare:['You want it? You got it. Hold my towel.','Chat calls me out? I answer.'],done:['Easy work. Next challenger.','Dare done. Who is next.'],fail:['Not taking that fight. Wrong weight class.','I pick my fights, chat.'],
+   idle:['Chat, push-ups for every follow. I am serious. I do not sleep anyway.','Who has been awake longer than me? Nobody? Thought so.','My hands are buzzing, chat. That is normal. That is fine.','Talk to me, chat. Silence makes me want to punch something.'],
+   reply:['@{u} say that to my face. At the weigh-in.','@{u} respect. You got heart.','@{u} "{m}"? I will put that on my shorts.','@{u} you are in my corner now. Do not let me down.'],
+   death:['Ten. Nine... chat... I am getting up...','Stoppage. Damn.'],allin:['All in. No guard. Chin out. Let us go.']}};
+ const VX=()=>VOX[S.ch]||VOX.gamb;
+ /* ---------------- chat ---------------- */
+ const HA=['dark','mid','gold','sad','raw','tiny','big','lost','pale','loud','based','cursed','free','true','salty'],HB=['wolf','enjoyer','goblin','pilot','frog','bridge','oracle','shrimp','king','ghost','bean','monk','gremlin','lurker','degen','cousin','gnome','whale'],HN=['','','99','420','777','ttv','_','2k','fr','og','0'];
+ function chatter(){try{const o=JSON.parse(localStorage.getItem('hindsight-streamer')||'{}');if(o.names&&o.names.length&&R()<.75)return P(o.names)}catch(_){}return (R()<.3?'':P(HA))+P(HB)+P(HN)+(R()<.25?Math.floor(R()*99):'')}
+ const COL=['#53fc18','#58d6c9','#a57be0','#f2a03c','#ef5d75','#6c8cff','#e0e0e0','#ffd070','#7fe07f','#ff8fb8'];
+ const cc=u=>{let h=0;for(const ch of u)h=(h*31+ch.charCodeAt(0))>>>0;return COL[h%COL.length]};
+ const ST={
+  bigbet:['ALL IN 🚨🚨🚨','{N} ACTUALLY DID IT','NO WAY {N} BET IT ALL','DO NOT DO THIS','SEND IT','{N} is NOT serious','mods ban {n} from gambling','my heart','zero fear','RIP (preemptive)','i cant watch','{bet} ON ONE BOARD???','THE BALLS','W BALLS','scared money dont make money','going down with the ship','this is financial advice','someone call {n}s mum'],
+  smallbet:['10%?? COWARD','scared money','bet max you coward','yawn','my nan bets more than this','🐔🐔🐔','BET IT ALL','respectfully, boring','!betmax','!betmax'],
+  gem:['💎','CASH OUT','ONE MORE','CASH OUT NOW','ONE MORE ONE MORE','green','💎💎','DONT GET GREEDY','KEEP GOING','in the zone','its rigged after 3 trust me'],
+  bust:['💀💀💀','HAHAHAHA','L','LLLLLL','{lost} GONE','unlucky','called it','refund','my condolences','F','F','F','i knew it','clip it','CLIP IT','rip {lost}','that was my rent money (it wasnt)','{N} SAID BREATHE 💀'],
+  rewind:['WAIT','???','DID THE BOARD JUST RESET','{N} IS HACKING','time traveller confirmed','how does {n} know','mods??','THE SAME BOARD','nah thats cheating','HOW','THIS IS SCRIPTED','im reporting this stream','the machine is real'],
+  bigwin:['LETS GOOOOO','🔥🔥🔥🔥','W','WWWWWWWW','HOLY','{mult}x ???','UNREAL','GOAT','{N} DID IT','I DOUBTED','never doubted (i did)','CLIP IT','THIS IS HISTORY','chat we are witnessing','RAKE IS SHAKING','GIVEAWAY??','pay me back','{win} 😭'],
+  win:['W','nice','green is green','ok ok','small W','take the money','💸'],
+  sellwin:['TO THE MOON 🚀','{mult}x','insider trading','how did {n} know','SEC IS WATCHING','pump it','🚀🚀🚀','teach me','{win} profit???'],
+  selloss:['sold the bottom 💀','paper hands','L trade','classic {n}','down bad'],
+  dare:['DO IT','DO IT DO IT','!dare','COWARD IF NOT','chat has spoken','30 SECONDS','we are watching'],
+  done:['{N} DID IT','RESPECT','LEGEND','W STREAMER','chat owns {n} now','I LOVE THIS STREAM','DARE AGAIN'],
+  fail:['COWARD','🐔','unfollowed','refund the dare','L streamer','boring','🐔🐔🐔🐔'],
+  death:['F','F','F','F','💀','NO','{n} is gone','RIP','what just happened','END STREAM?','o7','o7','o7'],
+  allin:['ALL IN ACTIVATED','oh no','here we go','DOUBLE OR NOTHING','{n} has lost it'],
+  live:['{N} IS LIVE','first','hi {n}','HELLO','we are so back','what are we doing today','gambling arc?','LETS GO']};
+ const WALL={bigbet:'🚨',bust:'💀',bigwin:'🔥',sellwin:'🚀',fail:'🐔',death:'o7',done:'👑',rewind:'⏪'};
+ let Q=[],n=0,last=null,dare=null,pred=null,meT=0,talkT=0,sched=[];
+ const vars=x=>({N:UP(),n:FN().toLowerCase(),bet:fmt(x.bet||0),lost:fmt(x.bet||0),win:fmt(x.win||0),mult:(x.m||0).toFixed(x.m>=10?0:1)});
+ const fill=(t,v)=>t.replace(/\{(\w+)\}/g,(_,k)=>v[k]!=null?v[k]:'');
+ let pinMe=null;function push(m){m.id=++n;if(m.k==='me')pinMe={m,at:Date.now()};Q.push(m);if(Q.length>40)Q.splice(0,Q.length-40);try{S.kchat=S.kchat||[];S.kchat.unshift({t:(m.u?m.u+': ':'')+m.t,c:m.k==='tip'?2:m.k==='me'?1:0});S.kchat.length=Math.min(S.kchat.length,8)}catch(_){}dirty=1}
+ function line(t){push({u:chatter(),t,k:'chat'})}
+ function storm(kind,x,inten){if(!S.live)return;x=x||{};const v=vars(x),L=ST[kind]||[],k=Math.max(1,inten||1),now=3+k*2,more=k*5;
+  for(let i=0;i<now;i++)line(fill(P(L),v));if(k>=3&&WALL[kind])push({u:chatter(),t:Array(10).fill(WALL[kind]).join(' '),k:'wall'});
+  for(let i=0;i<more;i++)sched.push({at:performance.now()+150+i*(260/Math.max(1,k-1))+R()*220,f:()=>line(fill(P(L),v))});
+  if(k>=2){const tips=k*2,base=Math.max(5,(S.viewers||0)*.002*k);for(let i=0;i<tips;i++)sched.push({at:performance.now()+300+i*350+R()*300,f:()=>tip(base*(.3+R()*2),fill(P(L),v))})}
+  try{hype(k*k*12)}catch(_){}}
+ function tip(a,msg){if(!S.live)return;a=Math.round(a);S.cash+=a;S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};S.kk.earned+=a;push({u:chatter(),t:msg,k:'tip',a})}
+ /* the streamer talks */
+ function voxOn(){try{return localStorage.getItem('hs-klikvoice')!=='0'}catch(_){return true}}
+ let VOICES=[];function pickVoice(){try{const sy=window.speechSynthesis;if(!sy||!sy.getVoices)return null;if(!VOICES.length)VOICES=sy.getVoices()||[];const en=VOICES.filter(x=>/^en/i.test(x.lang||''));if(!en.length)return null;
+   for(const want of VX().v){const f=en.find(x=>x.name&&x.name.toLowerCase().includes(want.toLowerCase()));if(f)return f}return en[0]}catch(_){return null}}
+ function speak(t,pri){try{if(!voxOn()||!(typeof AU!=='undefined'&&AU.on))return;const sy=window.speechSynthesis;if(!sy||typeof SpeechSynthesisUtterance==='undefined')return;if(sy.speaking||sy.pending){if(!pri)return;sy.cancel()}
+   const u=new SpeechSynthesisUtterance(String(t).replace(/@\S+/g,m=>m.slice(1)).replace(/[^\w\s.,!?'"%$-]/g,' ').slice(0,220));const x=VX();u.pitch=x.p;u.rate=x.r;const vv=pickVoice();if(vv)u.voice=vv;sy.speak(u)}catch(_){}}
+ function me(kind,x,pri){if(!S.live||!S.ch)return;const L=VX()[kind];if(!L)return;const now=performance.now();if(!pri&&now-meT<2500)return;meT=now;talkT=now;
+  let t=fill(P(L),Object.assign(vars(x||{}),x||{}));push({u:UP(),t,k:'me'});if(pri)try{say(`<b style="color:#53fc18">${esc(UP())} · LIVE</b> ${esc(t)}`,'cyan')}catch(_){}speak(t,pri)}
+ function reply(){const pool=Q.filter(m=>m.k==='chat'&&m.t.length<60).slice(-10);if(!pool.length)return me('idle');const m=P(pool),L=VX().reply;const t=fill(P(L),{u:m.u,m:m.t.replace(/[🚨💀🔥🚀🐔👑⏪]/g,'').trim().slice(0,40)||'that'});meT=talkT=performance.now();push({u:UP(),t,k:'me'});speak(t,false)}
+ /* clips */
+ function clip(title,pow){S.kk=S.kk||{peak:0,earned:0,deals:{},off:{}};const c=S.kk.clips24=S.kk.clips24||[];c.unshift({t:title,v:Math.round((S.viewers||0)*(.2+pow*.1)),p:pow,at:Date.now()});c.length=Math.min(c.length,6);push({t:`✂ CLIPPED: ${title}`,k:'sys'})}
+ /* dares */
+ const DARES={max:['BET MAX ON RAKE','rake'],gems:['CASH OUT WITH 4+ GEMS','rake'],buyall:['BUY ALL OF SOMETHING','mkt'],short:['SHORT SOMETHING','mkt']};
+ function startDare(k){k=k||P(Object.keys(DARES));dare={k,until:Date.now()+30000};push({t:`CHAT DARES ${UP()}: ${DARES[k][0]} · 30s`,k:'sys'});storm('dare',{},2);me('dare',{},true)}
+ function hit(k){if(!dare||dare.k!==k)return;dare=null;last='done';storm('done',{},4);try{hype(120)}catch(_){}clip(`CHAT DARED ${UP()} TO ${DARES[k][0]}. ${UP()} DID IT.`,4);me('done',{},true)}
+ /* predictions */
+ function openPred(bet){const yes=25+Math.floor(R()*50);pred={yes,votes:Math.max(12,Math.round((S.viewers||0)*.3)),bet};push({t:`PREDICTION · ${UP()} CASHES OUT? YES ${yes}% · BUSTS ${100-yes}%`,k:'sys'})}
+ function endPred(won){if(!pred)return;const p=pred;pred=null;const side=won?p.yes:100-p.yes;push({t:`PREDICTION · ${won?'CASHED OUT':'BUSTED'}. ${side}% of chat called it.${side<40?' The rest owe '+FN()+' an apology.':''}`,k:'sys'})}
+ /* ---------------- hooks ---------------- */
+ {const f=rbet;rbet=function(frac){const k=S.rake,c0=S.cash,live=k.b&&k.b.live;const r=f.apply(this,arguments);try{const b=k.b;if(!live&&b&&b.live&&S.live){const share=b.bet/Math.max(1,c0),inten=share>=.95?4:share>=.5?3:share>=.25?2:1;
+   if(inten>=2){storm('bigbet',{bet:b.bet},inten);me('bigbet',{},true);if(share>=.5)openPred(b.bet);if(inten>=4)clip(`${UP()} PUTS ${fmt(b.bet)} ON ONE BOARD`,3)}else{storm('smallbet',{},1);me('smallbet')}
+   if(+frac===1)hit('max')}}catch(_){}return r}}
+ {const f=rpick;rpick=function(i){const k=S.rake,b=k.b,was=b&&b.live;const r=f.apply(this,arguments);try{if(was&&S.live&&k.b===b){if(!b.live&&b.bust>=0){const inten=b.bet/Math.max(1,S.cash+b.bet)>=.5?4:2;storm('bust',{bet:b.bet},inten);me('bust',{},true);endPred(false);if(inten>=4)clip(`${UP()} LOSES ${fmt(b.bet)} ON ONE TILE`,3)}
+   else{storm('gem',{},b.picks.length>=3?2:1);if(b.picks.length>=3)me('gems');else if(R()<.5)me('gem')}}}catch(_){}return r}}
+ {const f=rcash;rcash=function(){const k=S.rake,b=k.b,m=b&&b.picks&&b.picks.length?rmult(b.picks.length):0,c0=S.cash,picks=b?b.picks.length:0;const r=f.apply(this,arguments);try{if(b&&k.b!==b&&S.live){const win=S.cash-c0,inten=m>=10?4:m>=5?3:m>=2.5?2:1;
+   storm(inten>=2?'bigwin':'win',{m,win},inten);me(inten>=2?'bigwin':'win',{},true);endPred(true);if(inten>=3)clip(`${UP()} CASHES OUT AT ${m.toFixed(1)}x · ${fmt(win)}`,inten);if(picks>=4)hit('gems')}}catch(_){}return r}}
+ {const f=rrew;rrew=function(){const k=S.rake,can=k.b&&!k.b.live&&k.b.bust>=0&&S.flux>=25;const r=f.apply(this,arguments);try{if(can&&S.live){storm('rewind',{},3);me('rewind',{},true)}}catch(_){}return r}}
+ {const f=doBuy;doBuy=function(frac){const c0=S.cash;const r=f.apply(this,arguments);try{if(S.live&&S.cash<c0){const share=(c0-S.cash)/Math.max(1,c0);if(share>=.5){storm('bigbet',{bet:c0-S.cash},share>=.95?3:2);me('bigbet')}if(+frac===1)hit('buyall')}}catch(_){}return r}}
+ {const f=doSell;doSell=function(){const h=S.hold[S.asset],cost=h&&h.cost||0,c0=S.cash;const r=f.apply(this,arguments);try{if(S.live&&cost>0&&S.cash>c0){const got=S.cash-c0,m=got/cost,inten=m>=10?4:m>=4?3:m>=1.5?2:1;
+   if(m>=1.05){storm('sellwin',{m,win:got-cost},inten);me('sellwin',{},inten>=2);if(inten>=3)clip(`${UP()} SELLS FOR ${m.toFixed(1)}x`,inten)}else{storm('selloss',{},1);me('selloss')}}}catch(_){}return r}}
+ {const f=doShort;doShort=function(){const r=f.apply(this,arguments);try{if(S.live){storm('bigbet',{bet:0},2);hit('short')}}catch(_){}return r}}
+ {const f=goLive;goLive=function(on){const was=S.live;const r=f.apply(this,arguments);try{if(S.live&&!was){Q=[];storm('live',{},2);setTimeout(()=>me('live',{},true),600)}if(!S.live&&was){dare=null;pred=null}}catch(_){}return r}}
+ {const f=die;die=function(c){const live=S.live;if(live)try{storm('death',{},4);me('death',{},true)}catch(_){}return f.apply(this,arguments)}}
+ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a="abil"]');if(b&&S.live&&S.ch==='gamb'&&!b.disabled)setTimeout(()=>{if(S.allin){storm('allin',{},2);me('allin',{},true)}},0)});
+ /* ---------------- the clock ---------------- */
+ let acc=0,dareT=performance.now()+45000,lastT=performance.now(),dirty=1;
+ setInterval(()=>{const now=performance.now(),dt=Math.min(1,(now-lastT)/1000);lastT=now;try{
+   for(let i=sched.length-1;i>=0;i--)if(sched[i].at<=now){const s=sched.splice(i,1)[0];try{s.f()}catch(_){}}
+   if(!S||!S.live||!S.ch){sched.length=0;return}
+   const rate=clamp(.5+Math.log10((S.viewers||0)+1)*.6+(S.hype||0)/120,.4,6);acc+=rate*dt;while(acc>=1){acc--;let t='';try{t=R()<.82?KC.line():P(CHATL)}catch(_){t=P(CHATL)}if(t){const mm=/^@?([\w.\-]{2,24}): (.+)$/.exec(t);if(mm)push({u:mm[1],t:mm[2],k:'chat'});else line(t)}}
+   if(now-talkT>(13000+R()*9000)&&S.phase!=='dead'){if(R()<.6)reply();else me('idle')}
+   if(dare&&Date.now()>dare.until){dare=null;last='fail';storm('fail',{},3);me('fail');try{S.hype=(S.hype||0)*.6;S.viewers=(S.viewers||0)*.85}catch(_){}}
+   if(!dare&&now>dareT&&S.phase==='trade'&&!S.dlg){dareT=now+50000+R()*30000;startDare()}
+   const c=S.kk&&S.kk.clips24;if(c)c.forEach(x=>{const age=(Date.now()-x.at)/60000,g=(S.viewers||10)*.01*x.p*dt/(1+age);x.v+=g;S.fame+=g*.03})}catch(_){}},100);
+ /* ---------------- the overlay ---------------- */
+ {const st=document.createElement('style');st.textContent=`#kc24{position:fixed;z-index:40;display:none;flex-direction:column;justify-content:flex-start;gap:3px;pointer-events:none;padding:6px 8px;
+   background:linear-gradient(90deg,rgba(6,10,6,.35),rgba(6,10,6,.9) 10%);font:13px/1.15 var(--read);color:#e6e1d4;overflow:hidden;text-shadow:0 1px 0 #000}
+  #kc24 .h24{display:flex;align-items:center;gap:6px;font:8px var(--disp);color:#53fc18;flex:none}#kc24 .l24{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:2px}#kc24 .pin24,#kc24 .pinme24{flex:none}
+  @media (max-width:899px){#kc24{font-size:12px;line-height:1.1}}#kc24 .h24 em{font-style:normal;color:#fff;background:#e8183c;padding:2px 4px}#kc24 .hb{flex:1;height:4px;background:#1f4a1a}#kc24 .hb i{display:block;height:100%;background:#53fc18;transition:width .3s}
+  #kc24 .m24{animation:in24 .18s ease-out;word-break:break-word}#kc24 .m24 b{font-weight:400}#kc24 .me24{background:rgba(83,252,24,.16);border-left:3px solid #53fc18;padding:2px 4px;color:#fff;font-size:1.08em}
+  #kc24 .pinme24{border-left-color:#f2c14e;box-shadow:0 0 0 1px rgba(242,193,78,.5)}#kc24 .tip24{color:#1a1305;background:#f2c14e;padding:1px 4px}#kc24 .wall24{font-size:1.25em;letter-spacing:2px;white-space:nowrap}#kc24 .sys24{color:#f2c14e;font:8px/1.5 var(--disp)}
+  #kc24 .pin24{border:1px solid #f2c14e;background:rgba(30,22,6,.85);padding:4px 6px;color:#f2c14e;font:8px/1.6 var(--disp)}#kc24 .pin24 .bar{display:flex;height:6px;margin-top:3px}#kc24 .pin24 .bar i{background:#58d6c9}#kc24 .pin24 .bar u{background:#ef5d75;flex:1}
+  @keyframes in24{from{transform:translateX(18px);opacity:0}}@media (min-width:900px){#kc24{font-size:16px}#kc24 .h24,#kc24 .sys24,#kc24 .pin24{font-size:10px}}
+  @media (prefers-reduced-motion:reduce){#kc24 .m24{animation:none}}`;document.head.appendChild(st)}
+ const ov=document.createElement('div');ov.id='kc24';document.body.appendChild(ov);let seen=-1;
+ function place(){const c=document.querySelector('.crt'),r=c&&c.getBoundingClientRect();if(!r||r.width<10)return false;const w=Math.round(r.width*(r.width<500?.62:.38));Object.assign(ov.style,{left:Math.round(r.right-w)+'px',top:Math.round(r.top)+'px',width:w+'px',height:Math.round(r.height)+'px'});return true}
+ setInterval(()=>{try{const on=S&&S.live&&S.ch&&S.phase!=='title'&&S.phase!=='pick';if(!on){ov.style.display='none';return}if(!place()){ov.style.display='none';return}ov.style.display='flex';
+   const sig=n+'|'+(pinMe&&Date.now()-pinMe.at<7000?1:0)+'|'+(dare?Math.ceil((dare.until-Date.now())/1000):'')+'|'+(pred?pred.yes:'')+'|'+Math.round(S.viewers||0)+'|'+Math.round(S.hype||0);if(sig===seen)return;seen=sig;
+   const rows=Math.max(4,Math.floor(parseFloat(ov.style.height)/(innerWidth>=900?22:17))-3),hp=clamp((S.hype||0)/4,0,100);
+   ov.innerHTML=`<div class="h24"><em>● LIVE</em><span>${fnum(S.viewers||0)}</span><span class="hb"><i style="width:${hp}%"></i></span><span>HYPE</span></div>`+
+    (dare?`<div class="pin24">CHAT DARE · ${DARES[dare.k][0]} · ${Math.max(0,Math.ceil((dare.until-Date.now())/1000))}s</div>`:'')+
+    (pred?`<div class="pin24 pr24">PREDICTION · CASHES OUT ${pred.yes}% · BUSTS ${100-pred.yes}% · ${fnum(pred.votes)} votes<div class="bar"><i style="width:${pred.yes}%"></i><u></u></div></div>`:'')+
+    '<div class="l24">'+Q.filter(m=>!(pinMe&&m===pinMe.m&&Date.now()-pinMe.at<7000)).slice(-rows).map(m=>m.k==='me'?`<div class="m24 me24"><b>${esc(m.u)}</b> ${esc(m.t)}</div>`:m.k==='tip'?`<div class="m24 tip24">$${fnum(m.a)} · ${esc(m.u)}: ${esc(m.t)}</div>`:m.k==='sys'?`<div class="m24 sys24">${esc(m.t)}</div>`:m.k==='wall'?`<div class="m24 wall24">${esc(m.t)}</div>`:`<div class="m24"><b style="color:${cc(m.u)}">${esc(m.u)}</b> ${esc(m.t)}</div>`).join('')+'</div>'+
+    (pinMe&&Date.now()-pinMe.at<7000?`<div class="m24 me24 pinme24"><b>${esc(pinMe.m.u)}</b> ${esc(pinMe.m.t)}</div>`:'')}catch(_){}},120);
+ /* ---------------- panels ---------------- */
+ {const pk=pKlik;pKlik=function(){const h=pk.apply(this,arguments),c=(S.kk&&S.kk.clips24)||[];
+   const extra=`<div class="sec">STREAM VOICE</div><button type="button" class="tk ${voxOn()?'on':''}" data-a="k24vox">${UP()} TALKS TO CHAT OUT LOUD · ${voxOn()?'ON':'OFF'}<small>${typeof AU!=='undefined'&&AU.on?'uses your device voice':'turn SOUND on to hear it'}</small></button>
+   ${dare?`<div class="note"><b>CHAT DARE:</b> ${DARES[dare.k][0]} · ${Math.max(0,Math.ceil((dare.until-Date.now())/1000))}s left</div>`:''}
+   <div class="sec">YOUR CLIPS</div>${c.length?c.map(x=>`<div class="read"><span>${esc(x.t)}</span><span class="g">${fnum(x.v)} views</span></div>`).join(''):'<div class="note">Big moments on stream get clipped. Clips keep pulling views, and views become fans.</div>'}`;
+   return h.replace(/<\/div>$/,extra+'</div>')}}
+ {const pr=pRake;pRake=function(){const h=pr.apply(this,arguments);if(S.live||!S.ch)return h;return h.replace('<div class="m">',`<button type="button" class="kgo" data-a="live" style="border-radius:22px">GO LIVE ON KLIK<small>chat reacts to every bet. the bigger the bet, the louder they get</small></button><div class="m">`)}}
+ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a="k24vox"]');if(!b)return;try{localStorage.setItem('hs-klikvoice',voxOn()?'0':'1')}catch(_){}if(voxOn())me('idle',{},true);render()});
+ return {get n(){return n},get last(){return last},dare:k=>startDare(k),storm,me}})();
+window.HS24=Object.assign(window.HS24||{},{klik:()=>KLIK24});
+try{ROADMAP.unshift(['SHIPPED','17 NOV 2026','v25 · KLIK IS ALIVE','Go live and chat sits on the screen, on every tab. Bet half your cash and it floods: walls of skulls, tip rain, a prediction, a viewer spike. Gems get CASH OUT against ONE MORE; busts get F; a rewind gets HE IS HACKING. Chat dares you every minute or so. Your character talks back unprompted, in their own voice and out loud: Boba breathes, Dax plays to camera, Ilse checks the followers, Tomo calls it a title fight. The best moments become clips that keep pulling views.'])}catch(_){}
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
