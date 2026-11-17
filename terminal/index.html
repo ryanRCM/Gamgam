@@ -7108,6 +7108,36 @@ const RW24=(()=>{
  {const n0=rnew;rnew=function(){const k=S.rake,lost=k.b&&!k.b.live&&k.b.bust>=0;const r=n0.apply(this,arguments);if(lost&&k.streak24){say(`Streak over at ×${k.streak24}. You let a board go.`,'rose');k.streak24=0;k.rw24=0;try{save();render()}catch(_){}}return r}}
  {const p0=pRake;pRake=function(){const h=p0.apply(this,arguments),n=S.rake.streak24||0;return n?h.replace('<div class="m">',`<div class="rs24">REWIND STREAK ×${n}${n>=2?' · rewound boards pay +'+Math.min(50,10*(n-1))+'%':' · beat another rewound board'}</div><div class="m">`):h}}
  return {show}})();
+/* STR24 : STREAMER MODE (title > More... > STREAMER). Big type everywhere, full log lines, a face-cam corner kept
+   clear, and CHAT NAMES: pasted names become the first names of everyone born from then on. Kept on this device. */
+const STR24=(()=>{const K='hindsight-streamer',FIRST0=FIRST.slice();let open=false;
+ const get=()=>{try{return JSON.parse(localStorage.getItem(K)||'{}')}catch(_){return {}}},put=o=>{try{localStorage.setItem(K,JSON.stringify(Object.assign(get(),o)))}catch(_){}};
+ {const st=document.createElement('style');st.textContent=`body.streamer24 #lines{font-size:20px!important}body.streamer24 #lines div{-webkit-line-clamp:unset!important;display:block!important}body.streamer24 #lines div:not(:last-child){display:none!important}
+  body.streamer24 .say{font-size:27px}body.streamer24 .card,body.streamer24 .th,body.streamer24 .note,body.streamer24 .ev div,body.streamer24 .list,body.streamer24 .post{font-size:22px}
+  body.streamer24 button small{font-size:20px}body.streamer24 button{font-size:12px}body.streamer24 .who2{font-size:11px}body.streamer24 .tile{min-height:44px}
+  #cam24{position:fixed;left:max(8px,env(safe-area-inset-left));bottom:max(8px,env(safe-area-inset-bottom));width:300px;height:170px;border:2px dashed rgba(242,193,78,.45);border-radius:6px;z-index:30;pointer-events:none;display:none;
+   font:9px var(--disp);color:rgba(242,193,78,.6);padding:8px;letter-spacing:.06em}body.streamer24 #cam24{display:block}
+  @media (max-width:700px){#cam24{width:112px;height:84px;font-size:7px}body.streamer24 #lines{margin-left:120px}}
+  .str24 textarea{min-height:120px}`;document.head.appendChild(st)}
+ const cam=document.createElement('div');cam.id='cam24';cam.textContent='FACE CAM';document.body.appendChild(cam);
+ function apply(){const o=get();document.body.classList.toggle('streamer24',!!o.on);const n=(o.names||[]).filter(Boolean);FIRST.splice(0,FIRST.length,...(n.length?n:FIRST0))}
+ apply();
+ function panel(){const o=get();return `<div class="str24 app lab"><div class="who2">STREAMER MODE</div><div class="note">Big type everywhere, every log line in full, and a corner kept clear for your face cam. Kept on this device.</div>
+  <button type="button" class="${o.on?'pri ':''}big" data-a="str24on">${o.on?'STREAMER MODE · ON':'STREAMER MODE · OFF'}<small>${o.on?'tap to turn off':'tap to turn on'}</small></button>
+  <div class="sec">CHAT NAMES</div><div class="note">Paste your chat. Every person born from now on gets one of these names: tenants, agents, rivals, presidents, the next you. ${(o.names||[]).length?`<b>${o.names.length} names loaded.</b>`:'Empty: the city uses its own names.'}</div>
+  <textarea class="names24" placeholder="one name per line, or commas">${(o.names||[]).join('\n')}</textarea>
+  <div class="row r2"><button type="button" data-a="str24names">USE THESE NAMES</button><button type="button" data-a="str24clear">CLEAR NAMES</button></div></div>
+  <button type="button" class="pri" data-a="str24back">BACK</button>`}
+ {const pt=pTitle;pTitle=function(){const h=pt.apply(this,arguments),b=`<button type="button" data-a="str24">STREAMER MODE · ${get().on?'ON':'OFF'}<small>big type, a face-cam corner, your chat as the city</small></button>`,i=h.indexOf('<button type="button" data-a="dev"');return i<0?h+b:h.slice(0,i)+b+h.slice(i)}}
+ {const r0=render;render=function(){const r=r0.apply(this,arguments);try{if(open&&S.phase==='title'){const p=$('panel');p.classList.remove('t21');p.innerHTML=panel()}else if(S.phase!=='title')open=false}catch(_){}return r}}
+ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a^="str24"]');if(!b)return;const a=b.dataset.a;e.stopPropagation();
+   if(a==='str24')open=true;else if(a==='str24back')open=false;else if(a==='str24on'){put({on:!get().on});apply()}
+   else if(a==='str24names'){const ta=document.querySelector('#panel textarea.names24'),n=[...new Set(String(ta&&ta.value||'').split(/[\s,;]+/).map(x=>x.replace(/[^\w.\-]/g,'').slice(0,20)).filter(x=>x.length>=2))].slice(0,300);put({names:n});apply();try{say(n.length?`${n.length} names from chat. The next people born in this city will carry them.`:'No names found in that.','cyan')}catch(_){}}
+   else if(a==='str24clear'){put({names:[]});apply()}
+   render()},true);
+ addEventListener('keydown',e=>{if(e.key==='F9'){put({on:!get().on});apply();e.preventDefault()}});
+ return {apply}})();
+window.HS24=Object.assign(window.HS24||{},{first:()=>FIRST.slice()});
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));

@@ -98,6 +98,19 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
     c("rbet", ".1"); const safe = [...document.querySelectorAll('#panel [data-a="rpick"]')].find(b => !b.disabled && !/✕/.test(b.innerText)); safe && safe.click(); await w(50); c("rcash"); await w(80);
     return { stamp, streak: S.rake.streak24, head: (document.querySelector("#panel .rs24") || {}).innerText || "" }; });
   ok(`${t} RAKE rewind stamps the screen and builds a streak`, rw.stamp && rw.streak === 1 && /STREAK/.test(rw.head), JSON.stringify(rw));
+  // v24 · STREAMER MODE: a title switch for big type and a face-cam corner that survives reloads, and chat names
+  // pasted in become the names of the people born from now on.
+  await p.evaluate(() => { localStorage.removeItem("hindsight-v2"); localStorage.removeItem("hindsight-streamer"); }); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(900);
+  const sm = await p.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)); const mb = document.querySelector("#panel .mbtn21"); mb && mb.click(); await w(50);
+    const b = document.querySelector('#panel [data-a="str24"]'); if (!b) return { err: "no STREAMER button" }; b.click(); await w(50);
+    const tg = document.querySelector('#panel [data-a="str24on"]'); if (!tg) return { err: "no toggle" }; tg.click(); await w(50);
+    const ta = document.querySelector("#panel textarea.names24"); if (!ta) return { err: "no names box" }; ta.value = "pixelqueen, lordofchat\nmodbot"; document.querySelector('#panel [data-a="str24names"]').click(); await w(50);
+    const fs0 = parseFloat(getComputedStyle(document.getElementById("lines")).fontSize);
+    return { on: document.body.classList.contains("streamer24"), cam: !!document.getElementById("cam24") && getComputedStyle(document.getElementById("cam24")).display !== "none", names: (HS24.first ? HS24.first() : []).includes("lordofchat"), fs0 }; });
+  await p.reload({ waitUntil: "load" }); await p.waitForTimeout(800);
+  const sm2 = await p.evaluate(() => ({ on: document.body.classList.contains("streamer24"), names: (HS24.first ? HS24.first() : []).includes("pixelqueen") }));
+  ok(`${t} streamer mode: big type, face-cam corner and chat names survive a reload`, !sm.err && sm.on && sm.cam && sm.names && sm.fs0 >= 19.5 && sm2.on && sm2.names, JSON.stringify([sm, sm2]));
+  await p.evaluate(() => localStorage.removeItem("hindsight-streamer"));
   await ctx.close();
 }
 await browser.close(); srv.close();
