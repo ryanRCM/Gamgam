@@ -74,6 +74,11 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
     return await p.evaluate(() => ({ d: HS.S.daily24, mk: HS.S.mk.map(a => Math.round(a[59] * 100)).join(","), hud: document.getElementById("hud").innerText })); };
   const d1 = await dailyRun(), d2 = await dailyRun();
   ok(`${t} TODAY'S MARKET is the same market on every run today`, !d1.err && d1.d && d1.mk === d2.mk && /DAILY/.test(d1.hud), JSON.stringify([d1.err || d1.d, d1.mk, d2.mk]));
+  // v24 · ELECTION NIGHT: a debate and a scandal come before the count, and the choices move the race.
+  const elErr = await p.evaluate(() => { try { HS.S.phase = "trade"; HS.S.dead = null; HS.S.dlg = null; HS24.startElection(0); return ""; } catch (e) { return e.message; } }); await p.waitForTimeout(300);
+  const el0 = await p.evaluate(() => ({ who: (document.querySelector("#panel .who2") || {}).innerText || "", live: HS.S.el && HS.S.el.live, n: document.querySelectorAll('#panel [data-a="dopt"]').length }));
+  const steps = await p.evaluate(async () => { const seen = []; for (let i = 0; i < 12 && HS.S.dlg; i++) { seen.push((document.querySelector("#panel .who2") || {}).innerText || ""); const x = document.querySelector('#panel [data-a="dcont"]') || document.querySelector('#panel [data-a="dopt"]:not([disabled])'); if (!x) break; x.click(); await new Promise(r => setTimeout(r, 60)); } return { seen, live: HS.S.el && HS.S.el.live, phase: HS.S.phase }; });
+  ok(`${t} election night opens with a debate and a scandal, then the count`, /DEBATE/.test(el0.who) && el0.live === false && el0.n === 3 && steps.seen.some(w => /SCANDAL/.test(w)) && steps.live === true && steps.phase === "election", elErr || JSON.stringify([el0, steps]));
   await ctx.close();
 }
 await browser.close(); srv.close();

@@ -7037,6 +7037,42 @@ const DAILY24=(()=>{const key=()=>{const d=new Date();return d.getFullYear()+'-'
    if(/intro|trade|war|election/.test(S.phase)){const e=document.querySelector('#hud .d24');if(e)e.textContent=' DAILY '+mmss(t)}}catch(_){}},1000);
  {const b0=beginLife;beginLife=function(){const daily=S.daily24&&!S.dailyGen24;if(!daily){S.daily24=null}const r=b0.apply(this,arguments);return r}}
  return {key,lab,mmss,best}})();
+/* ELECT24 : election night has moves. THE DEBATE (three questions, three ways to answer each, real odds),
+   THE SCANDAL (bury it, leak theirs, or own it), then THE COUNT: the old BUY ADS race, starting from where
+   your choices left it. Each beat is logged under the bars so the night reads as a story. */
+const ELECT24=(()=>{const P=a=>a[Math.floor(R()*a.length)];
+ const QS=[['"Where were you on the night of the market panic?"','Name the date it ends.','Make them laugh about it.','Look into the camera. Say nothing for four seconds.'],
+  ['"Your opponent says you have never held a real job."','Read out their tax return.','Thank them for the compliment.','Explain the economy in one sentence.'],
+  ['"Is it true you once lived under a bridge?"','"Yes. And I know who put me there."','Tell the bridge story. Make it beautiful.','"Every great fortune starts somewhere damp."'],
+  ['"How do you explain your returns? Nobody is that lucky."','"Ask my bookie."','"Luck is just being early."','Pull up the chart. Point at the future.'],
+  ['"Would you use a nuclear weapon?"','"Only once."','"I would call them first. I am very persuasive."','Quote the treaty, clause by clause.'],
+  ['"What do you say to the people you have hurt?"','"Get in line."','Name one of them. Apologise properly.','Promise a number. A big one.']];
+ const STY=[['NERVE',6],['CHARM',6],['LOGIC',6]];
+ const SC=[['A photograph of you under the Carrow Bridge, holding a needle, is on every front page.'],['A former aide says you predicted three disasters to the hour and bet on all of them.'],['Your face has been matched to a casino ban list under four different names.'],['A small, angry gnome has given a forty-minute interview about you.']];
+ const E=()=>S.el;
+ const log=t=>{const e=E();if(e){(e.log24=e.log24||[]).push(t)}};
+ function q(){const e=E();if(!e.qs24)e.qs24=[...QS].sort(()=>R()-.5).slice(0,3);return e.qs24[e.q24||0]}
+ DLG.deb24=()=>{const e=E(),x=q(),i=e.q24||0,riv=(()=>{try{return potus().n}catch(_){return 'Your opponent'}})();
+  return {who:`THE DEBATE · QUESTION ${i+1} OF 3`,text:`Studio lights. ${riv} is smiling at the next podium like they have already won. The moderator leans in: ${x[0]}`,
+   th:[['GUT',3,'Win two of three and the room is yours. Lose two and the count starts against you.'],['LOGIC',4,'Each style rolls a different stat. Pick your strongest.']],
+   opts:[0,1,2].map(k=>({t:x[k+1],check:[STY[k][0],ST(STY[k][0])+STY[k][1]+(i===2?1:0)],
+     ok:()=>{e.spd=Math.max(4,e.spd-1.2);e.you+=7;e.dw24=(e.dw24||0)+1;log(`DEBATE Q${i+1}: won the room`);return P(['The room laughs with you, not at you. The clip is everywhere in four minutes.','The moderator forgets the next question. Your numbers jump.','Your opponent looks at their notes. There is nothing in their notes.'])},
+     fail:()=>{e.riv+=9;log(`DEBATE Q${i+1}: lost it`);return P(['A silence long enough to be a meme. It is a meme.','Your opponent says "wow" into the microphone. That is the whole clip.','You answer a different question. Confidently. For a minute.'])},
+     next:'_dq24'}))}};
+ DLG._dq24=()=>{const e=E();e.q24=(e.q24||0)+1;openD(e.q24<3?'deb24':'scan24')};
+ DLG.scan24=()=>{const e=E();if(!e.sc24)e.sc24=P(SC)[0];
+  return {who:'THE SCANDAL · 9 PM',text:`${e.dw24>=2?'You won the debate. So of course: ':''}${e.sc24} The polls open in an hour.`,
+   th:[['GUT',3,'Burying it is expensive. Leaking theirs is dangerous. Owning it is a coin flip with a big upside.']],
+   opts:[{t:'BURY IT. Pay whoever needs paying.',cost:()=>Math.max(1e5,S.cash*.08),check:['LOGIC',ST('LOGIC')+5],ok:()=>{log('SCANDAL: buried');return 'Six phone calls. By ten it is a story about a different person with your haircut.'},fail:()=>{e.riv+=14;log('SCANDAL: buried badly');return 'The editor you paid prints that you paid them. Second front page.'},next:'_count24'},
+    {t:'LEAK THEIRS. You have the future; use it.',check:['NERVE',ST('NERVE')+6],ok:()=>{e.spd=Math.max(4,e.spd-3);log('SCANDAL: leaked theirs');heatAdd(10);return `By ten the story is about them, and it is worse. Their numbers fall off a table. Heat +10.`},fail:()=>{e.riv+=10;heatAdd(25);log('SCANDAL: the leak was traced');return 'It is traced back to you in forty minutes. Now there are two scandals and both are yours. Heat +25.'},next:'_count24'},
+    {t:'OWN IT. Go live. Say yes, that was me.',check:['CHARM',ST('CHARM')+7],ok:()=>{e.you+=18;S.fame*=1.1;log('SCANDAL: owned it');return 'You tell it straight, on camera, no notes. People love an honest wreck. +10% fans and a head start.'},fail:()=>{e.you=Math.max(0,e.you-8);log('SCANDAL: owning it backfired');return 'You start honest and end up crying about a dog you had at nine. Nobody knows what to do with it.'},next:'_count24'}]}};
+ DLG._count24=()=>{const e=E();S.dlg=null;e.live=true;say(`THE COUNT. ${e.dw24||0}/3 in the debate. ${(e.log24||[]).slice(-1)[0]||''}. Tap BUY ADS to push it over the line.`,'gold');save();render()};
+ {const se=startElection;startElection=function(d){const r=se.apply(this,arguments);try{const e=E();if(e&&!S.recount){e.live=false;e.q24=0;e.log24=[];openD('deb24')}}catch(_){}return r}}
+ {const pe=pElection;pElection=function(){const e=E()||{},b=(v,c,l)=>`<div class="m"><label>${l} ${Math.round(Math.min(100,v))}%</label><i><b style="width:${clamp(v,0,100)}%;background:${c}"></b></i></div>`;
+   return `<div class="who2">ELECTION NIGHT · THE COUNT</div>${b(e.you||0,'var(--gold)','YOU')}${b(e.riv||0,'var(--rose)','THEM')}${(e.log24||[]).length?`<div class="list">${e.log24.map(l=>`<div>${l}</div>`).join('')}</div>`:''}`+pe.apply(this,arguments).replace(/<div class="read">[\s\S]*?<\/div>/,'')}}
+ setInterval(()=>{try{if(S&&S.phase==='election'&&S.el&&S.el.live&&!S.dlg){const p=$('panel'),ls=p.querySelectorAll('.m label'),bs=p.querySelectorAll('.m i b');if(ls.length>=2){ls[0].textContent='YOU '+Math.round(Math.min(100,S.el.you))+'%';ls[1].textContent='THEM '+Math.round(Math.min(100,S.el.riv))+'%';bs[0].style.width=clamp(S.el.you,0,100)+'%';bs[1].style.width=clamp(S.el.riv,0,100)+'%'}}}catch(_){}},150);
+ return {}})();
+window.HS24=Object.assign(window.HS24||{},{startElection:d=>startElection(d)});
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
