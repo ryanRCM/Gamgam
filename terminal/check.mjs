@@ -67,6 +67,13 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   await p.evaluate(() => HS.die("pipe")); await p.waitForTimeout(500);
   const card = await p.evaluate(async () => { const b = document.querySelector('#panel [data-a="card24"]'); if (!b) return { err: "no card button" }; b.click(); await new Promise(r => setTimeout(r, 400)); const im = document.querySelector("#panel img.card24"); if (!im) return { err: "no preview" }; await im.decode().catch(() => {}); return { w: im.naturalWidth, h: im.naturalHeight, alt: im.alt }; });
   ok(`${t} death screen makes a 1080px death card with the cause`, card.w === 1080 && card.h === 1080 && /BLUE/.test(card.alt || ""), JSON.stringify(card));
+  // v24 · DAILY: TODAY'S MARKET gives everyone the same market today, and it shows on the HUD.
+  const dailyRun = async () => { await p.evaluate(() => localStorage.removeItem("hindsight-v2")); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(900);
+    const has = await p.evaluate(() => { const b = document.querySelector('#panel [data-a="daily24"]'); return !!b && b.getBoundingClientRect().height > 0; }); if (!has) return { err: "no visible TODAY'S MARKET button" };
+    await act("daily24"); await act("be"); await p.waitForTimeout(300);
+    return await p.evaluate(() => ({ d: HS.S.daily24, mk: HS.S.mk.map(a => Math.round(a[59] * 100)).join(","), hud: document.getElementById("hud").innerText })); };
+  const d1 = await dailyRun(), d2 = await dailyRun();
+  ok(`${t} TODAY'S MARKET is the same market on every run today`, !d1.err && d1.d && d1.mk === d2.mk && /DAILY/.test(d1.hud), JSON.stringify([d1.err || d1.d, d1.mk, d2.mk]));
   await ctx.close();
 }
 await browser.close(); srv.close();
