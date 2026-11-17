@@ -7073,6 +7073,21 @@ const ELECT24=(()=>{const P=a=>a[Math.floor(R()*a.length)];
  setInterval(()=>{try{if(S&&S.phase==='election'&&S.el&&S.el.live&&!S.dlg){const p=$('panel'),ls=p.querySelectorAll('.m label'),bs=p.querySelectorAll('.m i b');if(ls.length>=2){ls[0].textContent='YOU '+Math.round(Math.min(100,S.el.you))+'%';ls[1].textContent='THEM '+Math.round(Math.min(100,S.el.riv))+'%';bs[0].style.width=clamp(S.el.you,0,100)+'%';bs[1].style.width=clamp(S.el.riv,0,100)+'%'}}}catch(_){}},150);
  return {}})();
 window.HS24=Object.assign(window.HS24||{},{startElection:d=>startElection(d)});
+/* FAM24 : the family. Every death stores the face that died; the title shows the whole line for the saved world,
+   newest first, so "one more life" has faces on it. */
+const FAM24=(()=>{
+ {const d0=die;die=function(cause){const r=d0.apply(this,arguments);try{const rs=S.world.rulers,x=rs[rs.length-1];if(x&&!x.look){x.look=JSON.parse(JSON.stringify(LOOK()));x.g=S.gen;x.ch=S.ch;x.age=S.age;x.y=S.world.year;save()}}catch(_){}return r}}
+ {const st=document.createElement('style');st.textContent=`.fam24{display:flex;flex-direction:column;gap:6px}.fam24 .sec{color:var(--gold)}.ft24{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+ .f24{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;font-size:15px;line-height:1;color:var(--dim)}.f24 canvas{width:56px;height:56px;image-rendering:pixelated;border:2px solid var(--edge);background:#f3efe3}
+ .f24 b{color:var(--ink);font-weight:400;font-size:16px}.f24 em{font-style:normal;color:var(--rose);font-size:14px}.f24:first-child canvas{border-color:var(--gold)}`;document.head.appendChild(st)}
+ let rows=[];
+ {const pt=pTitle;pTitle=function(){const h=pt.apply(this,arguments);rows=[];let yr='';try{const s=JSON.parse(localStorage.getItem('hindsight-v2'));if(s&&s.world&&s.world.rulers){rows=s.world.rulers.slice(-8).reverse();yr=s.world.year}}catch(_){}
+   if(!rows.length)return h;
+   const fam=`<div class="fam24"><div class="sec">THE FAMILY · ${rows.length} ${rows.length===1?'LIFE':'LIVES'} · THE WORLD IS ${yr}</div><div class="ft24">${rows.map((r,i)=>`<div class="f24"><canvas width="32" height="32" data-f24="${i}"></canvas><b>${r.name}</b><small>${r.g?'G'+r.g+' · ':''}${r.years?r.years+' yrs in power':'never ruled'}</small><em>${r.cause}</em></div>`).join('')}</div></div>`;
+   const i=h.indexOf('<button type="button" data-a="road"');return i<0?h+fam:h.slice(0,i)+fam+h.slice(i)}}
+ {const r0=render;render=function(){const r=r0.apply(this,arguments);try{document.querySelectorAll('#panel canvas[data-f24]').forEach(c=>{const x=rows[+c.dataset.f24],g2=c.getContext('2d');g2.fillStyle=PAPER;g2.fillRect(0,0,32,32);
+   if(x&&x.look){try{faceF(g2,x.look,16,16.5,1.72,0,(x.age||0)>58)}catch(_){}}else{g2.fillStyle='#8d86a3';g2.font='20px monospace';g2.fillText('?',10,23)}})}catch(_){}return r}}
+ return {}})();
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));

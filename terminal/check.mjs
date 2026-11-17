@@ -79,6 +79,12 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   const el0 = await p.evaluate(() => ({ who: (document.querySelector("#panel .who2") || {}).innerText || "", live: HS.S.el && HS.S.el.live, n: document.querySelectorAll('#panel [data-a="dopt"]').length }));
   const steps = await p.evaluate(async () => { const seen = []; for (let i = 0; i < 12 && HS.S.dlg; i++) { seen.push((document.querySelector("#panel .who2") || {}).innerText || ""); const x = document.querySelector('#panel [data-a="dcont"]') || document.querySelector('#panel [data-a="dopt"]:not([disabled])'); if (!x) break; x.click(); await new Promise(r => setTimeout(r, 60)); } return { seen, live: HS.S.el && HS.S.el.live, phase: HS.S.phase }; });
   ok(`${t} election night opens with a debate and a scandal, then the count`, /DEBATE/.test(el0.who) && el0.live === false && el0.n === 3 && steps.seen.some(w => /SCANDAL/.test(w)) && steps.live === true && steps.phase === "election", elErr || JSON.stringify([el0, steps]));
+  // v24 · THE FAMILY: the title shows every life lived in this world, with faces, newest first.
+  await p.evaluate(() => { const S = HS.S; S.dlg = null; S.el = null; S.phase = "trade"; HS.die("pipe"); });
+  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem("hindsight-v2")); s.world.rulers.push({ name: "Mara Reyes", years: 4, cause: "ASSASSINATED", peak: 9, look: s.world.rulers[0].look, g: 2 }); localStorage.setItem("hindsight-v2", JSON.stringify(s)); });
+  await p.reload({ waitUntil: "load" }); await p.waitForTimeout(1000);
+  const fam = await p.evaluate(() => { const f = document.querySelector("#panel .fam24"); if (!f) return null; const r = f.getBoundingClientRect(); return { n: f.querySelectorAll(".f24").length, faces: f.querySelectorAll("canvas").length, h: r.height, txt: f.innerText.slice(0, 200) }; });
+  ok(`${t} title shows the family tree with faces`, fam && fam.n >= 2 && fam.faces >= 2 && fam.h > 0 && /Mara Reyes/.test(fam.txt) && /ASSASSINATED/.test(fam.txt), JSON.stringify(fam));
   await ctx.close();
 }
 await browser.close(); srv.close();
