@@ -111,6 +111,25 @@ for (const vp of [{ n: "phone", width: 390, height: 844, isMobile: true, hasTouc
   const sm2 = await p.evaluate(() => ({ on: document.body.classList.contains("streamer24"), names: (HS24.first ? HS24.first() : []).includes("pixelqueen") }));
   ok(`${t} streamer mode: big type, face-cam corner and chat names survive a reload`, !sm.err && sm.on && sm.cam && sm.names && sm.fs0 >= 19.5 && sm2.on && sm2.names, JSON.stringify([sm, sm2]));
   await p.evaluate(() => localStorage.removeItem("hindsight-streamer"));
+  // v24 · THE FIRST TRADE, GUIDED: one glowing control at a time, six steps, then the multiple on screen.
+  // It replaces the two clipped text lines that used to explain the trade.
+  await p.evaluate(() => { localStorage.clear(); }); await p.reload({ waitUntil: "load" }); await p.waitForTimeout(900);
+  await act("new"); await p.evaluate(() => { window.__rnd = 0.37; }); await act("be"); await p.evaluate(() => { window.__rnd = null; }); // a fixed market where the low pays
+  const gd = await p.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)), q = s => document.querySelector(s);
+    for (let i = 0; i < 30 && HS.S.phase === "intro"; i++) { const x = q('#panel [data-a="dcont"]') || q('#panel [data-a="dopt"]'); x && x.click(); await w(60); }
+    await w(150); const lines0 = document.getElementById("lines").innerText;
+    const log = []; const step = () => { const g = q("#panel .g24"), gl = q(".glow24"); return (g ? (g.innerText.match(/(\d)\/6/) || [, "?"])[1] : "-") + ":" + (gl ? (gl.id || gl.dataset.a) : "none"); };
+    log.push(step()); const c = s => { const b = q(s); b && !b.disabled && b.click(); };
+    c('[data-a="g24low"]'); await w(80); log.push(step()); c("#jb"); await w(80); log.push(step()); c('#panel [data-a="buy"][data-v="1"]'); await w(80); log.push(step());
+    const sl = q("#sl"); sl.value = 59; sl.dispatchEvent(new Event("input", { bubbles: true })); await w(80); log.push(step()); c("#jb"); await w(80); log.push(step()); c('#panel [data-a="sell"]'); await w(120);
+    return { log, done: (q("#panel .g24") || {}).innerText || "", old: /SEEK: memorise|Slide to a low/.test(lines0) }; });
+  ok(`${t} first trade is guided step by step and ends on the multiple`, gd.log.join(" ") === "1:sl 2:jb 3:buy 4:sl 5:jb 6:sell" && /×/.test(gd.done) && !gd.old, JSON.stringify(gd));
+  // Help card: "Tap anywhere to close" must mean anywhere, not only on the card.
+  await p.keyboard.press("?"); await p.waitForTimeout(150);
+  const hc0 = await p.evaluate(() => { const c = document.getElementById("ctrl22"); return !!c && c.style.display === "block"; });
+  await p.mouse.click(8, 790); await p.waitForTimeout(150);
+  const hc1 = await p.evaluate(() => { const c = document.getElementById("ctrl22"); return !!c && c.style.display === "block"; });
+  ok(`${t} the help card closes on a tap anywhere`, hc0 && !hc1, JSON.stringify({ shown: hc0, stillShown: hc1 }));
   await ctx.close();
 }
 await browser.close(); srv.close();

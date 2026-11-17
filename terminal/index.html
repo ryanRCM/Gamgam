@@ -6752,7 +6752,9 @@ const CTRL22=(()=>{let dev=matchMedia('(pointer:coarse)').matches?'touch':'keys'
  const card=document.createElement('div');card.id='ctrl22';card.style.cssText='position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:80;max-width:min(92vw,440px);background:#0b0a12;border:2px solid #f2c14e;padding:12px 14px;font:13px/1.5 monospace;color:#e6e1d4;display:none;box-shadow:0 6px 0 #000';document.body.appendChild(card);
  const q=document.createElement('button');q.type='button';q.textContent='?';q.title='Controls';q.style.cssText='position:fixed;right:6px;top:42%;z-index:31;opacity:.8;width:30px;height:30px;min-height:0;padding:0;border-radius:50%;font:14px monospace;background:#1b1728;color:#f2c14e;border:2px solid #352e4c';document.body.appendChild(q);
  function show(c){c=c||ctx();if(!c)return;const L=(CARDS[c]||{})[dev]||(CARDS[c]||{}).keys;if(!L)return;card.innerHTML=`<b style="color:#f2c14e;letter-spacing:.15em">${({desk:'THE DESK',walk:'THE HOUSE AND FIELD',world:'THE STREET',war:'THE PRESIDENCY'})[c]} · ${({touch:'TOUCH',keys:'KEYBOARD AND MOUSE',pad:'GAMEPAD'})[dev]}</b>${L.map(l=>`<div>· ${l}</div>`).join('')}<div style="color:#8d86a3;margin-top:6px">${dev==='touch'?'Tap anywhere to close':'Any key closes · ? shows this again'}</div>`;card.style.display='block'}
- const hide=()=>{card.style.display='none'};card.addEventListener('pointerdown',hide);addEventListener('keydown',e=>{if(card.style.display==='block'&&e.key!=='?'){hide()}if(e.key==='?'){show();e.preventDefault()}},true);q.addEventListener('click',()=>show());
+ const hide=()=>{card.style.display='none'};card.addEventListener('pointerdown',hide);
+ /* "Tap anywhere to close" means anywhere: a tap outside the card closes it and is swallowed, so it cannot fire a button by accident */
+ addEventListener('pointerdown',e=>{if(card.style.display!=='block'||card.contains(e.target)||(e.target.closest&&e.target.closest('#ctrl22q,.ctrl22q')))return;hide();e.preventDefault();e.stopPropagation();const sw=ev=>{ev.stopPropagation();ev.preventDefault()};addEventListener('click',sw,{capture:true,once:true});setTimeout(()=>removeEventListener('click',sw,{capture:true}),400)},true);addEventListener('keydown',e=>{if(card.style.display==='block'&&e.key!=='?'){hide()}if(e.key==='?'){show();e.preventDefault()}},true);q.addEventListener('click',()=>show());
  let seen={};try{seen=JSON.parse(localStorage.getItem('hs-ctrl22')||'{}')}catch(_){}
  function maybe(force){const c=ctx();if(!c)return;const k=c+'|'+dev;if(seen[k]&&!force)return;if(force&&seen[k])return;seen[k]=1;try{localStorage.setItem('hs-ctrl22',JSON.stringify(seen))}catch(_){}show(c)}
  setInterval(()=>{try{q.style.display=S&&S.ch&&S.phase!=='title'&&S.phase!=='pick'?'block':'none';maybe(false)}catch(_){}},1200);
@@ -7138,6 +7140,46 @@ const STR24=(()=>{const K='hindsight-streamer',FIRST0=FIRST.slice();let open=fal
  addEventListener('keydown',e=>{if(e.key==='F9'){put({on:!get().on});apply();e.preventDefault()}});
  return {apply}})();
 window.HS24=Object.assign(window.HS24||{},{first:()=>FIRST.slice()});
+/* GUIDE24 : the first trade, guided. Until a player has made one profitable round trip on this device, the MARKET
+   tab opens with a six-step strip and exactly one glowing control: slide back, JUMP, BUY ALL, slide to now, JUMP,
+   SELL ALL. The step comes from the game state, so going off-script never strands you. It ends on the multiple and
+   the time it took. The old two-line text tutorial (clipped on every screen) is not shown while the guide runs. */
+const GUIDE24=(()=>{const K='hindsight-guided';
+ const done=()=>{try{return !!localStorage.getItem(K)}catch(_){return false}};
+ const holding=()=>(S.hold||[]).some(h=>h&&h.u>0),lo=()=>N-1-sv('tether');
+ {const st=document.createElement('style');st.textContent=`.g24{border:2px solid var(--gold);background:#1f1808;padding:9px 10px;display:flex;flex-direction:column;gap:6px;border-radius:4px}
+  .g24 .sec{color:var(--gold)}.g24 .say{font-size:21px}.g24 .pips{display:flex;gap:4px}.g24 .pips i{flex:1;height:5px;background:#3a2c14}.g24 .pips i.on{background:var(--gold)}
+  .g24 button{min-height:36px;padding:6px}.g24.win{border-color:var(--up);background:#0b2416}.g24.win .say{font-size:26px;color:var(--up)}
+  .glow24{outline:3px solid var(--gold)!important;outline-offset:3px;animation:glow24 1s ease-in-out infinite}@keyframes glow24{50%{outline-color:rgba(242,193,78,.25)}}
+  @media (prefers-reduced-motion:reduce){.glow24{animation:none}}`;document.head.appendChild(st)}
+ function step(){if(!holding()){if(S.t===N-1)return S.cur<S.t&&S.cur>=lo()?2:1;return 3}if(S.t<N-1)return S.cur===N-1?5:4;return 6}
+ const TXT={1:['Drag the slider LEFT into the lit part of the chart: the past you can reach. Find a low.','#sl'],2:['JUMP. You are going back to that quarter, with your $1,000.','#jb'],3:['BUY ALL. Nobody here knows what this coin becomes.','#panel [data-a="buy"][data-v="1"]'],
+  4:['Now drag the slider all the way RIGHT, back to the present.','#sl'],5:['JUMP home.','#jb'],6:['SELL ALL. This is the whole trick.','#panel [data-a="sell"]']};
+ let win=null,was=false,seen24=0;
+ const active=()=>S&&S.phase==='trade'&&!S.dlg&&S.ch&&!done()&&S.loc!=='world';
+ {const s0=say;say=function(t){try{if(S&&S.ch&&!done()&&/^(Slide to a low|SEEK: memorise)/.test(String(t)))return}catch(_){}return s0.apply(this,arguments)}}
+ {const r0=render;render=function(){const r=r0.apply(this,arguments);try{detect();document.querySelectorAll('.glow24').forEach(e=>e.classList.remove('glow24'));
+   if(win&&holding())win=null;
+   if(win&&S.phase==='trade'&&!S.dlg&&S.tab==='mkt'){const p=$('panel');p.insertAdjacentHTML('afterbegin',`<div class="g24 win"><div class="sec">THE FIRST TRADE · DONE</div><div class="say">×${win.x.toFixed(win.x<10?2:1)} · ${fmt(win.a)} → ${fmt(win.b)} in ${win.s}</div><div class="note">That is the trick. Now do it bigger, and watch the HEAT.</div></div>`);return r}
+   if(!active())return r;if(!S.flags.g24){S.flags.g24={c0:S.cash,t0:Date.now()};S.tab='mkt';return render()}
+   if(S.tab!=='mkt'){const b=document.querySelector('#panel [data-a="tab"][data-v="mkt"]');if(b)b.classList.add('glow24');return r}
+   const n=step(),T=TXT[n],p=$('panel');try{const c=$('ctrl22');if(c&&c.style.display==='block'&&/THE DESK/.test(c.innerText))c.style.display='none'}catch(_){}
+   const anc=(p.querySelector('#tcur')||{}).parentElement;(anc&&anc.parentElement===p?anc:p.firstElementChild||p).insertAdjacentHTML(anc&&anc.parentElement===p?'beforebegin':'afterbegin',`<div class="g24" data-n="${n}"><div class="sec">THE FIRST TRADE · STEP ${n}/6</div><div class="pips">${[1,2,3,4,5,6].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</div><div class="say">${T[0]}</div>${n===1?'<button type="button" data-a="g24low">SHOW ME A LOW<small>moves the slider for you</small></button>':''}</div>`);
+   const tg=document.querySelector(T[1]);if(tg){tg.classList.add('glow24');if(seen24!==n){seen24=n;setTimeout(()=>{try{tg.scrollIntoView({block:'nearest',behavior:still?'auto':'smooth'})}catch(_){}},30)}}}catch(_){}return r}}
+ function detect(){try{if(!S||!S.ch||S.phase!=='trade'||done()){was=false;return}const h=holding();if(was&&!h&&S.t===N-1&&S.flags.g24){was=h;const c0=S.flags.g24.c0,x=S.cash/c0;
+   if(x>1.2){const s=Math.round((Date.now()-S.flags.g24.t0)/1000);win={x,a:c0,b:S.cash,s:Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};try{localStorage.setItem(K,'1')}catch(_){}try{sfx('ok');burst(160,90,40,[P.gold,P.cyan,'#fff'],90)}catch(_){}
+     say(`×${x.toFixed(2)}. ${fmt(c0)} became ${fmt(S.cash)}. SEEK lets you bet on the past too: memorise, jump back, BET.`,'gold');return true}
+   else{say(x>1?`×${x.toFixed(2)}. A profit, barely. Slide further back, to a lower point, and go again.`:'Sold for less than you paid. Slide further back, to a lower point, and go again.','rose')}}was=h}catch(_){}return false}
+ setInterval(()=>{if(detect())render()},100);
+ function refresh(){try{const g=document.querySelector('#panel .g24:not(.win)');if(!g||!active()||S.tab!=='mkt')return;try{const c=$('ctrl22');if(c&&c.style.display==='block'&&/THE DESK/.test(c.innerText)&&S.flags.g24&&Date.now()-S.flags.g24.t0<8000)c.style.display='none'}catch(_){}const n=step();if(+g.dataset.n===n)return;g.dataset.n=n;const T=TXT[n];
+   g.querySelector('.sec').textContent=`THE FIRST TRADE · STEP ${n}/6`;g.querySelectorAll('.pips i').forEach((e,i)=>e.classList.toggle('on',i<n));g.querySelector('.say').textContent=T[0];const sb=g.querySelector('[data-a="g24low"]');if(sb)sb.style.display=n===1?'':'none';
+   document.querySelectorAll('.glow24').forEach(e=>e.classList.remove('glow24'));const tg=document.querySelector(T[1]);if(tg){tg.classList.add('glow24');if(seen24!==n){seen24=n;try{tg.scrollIntoView({block:'nearest',behavior:still?'auto':'smooth'})}catch(_){}}}}catch(_){}}
+ $('panel').addEventListener('input',()=>setTimeout(refresh,0));setInterval(refresh,250);
+ /* while the guide runs it is the tutorial: the desk help card only opens when the player asks with ? */
+ let ask=0;addEventListener('keydown',e=>{if(e.key==='?')ask=Date.now()},true);addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button');if(b&&b.textContent.trim()==='?')ask=Date.now()},true);
+ setTimeout(()=>{const c=$('ctrl22');if(!c)return;new MutationObserver(()=>setTimeout(()=>{try{if(c.style.display==='block'&&active()&&Date.now()-ask>600&&/THE DESK/.test(c.innerText))c.style.display='none'}catch(_){}},0)).observe(c,{attributes:true,attributeFilter:['style'],childList:true})},0);
+ $('panel').addEventListener('click',e=>{const b=e.target.closest('[data-a="g24low"]');if(!b)return;const a=S.mk[S.asset];let k=lo();for(let i=lo();i<N-1;i++)if(a[i]<a[k])k=i;S.cur=k;try{sfx('tick')}catch(_){}render()});
+ return {step}})();
 window.HS={get VH(){return H},KC,R22,ROOM23:()=>ROOM23,DESK23:()=>DESK23,FIELD22:()=>FIELD22,INF22:()=>INF22,CONS22:()=>CONS22,CTRL22:()=>CTRL22,CAM22:()=>CAM22,MACH22:()=>MACH22,CRED22:()=>CRED22,ERA22:()=>ERA22,save:()=>save(),ECO22:()=>ECO22,TRIP22:()=>TRIP22,JOB22:()=>JOB22,CH22:()=>CH22,btBoard:()=>btBoard(),GOD,godSet,doKick2:()=>doKick(),sever,punch,PTS,body2,get HZ(){return HZ},goLive,potus,powerAct,breakFree,klikStep,doSpin,doKick,makeRain,toggleFocus,get S(){return S},get WR(){return WR},IN,enterWorld,exitWorld,startEnd,chaosAdd,boom,hitEnt,hurtMe,ECHO,sailTo,talkEcho,giveW,unmake,CHARS,SK,ASSETS,EVT,DLG,TEMPER,CAUSE,TRAITS,WEALTH,PROJ,DEEP,die,openD,render,track};
 const hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
